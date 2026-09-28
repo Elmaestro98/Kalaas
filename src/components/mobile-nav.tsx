@@ -1,11 +1,9 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BellRing, Home, Menu, Plus, Users, type LucideIcon } from "lucide-react";
-import { LienMobile } from "@/type/lienMobile";
-
+import { BellRing, Home, Menu, Plus, Users } from "lucide-react";
+import type { LienMobile } from "@/type/lienMobile";
 
 const LIENS: (LienMobile | null)[] = [
   { href: "/dashboard", label: "Accueil", icon: Home },

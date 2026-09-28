@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarProps } from "@/type/sidebar";
+ import type { SidebarProps } from
+"@/type/sidebar";
 import { NAV_SECTIONS } from "./navigations";
 
 export default function Sidebar({ role, footer }: SidebarProps) {

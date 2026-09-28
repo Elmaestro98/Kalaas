@@ -11,7 +11,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { NavSection } from "@/type/navSection";
+import type { NavSection } from "@/type/navSection";
 
 const TOUS: Role[] = ["DIRECTEUR", "CAISSIER", "FORMATEUR"];
 const BUREAU: Role[] = ["DIRECTEUR", "CAISSIER"];
