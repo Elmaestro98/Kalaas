@@ -1,0 +1,66 @@
+
+import type { Role } from "@prisma/client";
+import {
+  BarChart3,
+  BellRing,
+  BookOpen,
+  CalendarCheck,
+  ClipboardList,
+  LayoutDashboard,
+  Settings,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  roles: Role[];
+};
+
+export type NavSection = {
+  title?: string;
+  items: NavItem[];
+};
+
+const TOUS: Role[] = ["DIRECTEUR", "CAISSIER", "FORMATEUR"];
+const BUREAU: Role[] = ["DIRECTEUR", "CAISSIER"];
+
+export const NAV_SECTIONS: NavSection[] = [
+  {
+    items: [
+      { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard, roles: BUREAU },
+    ],
+  },
+  {
+    title: "Scolarité",
+    items: [
+      { href: "/students", label: "Apprenants", icon: Users, roles: BUREAU },
+      { href: "/enrollments", label: "Inscriptions", icon: ClipboardList, roles: BUREAU },
+      { href: "/courses", label: "Formations", icon: BookOpen, roles: ["DIRECTEUR"] },
+      { href: "/attendance", label: "Présences", icon: CalendarCheck, roles: TOUS },
+    ],
+  },
+  {
+    title: "Finances",
+    items: [
+      { href: "/payments", label: "Encaissements", icon: Wallet, roles: BUREAU },
+      { href: "/unpaid", label: "Impayés et relances", icon: BellRing, roles: BUREAU },
+      { href: "/reports", label: "Rapports", icon: BarChart3, roles: ["DIRECTEUR"] },
+    ],
+  },
+  {
+    title: "Réglages",
+    items: [
+      { href: "/settings", label: "Paramètres", icon: Settings, roles: ["DIRECTEUR"] },
+    ],
+  },
+];
+
+export const ROLE_LABELS: Record<Role, string> = {
+  DIRECTEUR: "Directeur",
+  CAISSIER: "Caissier",
+  FORMATEUR: "Formateur",
+};
