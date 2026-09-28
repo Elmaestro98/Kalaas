@@ -1,0 +1,494 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Listes de choix ───────────────────────────────
+
+enum Role {
+  DIRECTEUR
+  CAISSIER
+  FORMATEUR
+}
+
+enum StatutInstitut {
+  ACTIF
+  SUSPENDU
+}
+
+enum Offre {
+  ESSENTIEL
+  PRO
+  PREMIUM
+}
+
+enum StatutAbonnement {
+  ESSAI
+  ACTIF
+  EXPIRE
+  ANNULE
+}
+
+enum StatutInscription {
+  ACTIVE
+  ABANDON
+  TERMINEE
+  TRANSFEREE
+}
+
+enum TypeRemise {
+  MONTANT
+  POURCENTAGE
+}
+
+enum TypeEcheance {
+  INSCRIPTION
+  MENSUALITE
+}
+
+enum StatutEcheance {
+  A_PAYER
+  PARTIEL
+  PAYEE
+  ANNULEE
+}
+
+enum ModePaiement {
+  ESPECES
+  WAVE
+  ORANGE_MONEY
+  VIREMENT
+}
+
+enum StatutPresence {
+  PRESENT
+  ABSENT
+  RETARD
+  EXCUSE
+}
+
+enum CanalRelance {
+  WHATSAPP
+  SMS
+}
+
+enum DeclencheurRelance {
+  MANUELLE
+  J_MOINS_3
+  J_PLUS_1
+  J_PLUS_7
+}
+
+enum StatutRelance {
+  A_ENVOYER
+  ENVOYEE
+  ECHEC
+}
+
+enum StatutJob {
+  EN_ATTENTE
+  EN_COURS
+  TERMINE
+  ECHEC
+}
+
+// ─── Plateforme : instituts, comptes, rôles ────────
+
+model Institut {
+  id          String         @id @default(cuid())
+  clerkOrgId  String         @unique
+  nom         String
+  logoUrl     String?
+  adresse     String?
+  ville       String?
+  ninea       String?
+  rccm        String?
+  telephone   String?
+  telephone2  String?
+  sousDomaine String?        @unique
+  piedRecu    String?
+  
+  statut      StatutInstitut @default(ACTIF)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  abonnements    Abonnement[]
+  membres        Membre[]
+  formations     Formation[]
+  sessions       Session[]
+  apprenants     Apprenant[]
+  inscriptions   Inscription[]
+  echeances      Echeance[]
+  paiements      Paiement[]
+  repartitions   PaiementEcheance[]
+  annulations    Annulation[]
+  compteursRecu  CompteurRecu[]
+  cloturesCaisse ClotureCaisse[]
+  seances        Seance[]
+  presences      Presence[]
+  modelesRelance ModeleRelance[]
+  relances       Relance[]
+  journalAudit   JournalAudit[]
+  jobs           Job[]
+}
+
+model Abonnement {
+  id         String           @id @default(cuid())
+  institutId String
+  offre      Offre
+  statut     StatutAbonnement @default(ESSAI)
+  debut      DateTime
+  fin        DateTime
+  createdAt  DateTime         @default(now())
+
+  institut Institut @relation(fields: [institutId], references: [id])
+
+  @@index([institutId])
+}
+
+model Utilisateur {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
+  email       String
+  nom         String
+  superAdmin  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  membres      Membre[]
+  journalAudit JournalAudit[]
+}
+
+model Membre {
+  id            String   @id @default(cuid())
+  institutId    String
+  utilisateurId String
+  role          Role
+  actif         Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  utilisateur Utilisateur @relation(fields: [utilisateurId], references: [id])
+
+  sessionsAnimees    Session[]
+  paiementsEncaisses Paiement[]
+  annulations        Annulation[]
+  cloturesCaisse     ClotureCaisse[]
+  relancesEnvoyees   Relance[]
+
+  @@unique([institutId, utilisateurId])
+  @@index([utilisateurId])
+}
+
+// ─── Catalogue : formations et sessions ────────────
+
+model Formation {
+  id               String   @id @default(cuid())
+  institutId       String
+  intitule         String
+  dureeMois        Int
+  fraisInscription Int
+  prixTotal        Int
+  nbMensualites    Int
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  institut Institut  @relation(fields: [institutId], references: [id])
+  sessions Session[]
+
+  @@index([institutId])
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  institutId  String
+  formationId String
+  formateurId String?
+  nom         String
+  dateDebut   DateTime @db.Date
+  dateFin     DateTime @db.Date
+  horaires    String?
+  capacite    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  institut     Institut      @relation(fields: [institutId], references: [id])
+  formation    Formation     @relation(fields: [formationId], references: [id])
+  formateur    Membre?       @relation(fields: [formateurId], references: [id])
+  inscriptions Inscription[]
+  seances      Seance[]
+
+  @@index([institutId])
+  @@index([formationId])
+  @@index([formateurId])
+}
+
+// ─── Apprenants, inscriptions, échéancier ──────────
+
+model Apprenant {
+  id              String   @id @default(cuid())
+  institutId      String
+  prenom          String
+  nom             String
+  telephone       String
+  pieceIdentite   String?
+  tuteurNom       String?
+  tuteurTelephone String?
+  photoUrl        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  institut     Institut      @relation(fields: [institutId], references: [id])
+  inscriptions Inscription[]
+  paiements    Paiement[]
+
+  @@index([institutId, nom])
+  @@index([institutId, telephone])
+}
+
+model Inscription {
+  id           String            @id @default(cuid())
+  institutId   String
+  apprenantId  String
+  sessionId    String
+  date         DateTime          @default(now())
+  remiseType   TypeRemise?
+  remiseValeur Int               @default(0)
+  motifRemise  String?
+  statut       StatutInscription @default(ACTIVE)
+  dateSortie   DateTime?         @db.Date
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  institut  Institut   @relation(fields: [institutId], references: [id])
+  apprenant Apprenant  @relation(fields: [apprenantId], references: [id])
+  session   Session    @relation(fields: [sessionId], references: [id])
+  echeances Echeance[]
+  presences Presence[]
+
+  @@index([institutId])
+  @@index([apprenantId])
+  @@index([sessionId])
+}
+
+model Echeance {
+  id            String         @id @default(cuid())
+  institutId    String
+  inscriptionId String
+  type          TypeEcheance
+  libelle       String
+  ordre         Int
+  montantDu     Int
+  montantPaye   Int            @default(0)
+  dateLimite    DateTime       @db.Date
+  statut        StatutEcheance @default(A_PAYER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  institut     Institut           @relation(fields: [institutId], references: [id])
+  inscription  Inscription        @relation(fields: [inscriptionId], references: [id])
+  repartitions PaiementEcheance[]
+  relances     Relance[]
+
+  @@index([institutId, statut, dateLimite])
+  @@index([inscriptionId])
+}
+
+// ─── Paiements et caisse ───────────────────────────
+// Un paiement n'est jamais modifié ni supprimé :
+// une annulation crée une ligne Annulation.
+
+model Paiement {
+  id          String       @id @default(cuid())
+  institutId  String
+  apprenantId String
+  caissierId  String?
+  numeroRecu  String
+  mode        ModePaiement
+  montant     Int
+  reference   String?
+  note        String?
+  date        DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+
+  institut     Institut           @relation(fields: [institutId], references: [id])
+  apprenant    Apprenant          @relation(fields: [apprenantId], references: [id])
+  caissier     Membre?            @relation(fields: [caissierId], references: [id])
+  repartitions PaiementEcheance[]
+  annulation   Annulation?
+
+  @@unique([institutId, numeroRecu])
+  @@unique([mode, reference])
+  @@index([institutId, date])
+  @@index([apprenantId])
+  @@index([caissierId, date])
+}
+
+model PaiementEcheance {
+  id         String @id @default(cuid())
+  institutId String
+  paiementId String
+  echeanceId String
+  montant    Int
+
+  institut Institut @relation(fields: [institutId], references: [id])
+  paiement Paiement @relation(fields: [paiementId], references: [id])
+  echeance Echeance @relation(fields: [echeanceId], references: [id])
+
+  @@unique([paiementId, echeanceId])
+  @@index([echeanceId])
+  @@index([institutId])
+}
+
+model Annulation {
+  id         String   @id @default(cuid())
+  institutId String
+  paiementId String   @unique
+  auteurId   String
+  motif      String
+  date       DateTime @default(now())
+
+  institut Institut @relation(fields: [institutId], references: [id])
+  paiement Paiement @relation(fields: [paiementId], references: [id])
+  auteur   Membre   @relation(fields: [auteurId], references: [id])
+
+  @@index([institutId, date])
+}
+
+model CompteurRecu {
+  institutId String
+  annee      Int
+  dernier    Int    @default(0)
+
+  institut Institut @relation(fields: [institutId], references: [id])
+
+  @@id([institutId, annee])
+}
+
+model ClotureCaisse {
+  id               String   @id @default(cuid())
+  institutId       String
+  caissierId       String
+  date             DateTime @db.Date
+  montantTheorique Int
+  montantCompte    Int
+  ecart            Int
+  commentaire      String?
+  createdAt        DateTime @default(now())
+
+  institut Institut @relation(fields: [institutId], references: [id])
+  caissier Membre   @relation(fields: [caissierId], references: [id])
+
+  @@unique([institutId, caissierId, date])
+}
+
+// ─── Présences ─────────────────────────────────────
+
+model Seance {
+  id         String   @id @default(cuid())
+  institutId String
+  sessionId  String
+  date       DateTime @db.Date
+  createdAt  DateTime @default(now())
+
+  institut  Institut   @relation(fields: [institutId], references: [id])
+  session   Session    @relation(fields: [sessionId], references: [id])
+  presences Presence[]
+
+  @@unique([sessionId, date])
+  @@index([institutId])
+}
+
+model Presence {
+  id            String         @id @default(cuid())
+  institutId    String
+  seanceId      String
+  inscriptionId String
+  statut        StatutPresence
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  seance      Seance      @relation(fields: [seanceId], references: [id])
+  inscription Inscription @relation(fields: [inscriptionId], references: [id])
+
+  @@unique([seanceId, inscriptionId])
+  @@index([inscriptionId])
+  @@index([institutId])
+}
+
+// ─── Relances ──────────────────────────────────────
+
+model ModeleRelance {
+  id          String             @id @default(cuid())
+  institutId  String
+  declencheur DeclencheurRelance
+  canal       CanalRelance
+  contenu     String
+  actif       Boolean            @default(true)
+  updatedAt   DateTime           @updatedAt
+
+  institut Institut @relation(fields: [institutId], references: [id])
+
+  @@unique([institutId, declencheur, canal])
+}
+
+model Relance {
+  id          String             @id @default(cuid())
+  institutId  String
+  echeanceId  String
+  auteurId    String?
+  canal       CanalRelance
+  declencheur DeclencheurRelance
+  message     String
+  statut      StatutRelance      @default(A_ENVOYER)
+  envoyeeLe   DateTime?
+  createdAt   DateTime           @default(now())
+
+  institut Institut @relation(fields: [institutId], references: [id])
+  echeance Echeance @relation(fields: [echeanceId], references: [id])
+  auteur   Membre?  @relation(fields: [auteurId], references: [id])
+
+  @@index([institutId, createdAt])
+  @@index([echeanceId])
+}
+
+// ─── Traçabilité et tâches planifiées ──────────────
+
+model JournalAudit {
+  id         String   @id @default(cuid())
+  institutId String?
+  auteurId   String?
+  action     String
+  entite     String
+  entiteId   String
+  avant      Json?
+  apres      Json?
+  createdAt  DateTime @default(now())
+
+  institut Institut?    @relation(fields: [institutId], references: [id])
+  auteur   Utilisateur? @relation(fields: [auteurId], references: [id])
+
+  @@index([institutId, createdAt])
+  @@index([entite, entiteId])
+}
+
+model Job {
+  id            String    @id @default(cuid())
+  institutId    String?
+  type          String
+  payload       Json
+  statut        StatutJob @default(EN_ATTENTE)
+  tentatives    Int       @default(0)
+  executerApres DateTime  @default(now())
+  erreur        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  institut Institut? @relation(fields: [institutId], references: [id])
+
+  @@index([statut, executerApres])
+}
