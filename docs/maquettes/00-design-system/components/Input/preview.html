@@ -1,0 +1,14 @@
+<!-- @dsCard group="Formulaires" height=210 subtitle="repos · aide · erreur · désactivé" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Input</title></head>
+<body>
+<div id="root"></div>
+<script>
+var K=window.Kalaas,h=React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'kl-form'},
+ h(K.Input,{label:'Nom complet',required:true,placeholder:'Awa Diop'}),
+ h(K.Input,{label:'Téléphone',type:'tel',placeholder:'77 123 45 67',hint:'Utilisé pour les rappels de paiement.'}),
+ h(K.Input,{label:'Montant (FCFA)',defaultValue:'45 00',error:'Montant invalide : vérifiez les chiffres.'}),
+ h(K.Input,{label:'Matricule',defaultValue:'KL-2026-0142',disabled:true})));
+</script>
+</body></html>

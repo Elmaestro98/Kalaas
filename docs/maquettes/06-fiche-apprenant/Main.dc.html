@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Fiche apprenant</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1180px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<div style="width: 248px; flex-shrink: 0; height: 1180px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="app" footer="Mohamed Fall · Directeur" style="width: 248px; height: 1180px"></x-import>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="height: 56px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 8px; font-size: 14px">
+<a href="#" style="display: flex; align-items: center; gap: 6px; color: var(--ink-muted); text-decoration: none; min-height: 44px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>Apprenants</a>
+<span style="color: var(--border)">/</span><span style="font-weight: 600">Awa Diop</span>
+<span style="flex-grow: 1"></span><span style="color: var(--ink-muted)">Lundi 14 décembre 2026</span>
+</header>
+
+<main style="flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<!-- IDENTITY + ACTIONS -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 20px">
+<span style="width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">AD</span>
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 12px"><h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600">Awa Diop</h1><x-import component-from-global-scope="Kalaas.Badge" tone="danger" dot="{{yes}}">En retard</x-import></div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--ink-muted)">
+<span>ITF-2026-0102</span><span>Développement Web &amp; Mobile · Rentrée oct. 2026</span><span style="white-space: nowrap">+221 77 123 45 67</span><span>awa.diop@exemple.sn</span>
+</div>
+</div>
+<div style="display: flex; gap: 8px; flex-shrink: 0">
+<x-import component-from-global-scope="Kalaas.Button" variant="ghost">Modifier</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary">Relancer sur WhatsApp</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="gold">Encaisser un paiement</x-import>
+</div>
+</section>
+
+<!-- FINANCIAL SUMMARY: one strip, numbers that add up -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); gap: 28px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: var(--ink-muted)">Payé</span><span><b style="font-weight: 600">150 000</b> <span style="color: var(--ink-muted)">/ 450 000 FCFA</span></span></div>
+<div style="height: 8px; border-radius: 4px; background: #EEEAE1"><div style="width: 33%; height: 8px; border-radius: 4px; background: var(--navy-900)"></div></div>
+<div style="font-size: 12px; color: var(--ink-muted)">33 % · 3 paiements</div>
+</div>
+<div style="padding-left: 24px; border-left: 1px solid var(--border)"><div style="font-size: 13px; color: var(--ink-muted)">Reste à payer</div><div style="white-space: nowrap"><span style="font-size: 24px; font-weight: 700">300 000</span> <span style="font-size: 12px; color: var(--ink-muted)">FCFA</span></div></div>
+<div style="padding-left: 24px; border-left: 1px solid var(--border)"><div style="font-size: 13px; color: var(--danger); font-weight: 500">Dont en retard</div><div style="white-space: nowrap; color: var(--danger)"><span style="font-size: 24px; font-weight: 700">100 001</span> <span style="font-size: 12px">FCFA</span></div></div>
+<div style="padding-left: 24px; border-left: 1px solid var(--border)"><div style="font-size: 13px; color: var(--ink-muted)">Prochaine échéance</div><div style="font-size: 15px; font-weight: 600">5 janv. 2027</div><div style="font-size: 12px; color: var(--ink-muted)">66 667 FCFA</div></div>
+</section>
+
+<!-- TABS -->
+<nav role="tablist" aria-label="Sections de la fiche" style="display: flex; gap: 28px; border-bottom: 1px solid var(--border); font-size: 15px">
+<a href="#" role="tab" aria-selected="true" style="padding: 10px 0; border-bottom: 2px solid var(--gold-500); margin-bottom: -1px; color: var(--ink); font-weight: 600; text-decoration: none">Paiements</a>
+<a href="#" role="tab" aria-selected="false" style="padding: 10px 0; color: var(--ink-muted); text-decoration: none">Présences · 94 %</a>
+<a href="#" role="tab" aria-selected="false" style="padding: 10px 0; color: var(--ink-muted); text-decoration: none">Documents · 5</a>
+<a href="#" role="tab" aria-selected="false" style="padding: 10px 0; color: var(--ink-muted); text-decoration: none">Notes</a>
+</nav>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start">
+
+<!-- SCHEDULE -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px"><div><h2 style="margin: 0; font-size: 16px; font-weight: 600">Échéancier 2026-2027</h2><div style="font-size: 13px; color: var(--ink-muted)">Inscription + 6 mensualités · le 5 de chaque mois</div></div><x-import component-from-global-scope="Kalaas.Button" variant="ghost" size="sm">Ajuster l’échéancier</x-import></div>
+<sc-for list="{{sched}}" as="s" hint-placeholder-count="7">
+<div style="display: grid; grid-template-columns: 28px minmax(0, 1fr) 110px 150px 110px; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--border)">
+<sc-if value="{{s.paid}}" hint-placeholder-val="{{ false }}"><span style="width: 24px; height: 24px; border-radius: 50%; background: var(--success-soft); color: var(--success); display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg></span></sc-if>
+<sc-if value="{{s.late}}" hint-placeholder-val="{{ false }}"><span style="width: 24px; height: 24px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center">!</span></sc-if>
+<sc-if value="{{s.todo}}" hint-placeholder-val="{{ true }}"><span style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); box-sizing: border-box"></span></sc-if>
+<div style="min-width: 0"><div style="font-size: 14px; font-weight: 600">{{s.label}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{s.detail}}</div></div>
+<div style="font-size: 13px; color: var(--ink-muted)">{{s.due}}</div>
+<div style="text-align: right; white-space: nowrap"><div style="font-size: 14px; font-weight: 600">{{s.amount}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{s.sub}}</div></div>
+<div style="display: flex; justify-content: flex-end">
+<sc-if value="{{s.paid}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Badge" tone="success">Payé</x-import></sc-if>
+<sc-if value="{{s.late}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Badge" tone="danger">{{s.badge}}</x-import></sc-if>
+<sc-if value="{{s.todo}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kalaas.Badge" tone="neutral">À venir</x-import></sc-if>
+</div>
+</div>
+</sc-for>
+</section>
+
+<!-- RIGHT COLUMN -->
+<div style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; font-size: 14px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Dossier</h2>
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Inscrite le</span><span>10 sept. 2026</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Résidence</span><span>Sor, Saint-Louis</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="color: var(--ink-muted)">Pièce d’identité</span><span style="display: flex; align-items: center; gap: 8px"><span style="font-variant-numeric: tabular-nums">CNI •••• 1842</span><button type="button" style="border: 0; background: transparent; color: var(--gold-700); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px">Afficher</button></span></div>
+<div style="padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px">
+<span style="width: 36px; height: 36px; border-radius: 50%; background: var(--navy-900); color: var(--gold-500); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center">MD</span>
+<div style="flex-grow: 1"><div style="font-weight: 600">Moussa Diop</div><div style="font-size: 12px; color: var(--ink-muted)">Père · tuteur · +221 77 654 32 10</div></div>
+<button type="button" aria-label="Écrire à Moussa Diop sur WhatsApp" style="width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; color: #1E7A4F; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></button>
+</div>
+</section>
+
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Suivi</h2><x-import component-from-global-scope="Kalaas.Button" variant="ghost" size="sm">+ Ajouter une note</x-import></div>
+<sc-for list="{{log}}" as="l" hint-placeholder-count="4">
+<div style="display: flex; gap: 12px"><span style="width: 8px; height: 8px; margin-top: 7px; flex-shrink: 0; border-radius: 50%; background: var(--gold-500)"></span><div style="flex-grow: 1"><div style="display: flex; justify-content: space-between; gap: 8px"><span style="font-size: 14px; font-weight: 600">{{l.title}}</span><span style="font-size: 12px; color: var(--ink-muted); white-space: nowrap">{{l.date}}</span></div><div style="font-size: 13px; line-height: 20px; color: var(--ink-muted)">{{l.text}}</div></div></div>
+</sc-for>
+</section>
+</div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var S = function (label, due, amount, st, detail, sub, badge) { return { label: label, due: due, amount: amount, detail: detail, sub: sub || '', badge: badge || '', paid: st === 'paid', late: st === 'late', todo: st === 'todo' }; };
+    return {
+      yes: true,
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Filières' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 42 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      sched: [
+        S('Frais d’inscription', '12 sept.', '50 000', 'paid', 'Orange Money · reçu REC-2026-0012'),
+        S('Mensualité 1/6 · octobre', '5 oct.', '66 667', 'paid', 'Wave · reçu REC-2026-0145'),
+        S('Mensualité 2/6 · novembre', '5 nov.', '66 667', 'late', '33 333 payés le 10 nov. (Wave) · reçu REC-2026-0412', 'reste 33 334', 'Retard 39 j'),
+        S('Mensualité 3/6 · décembre', '5 déc.', '66 667', 'late', 'Aucun paiement · rappel envoyé le 12 déc.', '', 'Retard 9 j'),
+        S('Mensualité 4/6 · janvier', '5 janv.', '66 667', 'todo', ''),
+        S('Mensualité 5/6 · février', '5 févr.', '66 667', 'todo', ''),
+        S('Mensualité 6/6 · mars', '5 mars', '66 665', 'todo', 'Dernière échéance, arrondie')
+      ],
+      log: [
+        { title: 'Rappel WhatsApp automatique', date: '12 déc.', text: 'Mensualité de décembre, envoyé à Awa et à son père.' },
+        { title: 'Appel du secrétariat', date: '10 nov.', text: 'Accord avec M. Diop : novembre réglé en deux fois (33 333 + 33 334).' },
+        { title: 'Paiement partiel reçu', date: '10 nov.', text: '33 333 FCFA via Wave · reçu REC-2026-0412 envoyé sur WhatsApp.' },
+        { title: 'Inscription validée', date: '12 sept.', text: 'Frais d’inscription réglés · reçu REC-2026-0012.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Tableau de bord mobile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1320px; display: flex; flex-direction: column; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<header style="background: var(--navy-900); color: #FFFFFF; padding: 16px 20px 72px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<button type="button" style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: transparent; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 600"><span style="width: 28px; height: 28px; border-radius: 6px; background: var(--gold-500); color: var(--navy-900); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">IT</span>Institut Teranga<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<div style="display: flex; gap: 4px">
+<button type="button" aria-label="Rechercher" style="width: 44px; height: 44px; border: 0; background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg></button>
+<button type="button" aria-label="Notifications" style="position: relative; width: 44px; height: 44px; border: 0; background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span style="position: absolute; top: 10px; right: 11px; width: 8px; height: 8px; border-radius: 50%; background: #F97066"></span></button>
+</div>
+</div>
+<div><div style="font-size: 13px; color: #C9CFD8">Encaissé en octobre</div><div style="white-space: nowrap"><span style="font-size: 34px; font-weight: 700; letter-spacing: -0.02em; color: var(--gold-500)">2 450 000</span> <span style="font-size: 14px; color: #C9CFD8">FCFA</span></div>
+<div style="margin-top: 8px; height: 6px; border-radius: 3px; background: var(--navy-700)"><div style="width: 70%; height: 6px; border-radius: 3px; background: var(--gold-500)"></div></div>
+<div style="margin-top: 6px; font-size: 12px; color: #C9CFD8">70 % de l’objectif · 3 500 000 FCFA</div></div>
+</header>
+
+<main style="margin-top: -52px; padding: 0 16px 120px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-card)"><div style="font-size: 12px; color: var(--ink-muted)">Aujourd’hui</div><div style="font-size: 20px; font-weight: 700">185 000</div><div style="font-size: 12px; color: var(--ink-muted)">FCFA · 5 règlements</div></div>
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: var(--shadow-card)"><div style="font-size: 12px; color: var(--ink-muted)">À recouvrer</div><div style="font-size: 20px; font-weight: 700">870 000</div><div style="font-size: 12px; font-weight: 600; color: var(--danger)">18 en retard</div></div>
+</div>
+
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">À relancer</h2><a href="#" style="font-size: 13px; font-weight: 600">Voir les 18</a></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border)"><div style="flex-grow: 1"><div style="font-size: 14px; font-weight: 600">Ibrahima Sarr</div><div style="font-size: 12px; color: var(--ink-muted)"><span style="color: var(--danger); font-weight: 600">90 000 FCFA</span> · 14 j de retard</div></div><button type="button" aria-label="Relancer Ibrahima Sarr sur WhatsApp" style="width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; color: #1E7A4F; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></button></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border)"><div style="flex-grow: 1"><div style="font-size: 14px; font-weight: 600">Mariama Diallo</div><div style="font-size: 12px; color: var(--ink-muted)"><span style="color: var(--danger); font-weight: 600">45 000 FCFA</span> · 10 j de retard</div></div><button type="button" aria-label="Relancer Mariama Diallo sur WhatsApp" style="width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; color: #1E7A4F; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></button></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 0"><div style="flex-grow: 1"><div style="font-size: 14px; font-weight: 600">Babacar Seck</div><div style="font-size: 12px; color: var(--ink-muted)"><span style="color: var(--danger); font-weight: 600">70 000 FCFA</span> · 8 j de retard</div></div><button type="button" aria-label="Relancer Babacar Seck sur WhatsApp" style="width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; color: #1E7A4F; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></button></div>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" style="width: 100%; margin-top: 8px">Relancer les 18 sur WhatsApp</x-import>
+</section>
+
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 16px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 600">6 derniers mois</h2><span style="font-size: 12px; color: var(--ink-muted)">FCFA</span></div>
+<svg role="img" aria-label="Encaissements : mai 1,9 M, juin 2,05 M, juillet 1,8 M, août 1,45 M, septembre 2,85 M, octobre 2,45 M en cours" width="100%" height="160" viewBox="0 0 326 160" style="display: block; margin-top: 10px">
+<line x1="0" y1="130" x2="326" y2="130" stroke="#E4DFD3"></line>
+<g fill="#0D1B2A">
+<path d="M13 130 V61 a4 4 0 0 1 4 -4 H37 a4 4 0 0 1 4 4 V130 Z"></path>
+<path d="M67 130 V56 a4 4 0 0 1 4 -4 H91 a4 4 0 0 1 4 4 V130 Z"></path>
+<path d="M121 130 V65 a4 4 0 0 1 4 -4 H145 a4 4 0 0 1 4 4 V130 Z"></path>
+<path d="M175 130 V78 a4 4 0 0 1 4 -4 H199 a4 4 0 0 1 4 4 V130 Z"></path>
+<path d="M229 130 V27 a4 4 0 0 1 4 -4 H253 a4 4 0 0 1 4 4 V130 Z"></path>
+</g>
+<path d="M283 130 V42 a4 4 0 0 1 4 -4 H307 a4 4 0 0 1 4 4 V130 Z" fill="#C4A35A"></path>
+<g font-family="Poppins, sans-serif" font-size="11" fill="#5B6675" text-anchor="middle">
+<text x="27" y="148">Mai</text><text x="81" y="148">Juin</text><text x="135" y="148">Juil.</text><text x="189" y="148">Août</text><text x="243" y="148">Sept.</text><text x="297" y="148" fill="#0D1B2A" font-weight="600">Oct.</text>
+<text x="243" y="16" fill="#0D1B2A" font-weight="600">2,85 M</text><text x="297" y="31" fill="#0D1B2A" font-weight="600">2,45 M</text>
+</g>
+</svg>
+</section>
+
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Derniers paiements</h2><a href="#" style="font-size: 13px; font-weight: 600">Historique</a></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border)"><div style="flex-grow: 1"><div style="font-size: 14px; font-weight: 600">Moussa Ndiaye</div><div style="font-size: 12px; color: var(--ink-muted)">11:42 · Reçu 0891</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600">45 000</div><x-import component-from-global-scope="Kalaas.Badge" tone="info">Wave</x-import></div></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border)"><div style="flex-grow: 1"><div style="font-size: 14px; font-weight: 600">Awa Diop</div><div style="font-size: 12px; color: var(--ink-muted)">10:15 · Reçu 0890</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600">35 000</div><x-import component-from-global-scope="Kalaas.Badge" tone="warning">Orange Money</x-import></div></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 0"><div style="flex-grow: 1"><div style="font-size: 14px; font-weight: 600">Cheikh Fall</div><div style="font-size: 12px; color: var(--ink-muted)">09:50 · Reçu 0889</div></div><div style="text-align: right"><div style="font-size: 14px; font-weight: 600">60 000</div><x-import component-from-global-scope="Kalaas.Badge" tone="neutral">Espèces</x-import></div></div>
+</section>
+</main>
+
+<!-- bottom nav + FAB -->
+<nav aria-label="Navigation principale" style="position: absolute; left: 0; right: 0; bottom: 0; height: 72px; background: var(--surface-200); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; font-size: 11px; text-align: center">
+<a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink); font-weight: 600; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>Accueil</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink-muted); text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"></circle><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6M22 21a5 5 0 0 0-4-4.9"></path></svg>Apprenants</a>
+<span></span>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink-muted); text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>Relances</a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink-muted); text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>Plus</a>
+</nav>
+<button type="button" aria-label="Nouvel encaissement" style="position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); width: 60px; height: 60px; border: 4px solid var(--surface-100); border-radius: 50%; background: var(--gold-500); color: var(--navy-900); box-shadow: 0 8px 20px rgba(13,27,42,0.25); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

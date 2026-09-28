@@ -1,0 +1,17 @@
+{
+ "v": 3,
+ "createdOnFiles": {"v": 1, "at": "2026-09-27T20:30:00Z"},
+ "title": "Kalaas — Connexion",
+ "launch": {"view": "canvas"},
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 900, "title": "Connexion — Desktop", "is_interactive": true},
+  "Mobile.dc.html": {"x": 1520, "y": 0, "w": 390, "h": 844, "title": "Connexion — Mobile"},
+  "MobileErreur.dc.html": {"x": 1990, "y": 0, "w": 390, "h": 844, "title": "Connexion — Mobile, erreur"}
+ },
+ "order": ["Main.dc.html", "Mobile.dc.html", "MobileErreur.dc.html"],
+ "notes": {},
+ "designSystems": [
+  {"title": "Kalaas", "namespace": "kalaas", "artifact": "https://claude.ai/code/artifact/61162216-b876-40c2-929b-19ae3a50aed9", "version": "1790538008-da46", "copiedAt": "2026-09-27T20:30:00Z"}
+ ]
+}

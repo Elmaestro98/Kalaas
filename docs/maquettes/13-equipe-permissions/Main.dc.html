@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Inviter un membre</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 960px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<!-- page behind -->
+<div style="width: 248px; flex-shrink: 0; height: 960px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="par" footer="Mohamed Fall · Directeur" style="width: 248px; height: 960px"></x-import>
+</div>
+<div aria-hidden="true" style="flex-grow: 1; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+<h1 style="margin: 0; font-size: 22px; font-weight: 600">Paramètres · Équipe</h1>
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 16px; overflow: hidden">
+<sc-for list="{{team}}" as="m" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 14px"><span style="width: 34px; height: 34px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center">{{m.ini}}</span><span style="flex-grow: 1; font-weight: 600">{{m.nom}}</span><span style="width: 200px; color: var(--ink-muted)">{{m.role}}</span><span style="width: 160px; color: var(--ink-muted)">{{m.last}}</span></div>
+</sc-for>
+</div>
+</div>
+
+<!-- overlay covers the WHOLE app, sidebar included -->
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(13,27,42,0.5)"></div>
+
+<div role="dialog" aria-modal="true" aria-labelledby="invT" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 860px; background: var(--surface-200); border-radius: 20px; box-shadow: 0 30px 80px rgba(13,27,42,0.35); display: flex; flex-direction: column; overflow: hidden">
+<header style="padding: 22px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px">
+<div style="flex-grow: 1"><h2 id="invT" style="margin: 0; font-size: 20px; font-weight: 600">Inviter un membre de l’équipe</h2><div style="font-size: 14px; color: var(--ink-muted); margin-top: 2px">Il recevra un lien de connexion sur WhatsApp, valable 48 heures.</div></div>
+<button type="button" aria-label="Fermer" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr)">
+<!-- form -->
+<div style="padding: 22px 28px; display: flex; flex-direction: column; gap: 16px">
+<x-import component-from-global-scope="Kalaas.Input" label="Nom complet" required="{{yes}}" default-value="Babacar Seck"></x-import>
+<div class="kl-field"><label class="kl-field-label" for="wa">WhatsApp<span class="kl-field-req" aria-hidden="true">*</span></label><div style="display: flex; gap: 8px"><span style="display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-100); font-size: 15px; font-weight: 500">+221</span><input id="wa" class="kl-input" type="tel" value="76 991 30 08" readonly></div></div>
+<x-import component-from-global-scope="Kalaas.Input" label="E-mail" type="email" placeholder="Facultatif" hint="Pour recevoir aussi l’invitation par e-mail."></x-import>
+<div class="kl-field"><span class="kl-field-label">Rôle</span>
+<div role="radiogroup" aria-label="Rôle" style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{roles}}" as="r" hint-placeholder-count="4">
+<sc-if value="{{r.on}}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{r.pick}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 2px solid var(--navy-900); border-radius: 12px; background: var(--gold-100); font-family: inherit; text-align: left; cursor: pointer; color: var(--ink)"><span style="width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%; border: 5px solid var(--navy-900); box-sizing: border-box; background: #FFFFFF"></span><span><span style="display: block; font-size: 14px; font-weight: 600">{{r.label}}</span><span style="display: block; font-size: 12px; color: var(--ink-muted)">{{r.desc}}</span></span></button></sc-if>
+<sc-if value="{{r.off}}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{r.pick}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: #FFFFFF; font-family: inherit; text-align: left; cursor: pointer; color: var(--ink)"><span style="width: 18px; height: 18px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid #8A93A0; box-sizing: border-box"></span><span><span style="display: block; font-size: 14px; font-weight: 600">{{r.label}}</span><span style="display: block; font-size: 12px; color: var(--ink-muted)">{{r.desc}}</span></span></button></sc-if>
+</sc-for>
+</div></div>
+</div>
+
+<!-- what the role can do -->
+<aside style="padding: 22px 28px; background: var(--surface-100); border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--gold-700)">CE QUE {{roleUpper}} POURRA FAIRE</div>
+<sc-for list="{{perms}}" as="p" hint-placeholder-count="6">
+<div style="display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 20px">
+<sc-if value="{{p.yes}}" hint-placeholder-val="{{ true }}"><span style="width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: var(--success-soft); color: var(--success); display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg></span></sc-if>
+<sc-if value="{{p.no}}" hint-placeholder-val="{{ false }}"><span style="width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: #EEEAE1; color: #6B7482; display: flex; align-items: center; justify-content: center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></span></sc-if>
+<span><sc-if value="{{p.yes}}" hint-placeholder-val="{{ true }}"><span style="font-weight: 500; color: #0D1B2A">{{p.label}}</span></sc-if><sc-if value="{{p.no}}" hint-placeholder-val="{{ false }}"><span style="color: #6B7482">{{p.label}}</span></sc-if><span style="display: block; font-size: 12px; color: var(--ink-muted)">{{p.note}}</span></span>
+</div>
+</sc-for>
+<sc-if value="{{isFormateur}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; font-weight: 600">Sessions de ce formateur</div>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" checked style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">DEV1 · Dév. web matin</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">DEV2 · Dév. web soir</label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">BUR1 · Bureautique</label>
+</div>
+</sc-if>
+</aside>
+</div>
+
+<footer style="padding: 16px 28px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px">
+<span style="flex-grow: 1; font-size: 13px; color: var(--ink-muted)">Campus : Saint-Louis · modifiable à tout moment</span>
+<x-import component-from-global-scope="Kalaas.Button" variant="ghost">Annuler</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg">Envoyer l’invitation</x-import>
+</footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { role: 'sec' }; }
+  renderVals() {
+    var self = this, role = this.state.role;
+    var R = [
+      ['dir', 'Direction', 'Tout voir et tout gérer, y compris l’équipe'],
+      ['sec', 'Secrétariat et caisse', 'Inscriptions, encaissements, reçus'],
+      ['cpt', 'Comptable', 'Consulte les finances et exporte, sans encaisser'],
+      ['frm', 'Formateur', 'Fait l’appel dans ses sessions']
+    ];
+    var P = [
+      ['Inscrire des apprenants', { dir: 1, sec: 1 }, ''],
+      ['Encaisser et éditer des reçus', { dir: 1, sec: 1 }, 'Chaque encaissement est enregistré à son nom'],
+      ['Accorder une remise', { dir: 1 }, 'Réservé à la direction'],
+      ['Voir les rapports financiers', { dir: 1, cpt: 1 }, ''],
+      ['Faire l’appel', { dir: 1, frm: 1 }, role === 'frm' ? 'Uniquement dans ses sessions' : ''],
+      ['Gérer l’équipe et les paramètres', { dir: 1 }, '']
+    ];
+    var label = R.filter(function (r) { return r[0] === role; })[0][1];
+    return {
+      yes: true,
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Formations' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 23 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      team: [
+        { ini: 'MF', nom: 'Mohamed Fall', role: 'Direction', last: 'En ligne' },
+        { ini: 'FK', nom: 'Fatou Kane', role: 'Secrétariat et caisse', last: 'Il y a 5 min' },
+        { ini: 'OD', nom: 'Ousmane Diop', role: 'Secrétariat et caisse', last: 'Hier' },
+        { ini: 'MK', nom: 'Mamadou Kane', role: 'Formateur · DEV1', last: 'Ce matin' },
+        { ini: 'AS', nom: 'Alioune Sy', role: 'Formateur · ANG1', last: 'Il y a 3 jours' }
+      ],
+      roles: R.map(function (r) { return { label: r[1], desc: r[2], on: role === r[0], off: role !== r[0], pick: function () { self.setState({ role: r[0] }); } }; }),
+      roleUpper: role === 'dir' ? 'LA DIRECTION' : 'CE RÔLE',
+      isFormateur: role === 'frm',
+      perms: P.map(function (p) { var ok = !!p[1][role]; return { label: p[0], note: ok ? p[2] : '', yes: ok, no: !ok, style: ok ? 'font-weight: 500; color: #0D1B2A' : 'color: #6B7482' }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+ "v": 3,
+ "createdOnFiles": {"v": 1, "at": "2026-09-27T22:00:00Z"},
+ "title": "Kalaas — Nouvelle inscription",
+ "launch": {"view": "canvas"},
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1640, "title": "Nouvelle inscription — Desktop", "is_interactive": true},
+  "Mobile.dc.html": {"x": 1520, "y": 0, "w": 390, "h": 1100, "title": "Nouvelle inscription — Mobile"}
+ },
+ "order": ["Main.dc.html", "Mobile.dc.html"],
+ "notes": {},
+ "designSystems": [
+  {"title": "Kalaas", "namespace": "kalaas", "artifact": "https://claude.ai/code/artifact/61162216-b876-40c2-929b-19ae3a50aed9", "version": "1790538008-da46", "copiedAt": "2026-09-27T22:00:00Z"}
+ ]
+}

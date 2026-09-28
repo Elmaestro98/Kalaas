@@ -1,0 +1,18 @@
+{
+ "v": 3,
+ "createdOnFiles": {"v": 1, "at": "2026-09-27T22:20:00Z"},
+ "title": "Kalaas — Nouvel encaissement",
+ "launch": {"view": "canvas"},
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {"x": 0, "y": 0, "w": 390, "h": 1080, "title": "Encaissement — Mobile", "is_interactive": true},
+  "Succes.dc.html": {"x": 470, "y": 0, "w": 390, "h": 844, "title": "Encaissement — Confirmation"},
+  "Desktop.dc.html": {"x": 940, "y": 0, "w": 1440, "h": 1000, "title": "Encaissement — Desktop (panneau, parcours complet)", "is_interactive": true},
+  "Caisse.dc.html": {"x": 940, "y": 1120, "w": 1440, "h": 1000, "title": "Caisse du jour — Desktop", "is_interactive": true}
+ },
+ "order": ["Main.dc.html", "Succes.dc.html", "Desktop.dc.html", "Caisse.dc.html"],
+ "notes": {},
+ "designSystems": [
+  {"title": "Kalaas", "namespace": "kalaas", "artifact": "https://claude.ai/code/artifact/61162216-b876-40c2-929b-19ae3a50aed9", "version": "1790538008-da46", "copiedAt": "2026-09-27T22:20:00Z"}
+ ]
+}

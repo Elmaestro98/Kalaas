@@ -1,0 +1,13 @@
+<!-- @dsCard group="Données" height=280 subtitle="paiements des apprenants" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Table</title><style>#root{padding:var(--space-4)}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var K=window.Kalaas,h=React.createElement;
+var tone={'Payé':'success','En attente':'warning','Impayé':'danger'};
+ReactDOM.createRoot(document.getElementById('root')).render(h(K.Table,{
+ columns:[{key:'nom',label:'Apprenant'},{key:'promo',label:'Promotion'},{key:'montant',label:'Montant',align:'right'},{key:'statut',label:'Statut',render:function(r){return h(K.Badge,{tone:tone[r.statut]},r.statut)}}],
+ rows:[{id:1,nom:'Awa Diop',promo:'Développement Web',montant:'45 000 FCFA',statut:'Payé'},{id:2,nom:'Moussa Sarr',promo:'Infographie',montant:'35 000 FCFA',statut:'En attente'},{id:3,nom:'Fatou Ba',promo:'Développement Web',montant:'45 000 FCFA',statut:'Impayé'},{id:4,nom:'Ibrahima Gueye',promo:'Bureautique',montant:'25 000 FCFA',statut:'Payé'}]}));
+</script>
+</body></html>

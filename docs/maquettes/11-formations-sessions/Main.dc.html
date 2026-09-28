@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Formations et sessions</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+.fcard:hover{box-shadow:0 8px 28px rgba(13,27,42,0.12)}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1160px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<div style="width: 248px; flex-shrink: 0; height: 1160px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="form" footer="Mohamed Fall · Directeur" style="width: 248px; height: 1160px"></x-import>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="height: 72px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 12px">
+<div style="flex-grow: 1"><h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600">Formations et sessions</h1><div style="font-size: 13px; color: var(--ink-muted)">6 formations · 7 sessions actives · lundi 1er février 2027</div></div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary">+ Nouvelle session</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary">+ Nouvelle formation</x-import>
+</header>
+
+<main style="flex-grow: 1; padding: 20px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<!-- filters -->
+<div style="display: flex; align-items: center; gap: 12px">
+<div role="tablist" aria-label="Type de formation" style="display: flex; gap: 6px">
+<sc-for list="{{types}}" as="t" hint-placeholder-count="3">
+<sc-if value="{{t.on}}" hint-placeholder-val="{{ false }}"><button type="button" role="tab" aria-selected="true" onClick="{{t.pick}}" style="height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{t.label}} · {{t.count}}</button></sc-if>
+<sc-if value="{{t.off}}" hint-placeholder-val="{{ true }}"><button type="button" role="tab" aria-selected="false" onClick="{{t.pick}}" style="height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 999px; background: #FFFFFF; color: var(--ink); font-family: inherit; font-size: 13px; cursor: pointer">{{t.label}} · {{t.count}}</button></sc-if>
+</sc-for>
+</div>
+<span style="flex-grow: 1"></span>
+<label style="width: 300px; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-200); color: var(--ink-muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input type="search" aria-label="Rechercher" placeholder="Formation ou formateur" style="flex-grow: 1; border: 0; background: transparent; font-family: inherit; font-size: 14px; outline: none"></label>
+</div>
+
+<!-- catalogue: same 3 facts on every card -->
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+<sc-for list="{{forms}}" as="f" hint-placeholder-count="6">
+<a href="#" class="fcard" style="display: flex; flex-direction: column; gap: 12px; padding: 18px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; color: var(--ink); text-decoration: none; transition: box-shadow .15s">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px">
+<div style="min-width: 0"><div style="font-size: 16px; font-weight: 600; line-height: 22px">{{f.nom}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{f.duree}}</div></div>
+<x-import component-from-global-scope="Kalaas.Badge" tone="gold">{{f.type}}</x-import>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding: 10px 12px; background: var(--surface-100); border-radius: 10px">
+<span style="font-size: 12px; color: var(--ink-muted)">{{f.detail}}</span>
+<span style="white-space: nowrap"><b style="font-size: 18px; font-weight: 700">{{f.total}}</b> <span style="font-size: 11px; color: var(--ink-muted)">FCFA</span></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 12px; color: var(--ink-muted)">
+<div>Apprenants<div style="font-size: 16px; font-weight: 600; color: var(--ink)">{{f.app}}</div></div>
+<div>Sessions<div style="font-size: 16px; font-weight: 600; color: var(--ink)">{{f.sess}}</div></div>
+<div>Réussite<div style="font-size: 16px; font-weight: 600; color: var(--ink)">{{f.rec}}</div></div>
+</div>
+</a>
+</sc-for>
+</div>
+
+<!-- sessions -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border)"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Sessions actives</h2><x-import component-from-global-scope="Kalaas.Button" variant="ghost" size="sm">Exporter le planning</x-import></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr) minmax(0, 1fr) 190px 150px; gap: 14px; padding: 10px 18px; background: var(--surface-100); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink-muted)">
+<span>SESSION</span><span>PÉRIODE · HORAIRES</span><span>FORMATEUR</span><span>PLACES</span><span>STATUT</span>
+</div>
+<sc-for list="{{sessions}}" as="s" hint-placeholder-count="7">
+<div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr) minmax(0, 1fr) 190px 150px; gap: 14px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 13px">
+<div style="min-width: 0"><div style="font-weight: 600; white-space: nowrap">{{s.code}}</div><div style="font-size: 12px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.form}}</div></div>
+<div><div style="white-space: nowrap">{{s.dates}}</div><div style="font-size: 12px; color: var(--ink-muted); white-space: nowrap">{{s.hours}}</div></div>
+<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.prof}}</div>
+<div><div style="display: flex; justify-content: space-between; font-size: 12px"><span><b style="font-weight: 600">{{s.fill}}</b> inscrits</span><span style="color: var(--ink-muted)">{{s.left}}</span></div><div style="height: 5px; border-radius: 3px; background: #EEEAE1; margin-top: 5px"><div style="width: {{s.pct}}; height: 5px; border-radius: 3px; background: var(--navy-900)"></div></div></div>
+<div>
+<sc-if value="{{s.run}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kalaas.Badge" tone="success" dot="{{yes}}">{{s.stat}}</x-import></sc-if>
+<sc-if value="{{s.start}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Badge" tone="info" dot="{{yes}}">{{s.stat}}</x-import></sc-if>
+</div>
+</div>
+</sc-for>
+</section>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { type: 'all' }; }
+  renderVals() {
+    var self = this, t = this.state.type;
+    var F = [
+      ['Développement web & mobile', 'cert', 'Certifiante', '6 mois · 720 h', '50 000 + 6 × 66 667', '450 000', 42, 2, '94 %'],
+      ['Comptabilité & gestion', 'dipl', 'Diplômante', '6 mois · 650 h', '40 000 + 6 × 60 000', '400 000', 20, 1, '91 %'],
+      ['Couture & modélisme', 'cert', 'Certifiante', '6 mois · 800 h', '50 000 + 6 × 70 000', '470 000', 18, 1, '97 %'],
+      ['Anglais professionnel', 'cert', 'Certifiante', '4 mois · 320 h · TOEIC', '30 000 + 4 × 60 000', '270 000', 22, 1, '—'],
+      ['Esthétique & soins', 'cert', 'Certifiante', '6 mois · 580 h', '45 000 + 6 × 58 333', '395 000', 19, 1, '88 %'],
+      ['Bureautique & secrétariat', 'cert', 'Certifiante', '3 mois · 260 h', '25 000 + 3 × 60 000', '205 000', 12, 1, '95 %']
+    ];
+    var types = [['all', 'Toutes'], ['cert', 'Certifiantes'], ['dipl', 'Diplômantes']].map(function (x) {
+      var n = x[0] === 'all' ? F.length : F.filter(function (f) { return f[1] === x[0]; }).length;
+      return { label: x[1], count: n, on: t === x[0], off: t !== x[0], pick: function () { self.setState({ type: x[0] }); } };
+    });
+    var S = [
+      ['COH-2026-DEV1', 'Dév. web & mobile · matin', '1 oct. → 31 mars', 'Lun–Ven · 8h30–13h', 'Mamadou Kane', 18, 25, 'run'],
+      ['COH-2026-DEV2', 'Dév. web & mobile · soir', '15 nov. → 15 mai', 'Lun–Ven · 16h–20h', 'Cheikh Diop', 24, 25, 'run'],
+      ['COH-2026-CPT1', 'Comptabilité & gestion', '15 oct. → 15 avr.', 'Lun–Jeu · 9h–13h30', 'Fatou Kiné Ndiaye', 20, 20, 'run'],
+      ['COH-2026-MOD1', 'Couture & modélisme', '1 nov. → 30 avr.', 'Lun–Ven · 8h30–14h', 'Mariama Diallo', 18, 20, 'run'],
+      ['COH-2026-ANG1', 'Anglais professionnel', '1 déc. → 31 mars', 'Mar, Jeu, Sam · 17h–20h', 'Alioune Sy', 22, 25, 'run'],
+      ['COH-2027-EST1', 'Esthétique & soins', '15 janv. → 15 juil.', 'Lun–Ven · 9h–13h', 'Aminata Sow', 19, 20, 'run'],
+      ['COH-2027-BUR1', 'Bureautique & secrétariat', '1 févr. → 30 avr.', 'Lun–Jeu · 14h–18h', 'Ousmane Diagne', 12, 20, 'start']
+    ];
+    return {
+      yes: true,
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Formations' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 23 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      types: types,
+      forms: F.filter(function (f) { return t === 'all' || f[1] === t; }).map(function (f) { return { nom: f[0], type: f[2], duree: f[3], detail: f[4], total: f[5], app: f[6], sess: f[7], rec: f[8] }; }),
+      sessions: S.map(function (s) {
+        var left = s[6] - s[5];
+        return { code: s[0], form: s[1], dates: s[2], hours: s[3], prof: s[4], fill: s[5] + '/' + s[6], pct: Math.round(s[5] / s[6] * 100) + '%',
+          left: left === 0 ? 'Complet' : left + (left > 1 ? ' places' : ' place'), run: s[7] === 'run', start: s[7] === 'start', stat: s[7] === 'run' ? 'En cours' : 'Démarre aujourd’hui' };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

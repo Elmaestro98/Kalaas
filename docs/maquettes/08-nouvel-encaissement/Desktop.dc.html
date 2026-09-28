@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Encaissement desktop</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+.res:hover{background:#F5EDDB}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 1000px; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<!-- the page the panel opens from -->
+<div aria-hidden="true" style="position: absolute; inset: 0"><dc-import name="Caisse" hint-size="1440px,1000px"></dc-import></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(13,27,42,0.45)"></div>
+
+<aside role="dialog" aria-modal="true" aria-labelledby="encT" style="position: absolute; top: 0; right: 0; bottom: 0; width: 540px; background: var(--surface-200); box-shadow: -12px 0 40px rgba(13,27,42,0.25); display: flex; flex-direction: column">
+<header style="padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px">
+<div style="flex-grow: 1"><h2 id="encT" style="margin: 0; font-size: 18px; font-weight: 600">Nouvel encaissement</h2><div style="font-size: 12px; color: var(--ink-muted)">{{stepLabel}}</div></div>
+<button type="button" aria-label="Fermer" onClick="{{reset}}" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</header>
+
+<!-- STEP 1: find the learner -->
+<sc-if value="{{isSearch}}" hint-placeholder-val="{{ false }}">
+<div style="flex-grow: 1; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<label style="display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; border: 2px solid var(--gold-500); border-radius: 12px; background: #FFFFFF; box-shadow: 0 0 0 3px var(--gold-100)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B6675" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input type="search" aria-label="Rechercher un apprenant" value="ndi" readonly style="flex-grow: 1; border: 0; background: transparent; font-family: inherit; font-size: 16px; outline: none"></label>
+<div style="font-size: 12px; color: var(--ink-muted)">Nom, matricule ou téléphone · 3 résultats</div>
+<div style="display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 12px; overflow: hidden">
+<sc-for list="{{results}}" as="r" hint-placeholder-count="3">
+<button type="button" class="res" onClick="{{r.pick}}" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--border); background: #FFFFFF; font-family: inherit; text-align: left; cursor: pointer; color: var(--ink)">
+<span style="width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center">{{r.ini}}</span>
+<span style="flex-grow: 1"><span style="display: block; font-size: 14px; font-weight: 600">{{r.nom}}</span><span style="display: block; font-size: 12px; color: var(--ink-muted)">{{r.meta}}</span></span>
+<span style="text-align: right"><span style="display: block; font-size: 12px; color: var(--ink-muted)">Reste</span><span style="display: block; font-size: 14px; font-weight: 600">{{r.reste}}</span></span>
+</button>
+</sc-for>
+</div>
+<div style="font-size: 12px; color: var(--ink-muted)">Astuce : depuis une fiche apprenant, le bouton « Encaisser » ouvre ce panneau directement à l’étape suivante.</div>
+</div>
+</sc-if>
+
+<!-- STEP 2: amount, method, allocation -->
+<sc-if value="{{isForm}}" hint-placeholder-val="{{ true }}">
+<div style="flex-grow: 1; padding: 20px 24px; display: flex; flex-direction: column; gap: 18px; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-100); border-radius: 12px">
+<span style="width: 40px; height: 40px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); font-weight: 700; display: flex; align-items: center; justify-content: center">MN</span>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600">Moussa Ndiaye</div><div style="font-size: 12px; color: var(--ink-muted)">Dév. Web &amp; Mobile · reste 150 000 FCFA sur 450 000</div></div>
+<button type="button" onClick="{{toSearch}}" style="border: 0; background: transparent; color: var(--gold-700); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px">Changer</button>
+</div>
+<div class="kl-field"><label class="kl-field-label" for="amtD">Montant reçu</label>
+<div style="position: relative"><input id="amtD" class="kl-input" value="{{amountTxt}}" readonly style="font-size: 26px; font-weight: 700; height: 58px; padding-right: 70px"><span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-weight: 600">FCFA</span></div>
+<div style="display: flex; gap: 8px; margin-top: 4px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="3">
+<sc-if value="{{c.on}}" hint-placeholder-val="{{ false }}"><button type="button" aria-pressed="true" onClick="{{c.pick}}" style="height: 34px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{c.label}} · {{c.value}}</button></sc-if>
+<sc-if value="{{c.off}}" hint-placeholder-val="{{ true }}"><button type="button" aria-pressed="false" onClick="{{c.pick}}" style="height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: #FFFFFF; font-family: inherit; font-size: 13px; color: var(--ink); cursor: pointer">{{c.label}} · {{c.value}}</button></sc-if>
+</sc-for>
+</div></div>
+
+<div class="kl-field"><span class="kl-field-label">Moyen de paiement</span>
+<div role="radiogroup" aria-label="Moyen de paiement" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="4">
+<sc-if value="{{m.on}}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{m.pick}}" style="height: 46px; border: 2px solid var(--navy-900); border-radius: 10px; background: var(--gold-100); font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer">{{m.label}}</button></sc-if>
+<sc-if value="{{m.off}}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{m.pick}}" style="height: 46px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; font-family: inherit; font-size: 13px; color: var(--ink); cursor: pointer">{{m.label}}</button></sc-if>
+</sc-for>
+</div></div>
+
+<sc-if value="{{isMM}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kalaas.Input" label="{{refLabel}}" required="{{yes}}" placeholder="Référence du SMS de confirmation"></x-import></sc-if>
+<sc-if value="{{isCash}}" hint-placeholder-val="{{ false }}"><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end"><div class="kl-field"><span class="kl-field-label">Billets reçus</span><div style="height: 42px; display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; font-weight: 600">{{cashIn}} FCFA</div></div><div class="kl-field"><span class="kl-field-label">À rendre</span><div style="height: 42px; display: flex; align-items: center; font-size: 20px; font-weight: 700">{{change}}</div></div></div></sc-if>
+<sc-if value="{{isVir}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Input" label="Référence du virement" placeholder="Ex. VIR-CBAO-…" hint="Marqué « à vérifier » jusqu’à réception sur le compte."></x-import></sc-if>
+
+<div style="padding: 14px; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="font-weight: 600">Ce paiement règle</span><span style="font-size: 12px; color: var(--ink-muted)">la plus ancienne d’abord</span></div>
+<sc-for list="{{alloc}}" as="a" hint-placeholder-count="1">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>{{a.label}} <span style="font-size: 12px; color: var(--ink-muted)">· {{a.note}}</span></span><span style="font-weight: 600; white-space: nowrap">{{a.amount}}</span></div>
+</sc-for>
+<div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border); font-size: 13px"><span style="color: var(--ink-muted)">Reste après ce paiement</span><b style="font-weight: 600">{{after}}</b></div>
+</div>
+</div>
+<footer style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px">
+<span style="flex-grow: 1; font-size: 12px; color: var(--ink-muted)">Encaissé par Fatou Kane</span>
+<button type="button" onClick="{{toSearch}}" style="height: 44px; padding: 0 16px; border: 0; border-radius: 10px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer">Retour</button>
+<button type="button" onClick="{{confirm}}" style="height: 48px; padding: 0 22px; border: 0; border-radius: 10px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Encaisser {{amountTxt}} FCFA</button>
+</footer>
+</sc-if>
+
+<!-- STEP 3: done -->
+<sc-if value="{{isDone}}" hint-placeholder-val="{{ false }}">
+<div style="flex-grow: 1; padding: 32px 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+<span style="width: 64px; height: 64px; border-radius: 50%; background: var(--success-soft); color: var(--success); display: flex; align-items: center; justify-content: center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg></span>
+<div style="font-size: 22px; font-weight: 600">{{amountTxt}} FCFA encaissés</div>
+<div style="font-size: 14px; color: var(--ink-muted)">Moussa Ndiaye · reçu REC-0242 · {{modeLabel}}</div>
+</div>
+<div style="padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<sc-for list="{{alloc}}" as="a" hint-placeholder-count="1"><div style="display: flex; justify-content: space-between"><span>{{a.label}}</span><x-import component-from-global-scope="Kalaas.Badge" tone="success">{{a.short}}</x-import></div></sc-for>
+<div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border)"><span style="color: var(--ink-muted)">Reste à payer</span><b style="font-weight: 600">{{after}}</b></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface-100); border-radius: 12px; font-size: 13px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg><span style="flex-grow: 1">Reçu envoyé sur WhatsApp au +221 77 645 28 19</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg" style="width: 100%">Imprimer le reçu</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg" style="width: 100%">Voir la fiche</x-import>
+</div>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{toSearch}}" style="height: 50px; border: 0; border-radius: 10px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Encaisser pour un autre apprenant</button>
+<button type="button" onClick="{{undo}}" style="height: 40px; border: 0; background: transparent; font-family: inherit; font-size: 13px; color: var(--ink-muted); cursor: pointer">Erreur ? Annuler cet encaissement (10 min)</button>
+</div>
+</div>
+</sc-if>
+</aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { step: 'form', amt: 75000, mode: 'wave' }; }
+  renderVals() {
+    var self = this, st = this.state;
+    var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+    var go = function (s) { return function () { self.setState({ step: s }); }; };
+    var dues = [['Mensualité 5/6 · février', 75000], ['Mensualité 6/6 · mars', 75000]];
+    var left = st.amt, alloc = [];
+    dues.forEach(function (d) {
+      if (left <= 0) return;
+      var take = Math.min(left, d[1]); left -= take;
+      var full = take === d[1];
+      alloc.push({ label: d[0], amount: fmt(take), note: full ? 'soldée' : 'partiel, reste ' + fmt(d[1] - take), short: full ? 'Soldée' : 'Partiel' });
+    });
+    var modes = [['wave', 'Wave'], ['om', 'Orange Money'], ['cash', 'Espèces'], ['vir', 'Virement']];
+    var cashIn = Math.ceil(st.amt / 10000) * 10000;
+    var labels = { search: 'Étape 1 sur 2 · choisir l’apprenant', form: 'Étape 2 sur 2 · montant et moyen', done: 'Terminé' };
+    return {
+      yes: true,
+      stepLabel: labels[st.step],
+      isSearch: st.step === 'search', isForm: st.step === 'form', isDone: st.step === 'done',
+      toSearch: go('search'), confirm: go('done'), undo: go('form'),
+      reset: function () { self.setState({ step: 'search', amt: 75000, mode: 'wave' }); },
+      results: [
+        { ini: 'MN', nom: 'Moussa Ndiaye', meta: 'ITF-2026-0101 · Dév. Web & Mobile', reste: '150 000' },
+        { ini: 'ML', nom: 'Mamadou L. Ndao', meta: 'ITF-2026-0112 · Transport Logistique', reste: '100 000' },
+        { ini: 'FN', nom: 'Fatou Ndiaye', meta: 'ITF-2026-0147 · Comptabilité & Gestion', reste: '0' }
+      ].map(function (r) { r.pick = go('form'); return r; }),
+      amountTxt: fmt(st.amt),
+      chips: [['Mensualité', 75000], ['Tout solder', 150000], ['Acompte', 50000]].map(function (o) { return { label: o[0], value: fmt(o[1]), on: st.amt === o[1], off: st.amt !== o[1], pick: function () { self.setState({ amt: o[1] }); } }; }),
+      modes: modes.map(function (m) { return { label: m[1], on: st.mode === m[0], off: st.mode !== m[0], pick: function () { self.setState({ mode: m[0] }); } }; }),
+      modeLabel: modes.filter(function (m) { return m[0] === st.mode; })[0][1],
+      isMM: st.mode === 'wave' || st.mode === 'om', isCash: st.mode === 'cash', isVir: st.mode === 'vir',
+      refLabel: st.mode === 'om' ? 'Référence Orange Money' : 'Référence Wave',
+      cashIn: fmt(cashIn), change: fmt(cashIn - st.amt) + ' FCFA',
+      alloc: alloc, after: fmt(150000 - st.amt) + ' FCFA'
+    };
+  }
+}
+</script>
+</body>
+</html>

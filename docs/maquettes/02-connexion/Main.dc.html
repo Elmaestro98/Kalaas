@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Connexion</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<!-- BRAND PANEL -->
+<aside style="position: relative; width: 560px; flex-shrink: 0; background: var(--navy-900); color: #FFFFFF; padding: 56px 64px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden">
+<div style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Kalaas<span style="color: var(--gold-500)">.</span></div>
+
+<!-- motif: progress pills from the brand cover -->
+<svg aria-hidden="true" width="280" height="200" viewBox="0 0 280 200" style="position: absolute; right: -24px; top: 120px">
+<rect x="0" y="0" width="120" height="12" rx="6" fill="#C4A35A"></rect>
+<rect x="0" y="32" width="200" height="12" rx="6" fill="#C4A35A"></rect>
+<rect x="0" y="64" width="160" height="12" rx="6" fill="#C4A35A"></rect>
+<rect x="0" y="96" width="280" height="12" rx="6" fill="#C4A35A"></rect>
+<rect x="0" y="128" width="240" height="12" rx="6" fill="#2A3F57"></rect>
+<rect x="0" y="160" width="80" height="12" rx="6" fill="#2A3F57"></rect>
+</svg>
+
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 24px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #E6D3A3">ESPACE ÉTABLISSEMENT</div>
+<h2 style="margin: 0; font-size: 40px; line-height: 48px; font-weight: 700; letter-spacing: -0.02em">Votre institut vous attend.</h2>
+<div style="display: flex; flex-direction: column; gap: 14px; font-size: 16px; line-height: 24px; color: #C9CFD8">
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Paiements Wave et Orange Money</div>
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Reçus et relances sur WhatsApp</div>
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Présences et scolarité au même endroit</div>
+</div>
+</div>
+
+<div style="margin-top: 56px; padding: 20px; border: 1px solid var(--navy-700); border-radius: 14px; display: flex; gap: 14px; align-items: center">
+<span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #1E7A4F; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></span>
+<div style="font-size: 14px; line-height: 21px; color: #C9CFD8"><div style="color: #FFFFFF; font-weight: 600">Bloqué pour vous connecter ?</div>Support WhatsApp : <a href="#" style="color: #E6D3A3; font-weight: 500">+221 76 843 12 63</a></div>
+</div>
+
+<div style="margin-top: 32px; display: flex; justify-content: space-between; font-size: 13px; color: #A7B0BC">
+<span>© 2026 Kalaas · AFRICATECHNOLOGIE</span>
+<a href="#" style="color: #A7B0BC; text-decoration: none">Confidentialité</a>
+</div>
+</aside>
+
+<!-- FORM -->
+<main style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 48px">
+<div style="width: 440px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-card); padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div>
+<h1 style="margin: 0; font-size: 30px; line-height: 38px; font-weight: 600; letter-spacing: -0.01em">Connexion</h1>
+<p style="margin: 6px 0 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Accédez à l’espace de gestion de votre institut.</p>
+</div>
+
+<!-- method switch -->
+<div role="tablist" aria-label="Méthode de connexion" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--surface-100); border: 1px solid var(--border); border-radius: 12px">
+<sc-if value="{{isEmail}}" hint-placeholder-val="{{ true }}">
+<button type="button" role="tab" aria-selected="true" onClick="{{pickEmail}}" style="height: 40px; border: 0; border-radius: 9px; background: #FFFFFF; color: #0D1B2A; font-family: inherit; font-size: 14px; font-weight: 600; box-shadow: 0 1px 3px rgba(13,27,42,0.12); cursor: pointer">E-mail</button>
+<button type="button" role="tab" aria-selected="false" onClick="{{pickPhone}}" style="height: 40px; border: 0; border-radius: 9px; background: transparent; color: #5B6675; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer">Téléphone</button>
+</sc-if>
+<sc-if value="{{isPhone}}" hint-placeholder-val="{{ false }}">
+<button type="button" role="tab" aria-selected="false" onClick="{{pickEmail}}" style="height: 40px; border: 0; border-radius: 9px; background: transparent; color: #5B6675; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer">E-mail</button>
+<button type="button" role="tab" aria-selected="true" onClick="{{pickPhone}}" style="height: 40px; border: 0; border-radius: 9px; background: #FFFFFF; color: #0D1B2A; font-family: inherit; font-size: 14px; font-weight: 600; box-shadow: 0 1px 3px rgba(13,27,42,0.12); cursor: pointer">Téléphone</button>
+</sc-if>
+</div>
+
+<sc-if value="{{isEmail}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<x-import component-from-global-scope="Kalaas.Input" label="Adresse e-mail" type="email" placeholder="vous@votre-institut.sn" autocomplete="email"></x-import>
+<div class="kl-field">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><label class="kl-field-label" for="pwd">Mot de passe</label><a href="#" style="font-size: 14px; font-weight: 500">Mot de passe oublié ?</a></div>
+<div style="position: relative">
+<input id="pwd" class="kl-input" type="{{pwdType}}" placeholder="Votre mot de passe" autocomplete="current-password" style="padding-right: 52px">
+<button type="button" aria-label="{{pwdLabel}}" onClick="{{togglePwd}}" style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 44px; height: 40px; border: 0; background: transparent; color: var(--ink-muted); cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+</div>
+</div>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink); cursor: pointer"><input type="checkbox" checked style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">Rester connecté sur cet appareil</label>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">Se connecter</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{isPhone}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div class="kl-field">
+<label class="kl-field-label" for="tel">Numéro de téléphone</label>
+<div style="display: flex; gap: 8px">
+<span style="display: flex; align-items: center; padding: 0 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-100); font-size: 15px; font-weight: 500">+221</span>
+<input id="tel" class="kl-input" type="tel" placeholder="77 123 45 67" autocomplete="tel-national">
+</div>
+<span class="kl-field-hint">Nous vous envoyons un code à 6 chiffres par SMS.</span>
+</div>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">Recevoir mon code</x-import>
+</div>
+</sc-if>
+
+<div style="display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--ink-muted)"><span style="flex-grow: 1; height: 1px; background: var(--border)"></span>ou<span style="flex-grow: 1; height: 1px; background: var(--border)"></span></div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg" style="width: 100%">Continuer avec Google</x-import>
+</div>
+
+<p style="margin: 0; font-size: 15px; color: var(--ink-muted)">Pas encore de compte ? <a href="#" style="font-weight: 600">Créer mon institut</a> · 14 jours offerts</p>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>Connexion chiffrée · Chaque institut dispose de son espace séparé</p>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'email', show: false }; }
+  renderVals() {
+    var email = this.state.tab === 'email';
+    return {
+      isEmail: email, isPhone: !email,
+      pickEmail: () => this.setState({ tab: 'email' }),
+      pickPhone: () => this.setState({ tab: 'phone' }),
+      pwdType: this.state.show ? 'text' : 'password',
+      pwdLabel: this.state.show ? 'Masquer le mot de passe' : 'Afficher le mot de passe',
+      togglePwd: () => this.setState({ show: !this.state.show })
+    };
+  }
+}
+</script>
+</body>
+</html>

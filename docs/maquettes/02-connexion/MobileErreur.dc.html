@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Connexion, erreur</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<header style="position: relative; background: var(--navy-900); color: #FFFFFF; padding: 28px 24px 72px; overflow: hidden">
+<div style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em">Kalaas<span style="color: var(--gold-500)">.</span></div>
+<div style="margin-top: 20px; font-size: 22px; line-height: 30px; font-weight: 600">Votre institut vous attend.</div>
+<svg aria-hidden="true" width="120" height="80" viewBox="0 0 120 80" style="position: absolute; right: -10px; top: 26px"><rect x="0" y="0" width="60" height="8" rx="4" fill="#C4A35A"></rect><rect x="0" y="20" width="100" height="8" rx="4" fill="#C4A35A"></rect><rect x="0" y="40" width="80" height="8" rx="4" fill="#C4A35A"></rect><rect x="0" y="60" width="120" height="8" rx="4" fill="#2A3F57"></rect></svg>
+</header>
+<main style="margin: -44px 16px 0; background: var(--surface-200); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow-card); padding: 24px 20px; display: flex; flex-direction: column; gap: 18px">
+<div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 600">Connexion</h1></div>
+<div role="alert" style="display: flex; gap: 12px; padding: 14px; background: var(--danger-soft); border-radius: 12px; font-size: 14px; line-height: 21px; color: var(--ink)">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+<div><div style="font-weight: 600; color: var(--danger)">E-mail ou mot de passe incorrect</div>Vérifiez vos identifiants ou <a href="#" style="font-weight: 600">réinitialisez votre mot de passe</a>.</div>
+</div>
+<x-import component-from-global-scope="Kalaas.Input" label="Adresse e-mail" type="email" default-value="direction@institut-exemple.sn"></x-import>
+<x-import component-from-global-scope="Kalaas.Input" label="Mot de passe" type="password" default-value="motdepasse" error="Vérifiez la saisie : les majuscules comptent."></x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">Réessayer</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="ghost" size="lg" style="width: 100%">Recevoir un code par SMS à la place</x-import>
+</main>
+<div style="padding: 20px 24px; display: flex; justify-content: center">
+<a href="#" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>Toujours bloqué ? Support WhatsApp</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

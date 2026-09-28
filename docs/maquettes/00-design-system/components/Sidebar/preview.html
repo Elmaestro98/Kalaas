@@ -1,0 +1,16 @@
+<!-- @dsCard group="Navigation" height=520 subtitle="navigation principale" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Sidebar</title><style>html,body{height:100%;margin:0}#root{height:100%;display:flex}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var K=window.Kalaas,h=React.createElement;
+function Demo(){var s=React.useState('paiements');
+ return h(K.Sidebar,{active:s[0],onSelect:s[1],footer:'Institut Excellence · Saint-Louis',sections:[
+  {items:[{key:'dash',label:'Tableau de bord'}]},
+  {title:'Scolarité',items:[{key:'apprenants',label:'Apprenants'},{key:'promos',label:'Promotions'},{key:'presences',label:'Présences'}]},
+  {title:'Finances',items:[{key:'paiements',label:'Paiements',count:12},{key:'depenses',label:'Dépenses'}]},
+  {title:'Réglages',items:[{key:'params',label:'Paramètres'}]}]})}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body></html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Abonnement</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1240px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<div style="width: 248px; flex-shrink: 0; height: 1240px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="par" footer="Mohamed Fall · Directeur" style="width: 248px; height: 1240px"></x-import>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="height: 72px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center"><h1 style="margin: 0; font-size: 22px; font-weight: 600">Paramètres</h1></header>
+
+<div style="flex-grow: 1; padding: 24px 32px; display: flex; gap: 24px; align-items: flex-start">
+<!-- settings sub-nav -->
+<nav aria-label="Paramètres" style="width: 210px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<a href="#" style="padding: 10px 12px; border-radius: 8px; color: var(--ink); text-decoration: none">Institut</a>
+<a href="#" style="padding: 10px 12px; border-radius: 8px; color: var(--ink); text-decoration: none">Équipe</a>
+<a href="#" style="padding: 10px 12px; border-radius: 8px; color: var(--ink); text-decoration: none">Reçus</a>
+<a href="#" style="padding: 10px 12px; border-radius: 8px; color: var(--ink); text-decoration: none">Relances</a>
+<a href="#" aria-current="page" style="padding: 10px 12px; border-radius: 8px; background: var(--surface-200); border: 1px solid var(--border); color: var(--ink); font-weight: 600; text-decoration: none">Abonnement</a>
+</nav>
+
+<main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<!-- trial status -->
+<section style="background: var(--navy-900); color: #FFFFFF; border-radius: 16px; padding: 20px 24px; display: flex; align-items: center; gap: 24px">
+<div style="flex-grow: 1"><div style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #E6D3A3">ESSAI GRATUIT · FORMULE PRO</div><div style="font-size: 20px; font-weight: 600; margin-top: 2px">Encore 9 jours, jusqu’au 15 octobre 2026</div><div style="font-size: 13px; color: #C9CFD8">Tout fonctionne comme en version payante. Aucune donnée n’est perdue à la fin de l’essai.</div></div>
+<div style="width: 200px"><div style="display: flex; justify-content: space-between; font-size: 12px; color: #C9CFD8"><span>Jour 5 sur 14</span></div><div style="height: 6px; border-radius: 3px; background: var(--navy-700); margin-top: 6px"><div style="width: 36%; height: 6px; border-radius: 3px; background: var(--gold-500)"></div></div></div>
+</section>
+
+<!-- usage -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<sc-for list="{{usage}}" as="u" hint-placeholder-count="3">
+<div><div style="display: flex; justify-content: space-between; font-size: 13px"><span style="color: var(--ink-muted)">{{u.label}}</span><span style="color: var(--ink-muted)">{{u.left}}</span></div><div style="font-size: 20px; font-weight: 700; margin-top: 2px">{{u.used}} <span style="font-size: 13px; font-weight: 400; color: var(--ink-muted)">/ {{u.max}}</span></div><div style="height: 6px; border-radius: 3px; background: #EEEAE1; margin-top: 8px"><div style="width: {{u.pct}}; height: 6px; border-radius: 3px; background: var(--navy-900)"></div></div></div>
+</sc-for>
+</section>
+
+<!-- plans -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div><h2 style="margin: 0; font-size: 17px; font-weight: 600">Choisir votre formule</h2><div style="font-size: 13px; color: var(--ink-muted)">Prix en FCFA [HT ou TTC : à préciser]. Sans engagement.</div></div>
+<div role="group" aria-label="Période" style="display: flex; padding: 3px; background: var(--surface-100); border: 1px solid var(--border); border-radius: 10px; font-size: 13px">
+<sc-if value="{{monthly}}" hint-placeholder-val="{{ true }}"><button type="button" aria-pressed="true" style="height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(13,27,42,0.12); font-family: inherit; font-weight: 600; color: var(--ink)">Mensuel</button><button type="button" aria-pressed="false" onClick="{{toYear}}" style="height: 34px; padding: 0 14px; border: 0; background: transparent; font-family: inherit; color: var(--ink); cursor: pointer">Annuel · 2 mois offerts</button></sc-if>
+<sc-if value="{{yearly}}" hint-placeholder-val="{{ false }}"><button type="button" aria-pressed="false" onClick="{{toMonth}}" style="height: 34px; padding: 0 14px; border: 0; background: transparent; font-family: inherit; color: var(--ink); cursor: pointer">Mensuel</button><button type="button" aria-pressed="true" style="height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(13,27,42,0.12); font-family: inherit; font-weight: 600; color: var(--ink)">Annuel · 2 mois offerts</button></sc-if>
+</div>
+</div>
+<div role="radiogroup" aria-label="Formule" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{plans}}" as="p" hint-placeholder-count="3">
+<sc-if value="{{p.on}}" hint-placeholder-val="{{ false }}">
+<button type="button" role="radio" aria-checked="true" style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 2px solid var(--navy-900); border-radius: 14px; background: var(--gold-100); font-family: inherit; text-align: left; color: var(--ink); cursor: pointer">
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-size: 16px; font-weight: 600">{{p.name}}</span><x-import component-from-global-scope="Kalaas.Badge" tone="gold">Sélectionnée</x-import></div>
+<div style="white-space: nowrap"><span style="font-size: 26px; font-weight: 700">{{p.price}}</span> <span style="font-size: 13px; color: var(--ink-muted)">FCFA / {{per}}</span></div>
+<div style="font-size: 13px; line-height: 20px; color: var(--ink)">{{p.feat}}</div>
+</button>
+</sc-if>
+<sc-if value="{{p.free}}" hint-placeholder-val="{{ true }}">
+<button type="button" role="radio" aria-checked="false" onClick="{{p.pick}}" style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: #FFFFFF; font-family: inherit; text-align: left; color: var(--ink); cursor: pointer">
+<div style="font-size: 16px; font-weight: 600">{{p.name}}</div>
+<div style="white-space: nowrap"><span style="font-size: 26px; font-weight: 700">{{p.price}}</span> <span style="font-size: 13px; color: var(--ink-muted)">FCFA / {{per}}</span></div>
+<div style="font-size: 13px; line-height: 20px; color: var(--ink)">{{p.feat}}</div>
+</button>
+</sc-if>
+<sc-if value="{{p.blocked}}" hint-placeholder-val="{{ false }}">
+<div aria-disabled="true" style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px dashed var(--border); border-radius: 14px; background: var(--surface-100)">
+<div style="font-size: 16px; font-weight: 600; color: #6B7482">{{p.name}}</div>
+<div style="white-space: nowrap; color: #6B7482"><span style="font-size: 26px; font-weight: 700">{{p.price}}</span> <span style="font-size: 13px">FCFA / {{per}}</span></div>
+<div style="font-size: 13px; line-height: 20px; color: var(--ink-muted)">{{p.feat}}</div>
+<div style="font-size: 12px; color: var(--warning); font-weight: 600">Indisponible : vous avez 214 apprenants</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</section>
+
+<!-- pay -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 600">Moyen de paiement</h2>
+<div role="radiogroup" aria-label="Moyen de paiement" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{pays}}" as="m" hint-placeholder-count="2">
+<sc-if value="{{m.on}}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" style="padding: 14px 16px; border: 2px solid var(--navy-900); border-radius: 12px; background: var(--gold-100); font-family: inherit; text-align: left; color: var(--ink)"><div style="font-size: 15px; font-weight: 600">{{m.label}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{m.how}}</div></button></sc-if>
+<sc-if value="{{m.off}}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{m.pick}}" style="padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #FFFFFF; font-family: inherit; text-align: left; color: var(--ink); cursor: pointer"><div style="font-size: 15px; font-weight: 600">{{m.label}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{m.how}}</div></button></sc-if>
+</sc-for>
+</div>
+<div style="font-size: 13px; color: var(--ink-muted)">Un rappel WhatsApp est envoyé 3 jours avant chaque échéance. Pas de prélèvement automatique.</div>
+</div>
+<div style="padding: 16px; background: var(--surface-100); border-radius: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Formule</span><span style="font-weight: 500">{{sumPlan}}</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Démarre le</span><span style="font-weight: 500">15 oct. 2026</span></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding-top: 8px; border-top: 1px solid var(--border)"><span style="font-weight: 600">À payer</span><span><b style="font-size: 22px; font-weight: 700">{{sumPrice}}</b> <span style="font-size: 12px; color: var(--ink-muted)">FCFA</span></span></div>
+<button type="button" style="margin-top: 6px; height: 48px; border: 0; border-radius: 10px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer">{{cta}}</button>
+<div style="font-size: 12px; color: var(--ink-muted); text-align: center">Vous pouvez aussi payer à la fin de l’essai.</div>
+</div>
+</section>
+
+<!-- invoices -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; gap: 16px">
+<div style="flex-grow: 1"><h2 style="margin: 0; font-size: 17px; font-weight: 600">Factures</h2><div style="font-size: 13px; color: var(--ink-muted)">Aucune facture pendant l’essai. Elles apparaîtront ici, en PDF, après le premier paiement.</div></div>
+<a href="#" style="font-size: 13px; font-weight: 600">Modifier les informations de facturation</a>
+</section>
+</main>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { period: 'm', plan: 'pro', pay: 'wave' }; }
+  renderVals() {
+    var self = this, st = this.state, y = st.period === 'y';
+    var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+    var P = [
+      ['ess', 'Essentiel', 10000, 'Jusqu’à 100 apprenants · 2 comptes · reçus PDF', true],
+      ['pro', 'Pro', 20000, 'Jusqu’à 300 apprenants · 5 comptes · 500 messages WhatsApp / mois · relances automatiques', false],
+      ['pre', 'Premium', 35000, 'Apprenants et comptes illimités · plusieurs campus · exports comptables', false]
+    ];
+    var price = function (m) { return y ? m * 10 : m; };
+    var cur = P.filter(function (p) { return p[0] === st.plan; })[0];
+    var pays = [['wave', 'Wave', 'Paiement depuis l’application Wave'], ['om', 'Orange Money', 'Paiement depuis Orange Money']];
+    var payLabel = pays.filter(function (p) { return p[0] === st.pay; })[0][1];
+    return {
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Formations' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 23 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      usage: [
+        { label: 'Apprenants actifs', used: 214, max: 300, pct: '71%', left: '86 places' },
+        { label: 'Comptes de l’équipe', used: 4, max: 5, pct: '80%', left: '1 compte' },
+        { label: 'Messages WhatsApp (octobre)', used: 120, max: 500, pct: '24%', left: '380 restants' }
+      ],
+      monthly: !y, yearly: y, per: y ? 'an' : 'mois',
+      toYear: function () { self.setState({ period: 'y' }); }, toMonth: function () { self.setState({ period: 'm' }); },
+      plans: P.map(function (p) { return { name: p[1], price: fmt(price(p[2])), feat: p[3], blocked: p[4], on: !p[4] && st.plan === p[0], free: !p[4] && st.plan !== p[0], pick: function () { self.setState({ plan: p[0] }); } }; }),
+      pays: pays.map(function (m) { return { label: m[1], how: m[2], on: st.pay === m[0], off: st.pay !== m[0], pick: function () { self.setState({ pay: m[0] }); } }; }),
+      sumPlan: cur[1] + (y ? ' · annuel' : ' · mensuel'),
+      sumPrice: fmt(price(cur[2])),
+      cta: 'Payer ' + fmt(price(cur[2])) + ' FCFA avec ' + payLabel
+    };
+  }
+}
+</script>
+</body>
+</html>

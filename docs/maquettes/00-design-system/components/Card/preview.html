@@ -1,0 +1,13 @@
+<!-- @dsCard group="Conteneurs" height=300 subtitle="standard · accent" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Card</title>
+<style>.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-4);padding:var(--space-4)}.kpi{font-size:30px;line-height:38px;font-weight:600;color:var(--ink);margin:0}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var K=window.Kalaas,h=React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'grid'},
+ h(K.Card,{eyebrow:'Promotion 2026',title:'Développement Web',aside:h(K.Badge,{tone:'success'},'Active'),footer:h(React.Fragment,null,h(K.Button,{variant:'ghost',size:'sm'},'Détails'),h(K.Button,{size:'sm'},'Gérer'))},'32 apprenants · 4 formateurs · démarrage le 6 oct. 2026'),
+ h(K.Card,{accent:true,eyebrow:'Encaissements',title:'Octobre 2026'},h('p',{className:'kpi'},'2 450 000 FCFA'),h('span',null,'87 % des mensualités réglées'))));
+</script>
+</body></html>

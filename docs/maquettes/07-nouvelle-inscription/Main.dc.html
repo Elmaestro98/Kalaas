@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Nouvelle inscription</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1640px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<div style="width: 248px; flex-shrink: 0; height: 1640px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="ins" footer="Mohamed Fall · Directeur" style="width: 248px; height: 1640px"></x-import>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="height: 72px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 12px">
+<a href="#" aria-label="Retour aux inscriptions" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 10px; color: var(--ink)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div style="flex-grow: 1"><h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600">Nouvelle inscription</h1><div style="font-size: 13px; color: var(--ink-muted)">Année 2026-2027 · Campus Saint-Louis</div></div>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Brouillon enregistré</span>
+</header>
+
+<main style="flex-grow: 1; padding: 24px 32px; display: flex; gap: 24px; align-items: flex-start">
+
+<!-- FORM -->
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<!-- 1. Apprenant -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 12px"><span style="width: 28px; height: 28px; border-radius: 50%; background: var(--navy-900); color: #FFFFFF; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">1</span><h2 style="margin: 0; font-size: 17px; font-weight: 600; flex-grow: 1">Apprenant</h2>
+<div role="group" aria-label="Type d’apprenant" style="display: flex; padding: 3px; background: var(--surface-100); border: 1px solid var(--border); border-radius: 10px; font-size: 13px">
+<button type="button" aria-pressed="true" style="height: 32px; padding: 0 12px; border: 0; border-radius: 7px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(13,27,42,0.12); font-family: inherit; font-weight: 600; color: var(--ink); cursor: pointer">Nouvel apprenant</button>
+<button type="button" aria-pressed="false" style="height: 32px; padding: 0 12px; border: 0; border-radius: 7px; background: transparent; font-family: inherit; color: var(--ink-muted); cursor: pointer">Réinscription</button>
+</div></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<x-import component-from-global-scope="Kalaas.Input" label="Prénom" required="{{yes}}" default-value="Aminata"></x-import>
+<x-import component-from-global-scope="Kalaas.Input" label="Nom" required="{{yes}}" default-value="Sow"></x-import>
+<div class="kl-field"><label class="kl-field-label" for="tel1">WhatsApp<span class="kl-field-req" aria-hidden="true">*</span></label><div style="display: flex; gap: 8px"><span style="display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-100); font-size: 15px; font-weight: 500">+221</span><input id="tel1" class="kl-input" type="tel" value="77 412 88 90" readonly></div><span class="kl-field-hint">Reçus et rappels envoyés sur ce numéro.</span></div>
+<x-import component-from-global-scope="Kalaas.Input" label="E-mail" type="email" default-value="aminata.sow@gmail.com" hint="Facultatif"></x-import>
+<x-import component-from-global-scope="Kalaas.Input" label="Date de naissance" default-value="18/03/2003"></x-import>
+<x-import component-from-global-scope="Kalaas.Select" label="Sexe" default-value="F" options="{{sexes}}"></x-import>
+<x-import component-from-global-scope="Kalaas.Input" label="Pièce d’identité (CNI ou passeport)" default-value="1751 2001 02847" hint="Facultatif · visible uniquement par la direction"></x-import>
+<x-import component-from-global-scope="Kalaas.Input" label="Lieu de naissance" default-value="Saint-Louis"></x-import>
+</div>
+<div style="padding: 16px; background: var(--surface-100); border-radius: 12px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Tuteur ou garant</span><span style="font-size: 12px; color: var(--ink-muted)">Reçoit aussi les rappels de paiement</span></div>
+<div style="display: grid; grid-template-columns: 1.2fr 0.8fr 1fr; gap: 12px">
+<x-import component-from-global-scope="Kalaas.Input" label="Nom" default-value="Amadou Sow"></x-import>
+<x-import component-from-global-scope="Kalaas.Select" label="Lien" default-value="Père" options="{{liens}}"></x-import>
+<x-import component-from-global-scope="Kalaas.Input" label="Téléphone" default-value="+221 78 320 15 44"></x-import>
+</div>
+</div>
+</section>
+
+<!-- 2. Filière -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px"><span style="width: 28px; height: 28px; border-radius: 50%; background: var(--navy-900); color: #FFFFFF; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">2</span><h2 style="margin: 0; font-size: 17px; font-weight: 600">Filière et rentrée</h2></div>
+<x-import component-from-global-scope="Kalaas.Select" label="Filière" required="{{yes}}" default-value="cg" options="{{filieres}}"></x-import>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<div style="padding: 14px; border: 1px solid var(--border); border-radius: 12px"><div style="font-size: 12px; color: var(--ink-muted)">Horaires</div><div style="font-size: 14px; font-weight: 600">Soir · 18h–21h</div></div>
+<div style="padding: 14px; border: 1px solid var(--border); border-radius: 12px"><div style="font-size: 12px; color: var(--ink-muted)">Début des cours</div><div style="font-size: 14px; font-weight: 600">3 nov. 2026 · présentiel</div></div>
+<div style="padding: 14px; border: 1px solid var(--border); border-radius: 12px"><div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted)"><span>Places</span><span>18/30</span></div><div style="font-size: 14px; font-weight: 600">12 restantes</div><div style="height: 4px; border-radius: 2px; background: #EEEAE1; margin-top: 6px"><div style="width: 60%; height: 4px; border-radius: 2px; background: var(--navy-900)"></div></div></div>
+</div>
+<div style="font-size: 13px; color: var(--ink-muted)">Tarif de la filière : 25 000 FCFA d’inscription + 6 mensualités de 40 000 FCFA (le 5 du mois).</div>
+</section>
+
+<!-- 3. Remise -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px"><span style="width: 28px; height: 28px; border-radius: 50%; background: var(--navy-900); color: #FFFFFF; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">3</span><h2 style="margin: 0; font-size: 17px; font-weight: 600; flex-grow: 1">Remise</h2>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer"><input type="checkbox" checked="{{remise}}" onChange="{{toggleRemise}}" style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">Appliquer une remise</label></div>
+<sc-if value="{{remise}}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<x-import component-from-global-scope="Kalaas.Select" label="Motif" default-value="bourse" options="{{motifs}}"></x-import>
+<div class="kl-field"><label class="kl-field-label" for="mt">Montant</label><div style="position: relative"><input id="mt" class="kl-input" value="25 000" readonly style="padding-right: 64px"><span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--ink-muted)">FCFA</span></div></div>
+<div class="kl-field"><span class="kl-field-label">Déduire de</span>
+<div role="group" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 3px; background: var(--surface-100); border: 1px solid var(--border); border-radius: 8px">
+<sc-for list="{{where}}" as="w" hint-placeholder-count="2">
+<sc-if value="{{w.on}}" hint-placeholder-val="{{ false }}"><button type="button" aria-pressed="true" onClick="{{w.pick}}" style="height: 36px; border: 0; border-radius: 6px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(13,27,42,0.12); font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer">{{w.label}}</button></sc-if>
+<sc-if value="{{w.off}}" hint-placeholder-val="{{ true }}"><button type="button" aria-pressed="false" onClick="{{w.pick}}" style="height: 36px; border: 0; border-radius: 6px; background: transparent; font-family: inherit; font-size: 13px; color: var(--ink-muted); cursor: pointer">{{w.label}}</button></sc-if>
+</sc-for>
+</div></div>
+</div>
+<div style="font-size: 13px; color: var(--ink-muted)">Une remise est tracée à votre nom et visible dans les rapports.</div>
+</sc-if>
+</section>
+
+<!-- 4. Premier paiement -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px"><span style="width: 28px; height: 28px; border-radius: 50%; background: var(--navy-900); color: #FFFFFF; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center">4</span><h2 style="margin: 0; font-size: 17px; font-weight: 600; flex-grow: 1">Frais d’inscription · 25 000 FCFA</h2>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer"><input type="checkbox" checked="{{payNow}}" onChange="{{togglePay}}" style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">Encaisser maintenant</label></div>
+<sc-if value="{{payNow}}" hint-placeholder-val="{{ true }}">
+<div role="radiogroup" aria-label="Moyen de paiement" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="4">
+<sc-if value="{{m.on}}" hint-placeholder-val="{{ false }}"><button type="button" role="radio" aria-checked="true" onClick="{{m.pick}}" style="height: 52px; border: 2px solid var(--navy-900); border-radius: 12px; background: var(--gold-100); font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer">{{m.label}}</button></sc-if>
+<sc-if value="{{m.off}}" hint-placeholder-val="{{ true }}"><button type="button" role="radio" aria-checked="false" onClick="{{m.pick}}" style="height: 52px; border: 1px solid var(--border); border-radius: 12px; background: #FFFFFF; font-family: inherit; font-size: 14px; color: var(--ink); cursor: pointer">{{m.label}}</button></sc-if>
+</sc-for>
+</div>
+<sc-if value="{{isMobileMoney}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kalaas.Input" label="{{refLabel}}" required="{{yes}}" placeholder="Ex. T26110412A8F" hint="Copiez la référence du SMS de confirmation : elle permet de retrouver le paiement."></x-import></sc-if>
+<sc-if value="{{isCash}}" hint-placeholder-val="{{ false }}"><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px"><x-import component-from-global-scope="Kalaas.Input" label="Montant reçu" default-value="30 000"></x-import><div class="kl-field"><span class="kl-field-label">À rendre</span><div style="height: 42px; display: flex; align-items: center; font-size: 20px; font-weight: 700">5 000 FCFA</div></div></div></sc-if>
+<sc-if value="{{isCheque}}" hint-placeholder-val="{{ false }}"><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px"><x-import component-from-global-scope="Kalaas.Input" label="N° de chèque" placeholder="Ex. 0012345"></x-import><x-import component-from-global-scope="Kalaas.Input" label="Banque" placeholder="Ex. CBAO"></x-import></div></sc-if>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>Le reçu PDF part sur WhatsApp au +221 77 412 88 90 et au tuteur.</div>
+</sc-if>
+</section>
+</div>
+
+<!-- STICKY SUMMARY -->
+<aside style="width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px">
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-card); overflow: hidden">
+<div style="background: var(--navy-900); color: #FFFFFF; padding: 18px 20px; display: flex; align-items: center; gap: 12px">
+<span style="width: 40px; height: 40px; border-radius: 50%; background: var(--gold-500); color: var(--navy-900); font-weight: 700; display: flex; align-items: center; justify-content: center">AS</span>
+<div><div style="font-size: 15px; font-weight: 600">Aminata Sow</div><div style="font-size: 12px; color: #C9CFD8">Comptabilité &amp; Gestion · nov. 2026</div></div>
+</div>
+<div style="padding: 8px 20px">
+<sc-for list="{{sched}}" as="s" hint-placeholder-count="7">
+<div style="display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px">
+<div style="flex-grow: 1"><div style="font-weight: 500">{{s.label}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{s.due}}</div></div>
+<sc-if value="{{s.adj}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: var(--ink-muted); text-decoration: line-through">40 000</span></sc-if>
+<span style="font-weight: 600; white-space: nowrap">{{s.amount}}</span>
+</div>
+</sc-for>
+</div>
+<div style="padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<div style="display: flex; justify-content: space-between; color: var(--ink-muted)"><span>Tarif de la filière</span><span>265 000</span></div>
+<sc-if value="{{remise}}" hint-placeholder-val="{{ true }}"><div style="display: flex; justify-content: space-between; color: var(--gold-700); font-weight: 500"><span>Bourse d’excellence</span><span>− 25 000</span></div></sc-if>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; border-top: 1px solid var(--border)"><span style="font-weight: 600">Total</span><span><b style="font-size: 26px; font-weight: 700">{{total}}</b> <span style="font-size: 12px; color: var(--ink-muted)">FCFA</span></span></div>
+<sc-if value="{{payNow}}" hint-placeholder-val="{{ true }}"><div style="display: flex; justify-content: space-between; padding: 10px 12px; background: var(--gold-100); border-radius: 10px; font-weight: 600"><span>À encaisser maintenant</span><span>25 000 FCFA</span></div></sc-if>
+</div>
+</div>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">{{cta}}</x-import>
+<div style="font-size: 12px; line-height: 18px; color: var(--ink-muted); text-align: center">Après validation : reçu, attestation d’inscription et échéancier en PDF.</div>
+</aside>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1640}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { remise: true, where: 'last', payNow: true, mode: 'wave' }; }
+  renderVals() {
+    var self = this, st = this.state;
+    var months = [['Novembre', '5 nov. 2026'], ['Décembre', '5 déc. 2026'], ['Janvier', '5 janv. 2027'], ['Février', '5 févr. 2027'], ['Mars', '5 mars 2027'], ['Avril', '5 avr. 2027']];
+    var adjIdx = st.remise ? (st.where === 'last' ? 5 : 0) : -1;
+    var sched = [{ label: 'Frais d’inscription', due: st.payNow ? 'Aujourd’hui' : 'À la signature', amount: '25 000', adj: false }].concat(months.map(function (m, i) {
+      return { label: 'Mensualité ' + (i + 1) + ' · ' + m[0], due: m[1], amount: i === adjIdx ? '15 000' : '40 000', adj: i === adjIdx };
+    }));
+    var modeList = [['wave', 'Wave'], ['om', 'Orange Money'], ['cash', 'Espèces'], ['cheque', 'Chèque']];
+    return {
+      yes: true,
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Filières' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 42 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      sexes: [{ value: 'F', label: 'Féminin' }, { value: 'M', label: 'Masculin' }],
+      liens: ['Père', 'Mère', 'Tuteur', 'Employeur', 'Autre'],
+      filieres: [{ value: 'cg', label: 'Comptabilité & Gestion · rentrée nov. 2026 · soir' }, { value: 'dw', label: 'Développement Web & Mobile · rentrée nov. 2026' }],
+      motifs: [{ value: 'bourse', label: 'Bourse d’excellence' }, { value: 'fratrie', label: 'Réduction fratrie' }, { value: 'partenaire', label: 'Partenaire' }, { value: 'direction', label: 'Geste de la direction' }],
+      remise: st.remise,
+      toggleRemise: function () { self.setState({ remise: !self.state.remise }); },
+      where: [['first', '1re mensualité'], ['last', 'Dernière']].map(function (w) { return { label: w[1], on: st.where === w[0], off: st.where !== w[0], pick: function () { self.setState({ where: w[0] }); } }; }),
+      payNow: st.payNow,
+      togglePay: function () { self.setState({ payNow: !self.state.payNow }); },
+      modes: modeList.map(function (m) { return { label: m[1], on: st.mode === m[0], off: st.mode !== m[0], pick: function () { self.setState({ mode: m[0] }); } }; }),
+      isMobileMoney: st.mode === 'wave' || st.mode === 'om',
+      isCash: st.mode === 'cash', isCheque: st.mode === 'cheque',
+      refLabel: st.mode === 'om' ? 'Référence de la transaction Orange Money' : 'Référence de la transaction Wave',
+      sched: sched,
+      total: st.remise ? '240 000' : '265 000',
+      cta: st.payNow ? 'Valider et encaisser 25 000 FCFA' : 'Valider l’inscription'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Inviter un formateur</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1060px; display: flex; flex-direction: column; background: var(--surface-200); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<header style="padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 4px">
+<button type="button" aria-label="Fermer" style="width: 44px; height: 44px; border: 0; background: transparent; color: var(--ink); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<h1 style="margin: 0; font-size: 17px; font-weight: 600">Inviter un membre</h1>
+</header>
+<main style="padding: 18px 16px 120px; display: flex; flex-direction: column; gap: 16px">
+<x-import component-from-global-scope="Kalaas.Input" label="Nom complet" required="{{yes}}" default-value="Aïssatou Ba"></x-import>
+<div class="kl-field"><label class="kl-field-label" for="wam">WhatsApp<span class="kl-field-req" aria-hidden="true">*</span></label><div style="display: flex; gap: 8px"><span style="display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-100); font-size: 15px; font-weight: 500">+221</span><input id="wam" class="kl-input" type="tel" value="77 540 12 90" readonly></div></div>
+<div class="kl-field"><span class="kl-field-label">Rôle</span>
+<div role="radiogroup" aria-label="Rôle" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button type="button" role="radio" aria-checked="false" style="min-height: 48px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; font-family: inherit; font-size: 13px; color: var(--ink)">Direction</button>
+<button type="button" role="radio" aria-checked="false" style="min-height: 48px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; font-family: inherit; font-size: 13px; color: var(--ink)">Secrétariat et caisse</button>
+<button type="button" role="radio" aria-checked="false" style="min-height: 48px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; font-family: inherit; font-size: 13px; color: var(--ink)">Comptable</button>
+<button type="button" role="radio" aria-checked="true" style="min-height: 48px; border: 2px solid var(--navy-900); border-radius: 10px; background: var(--gold-100); font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink)">Formateur</button>
+</div></div>
+<section style="padding: 14px; background: var(--surface-100); border-radius: 12px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 13px; font-weight: 600">Sessions de cette formatrice</div>
+<label style="display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 14px"><input type="checkbox" style="width: 20px; height: 20px; margin: 0; accent-color: #0D1B2A">DEV1 · Dév. web matin</label>
+<label style="display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 14px"><input type="checkbox" checked style="width: 20px; height: 20px; margin: 0; accent-color: #0D1B2A">BUR1 · Bureautique</label>
+<label style="display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 14px"><input type="checkbox" style="width: 20px; height: 20px; margin: 0; accent-color: #0D1B2A">CPT1 · Comptabilité</label>
+</section>
+<section style="display: flex; flex-direction: column; gap: 8px; font-size: 13px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--gold-700)">ELLE POURRA</div>
+<div style="display: flex; gap: 8px"><span style="color: var(--success); font-weight: 700">✓</span>Faire l’appel dans ses sessions</div>
+<div style="display: flex; gap: 8px"><span style="color: var(--success); font-weight: 700">✓</span>Voir la liste de ses apprenants</div>
+<div style="display: flex; gap: 8px; color: #6B7482"><span style="font-weight: 700">✕</span>Voir les paiements et les montants</div>
+</section>
+</main>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface-200); border-top: 1px solid var(--border); padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 6px">
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">Envoyer l’invitation</x-import>
+<span style="font-size: 12px; color: var(--ink-muted); text-align: center">Lien envoyé sur WhatsApp · valable 48 h</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() { return { yes: true }; }
+}
+</script>
+</body>
+</html>

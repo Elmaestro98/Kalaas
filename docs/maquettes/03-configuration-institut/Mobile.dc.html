@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Configuration mobile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 390px; height: 1180px; display: flex; flex-direction: column; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<header style="background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 12px 20px 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><div style="font-size: 20px; font-weight: 700">Kalaas<span style="color: var(--gold-500)">.</span></div><a href="#" aria-label="Besoin d’aide sur WhatsApp" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></a></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">Étape 1 sur 3 · Votre institut</span><span style="color: var(--ink-muted)">Ensuite : filières</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px"><span style="height: 4px; border-radius: 2px; background: var(--gold-500)"></span><span style="height: 4px; border-radius: 2px; background: var(--border)"></span><span style="height: 4px; border-radius: 2px; background: var(--border)"></span></div>
+</header>
+
+<main style="padding: 24px 20px; display: flex; flex-direction: column; gap: 20px">
+<div><h1 style="margin: 0; font-size: 24px; line-height: 32px; font-weight: 600">Parlons de votre institut</h1><p style="margin: 4px 0 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Ces informations apparaissent sur vos reçus.</p></div>
+<x-import component-from-global-scope="Kalaas.Input" label="Nom de l’institut" required="{{yes}}" placeholder="Ex. Institut Excellence"></x-import>
+<x-import component-from-global-scope="Kalaas.Select" label="Ville" required="{{yes}}" default-value="Saint-Louis" options="{{cities}}"></x-import>
+<div class="kl-field"><label class="kl-field-label" for="wam">Numéro WhatsApp<span class="kl-field-req" aria-hidden="true">*</span></label>
+<div style="display: flex; gap: 8px"><span style="display: flex; align-items: center; padding: 0 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-100); font-size: 15px; font-weight: 500">+221</span><input id="wam" class="kl-input" type="tel" inputmode="numeric" placeholder="77 123 45 67"></div>
+<span class="kl-field-hint">Les reçus et relances partent de ce numéro.</span></div>
+<div style="display: flex; align-items: center; gap: 14px; padding: 14px; border: 1.5px dashed var(--border); border-radius: 12px; background: var(--surface-200)">
+<span style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 10px; background: var(--navy-900); color: var(--gold-500); font-weight: 700; display: flex; align-items: center; justify-content: center">IE</span>
+<div style="flex-grow: 1; font-size: 14px; line-height: 20px"><div style="font-weight: 500">Logo</div><div style="color: var(--ink-muted); font-size: 13px">Facultatif · PNG ou SVG</div></div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="sm">Ajouter</x-import>
+</div>
+
+<!-- receipt preview, collapsed -->
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 14px; overflow: hidden">
+<div style="height: 4px; background: var(--gold-500)"></div>
+<div style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 13px; font-weight: 600">Aperçu de votre reçu</span><x-import component-from-global-scope="Kalaas.Badge" tone="neutral">Exemple</x-import></div>
+<div style="display: flex; gap: 10px; align-items: center"><span style="width: 36px; height: 36px; border-radius: 8px; background: var(--navy-900); color: var(--gold-500); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center">IE</span><div><div style="font-size: 15px; font-weight: 600">Institut Excellence</div><div style="font-size: 12px; color: var(--ink-muted)">Saint-Louis · +221 77 123 45 67</div></div></div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px; border-top: 1px dashed var(--border)"><span style="font-size: 13px; color: var(--ink-muted)">Awa Diop · L3 Informatique</span><span style="font-size: 20px; font-weight: 700">45 000 FCFA</span></div>
+</div>
+</div>
+
+<!-- legal, collapsed -->
+<button type="button" aria-expanded="false" style="display: flex; justify-content: space-between; align-items: center; min-height: 56px; padding: 0 16px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 15px; color: var(--ink); text-align: left; cursor: pointer"><span><span style="font-weight: 600">Mentions légales</span><span style="display: block; font-size: 13px; color: var(--ink-muted)">Adresse, NINEA, RCCM · facultatif</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+</main>
+
+<div style="margin-top: auto; background: var(--surface-200); border-top: 1px solid var(--border); padding: 12px 20px 24px; display: flex; flex-direction: column; gap: 8px">
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">Continuer : vos filières →</x-import>
+<span style="font-size: 12px; color: var(--ink-muted); text-align: center">Enregistré automatiquement</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() { return { yes: true, cities: ['Saint-Louis', 'Dakar', 'Thiès', 'Ziguinchor', 'Kaolack', 'Autre'] }; }
+}
+</script>
+</body>
+</html>

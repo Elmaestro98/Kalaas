@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Tableau de bord</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+.bar{transition:opacity .15s}.bar:hover{opacity:.8}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1120px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<!-- SIDEBAR (design-system component) -->
+<div style="width: 248px; flex-shrink: 0; height: 1120px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="{{active}}" on-select="{{select}}" footer="{{sideFoot}}" style="width: 248px; height: 1120px"></x-import>
+</div>
+
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0">
+
+<!-- TOP BAR -->
+<header style="height: 72px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 20px">
+<button type="button" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-200); font-family: inherit; font-size: 14px; color: var(--ink); cursor: pointer"><span style="width: 26px; height: 26px; border-radius: 6px; background: var(--navy-900); color: var(--gold-500); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">IT</span><span style="font-weight: 600">Institut Teranga</span><span style="color: var(--ink-muted)">· Saint-Louis</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<label style="flex-grow: 1; max-width: 460px; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-100); color: var(--ink-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input type="search" aria-label="Rechercher" placeholder="Rechercher un apprenant, un reçu…" style="flex-grow: 1; border: 0; background: transparent; font-family: inherit; font-size: 14px; color: var(--ink); outline: none"><span style="font-size: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 0 6px">Ctrl K</span></label>
+<span style="flex-grow: 1"></span>
+<button type="button" aria-label="Notifications, 3 nouvelles" style="position: relative; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg><span style="position: absolute; top: 9px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 2px #FFFFFF"></span></button>
+<x-import component-from-global-scope="Kalaas.Button" variant="gold">+ Nouvel encaissement</x-import>
+</header>
+
+<!-- CONTENT -->
+<main style="flex-grow: 1; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; overflow: hidden">
+
+<div style="display: flex; align-items: flex-end; gap: 16px">
+<div style="flex-grow: 1"><h1 style="margin: 0; font-size: 26px; line-height: 34px; font-weight: 600">Bonjour Mohamed</h1><p style="margin: 2px 0 0; font-size: 14px; color: var(--ink-muted)">Lundi 5 octobre 2026 · point de trésorerie et d’activité</p></div>
+<div role="group" aria-label="Période" style="display: flex; padding: 4px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 10px; font-size: 13px">
+<button type="button" style="height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: transparent; font-family: inherit; color: var(--ink-muted); cursor: pointer">Aujourd’hui</button>
+<button type="button" aria-pressed="true" style="height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-weight: 600; cursor: pointer">Octobre</button>
+<button type="button" style="height: 34px; padding: 0 14px; border: 0; border-radius: 7px; background: transparent; font-family: inherit; color: var(--ink-muted); cursor: pointer">Année 2026-27</button>
+</div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary">Exporter le journal de caisse</x-import>
+</div>
+
+<!-- KPIs -->
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div style="background: var(--navy-900); color: #FFFFFF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: #C9CFD8">Encaissé en octobre</div>
+<div style="white-space: nowrap"><span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: var(--gold-500)">2 450 000</span> <span style="font-size: 13px; color: #C9CFD8">FCFA</span></div>
+<div style="height: 6px; border-radius: 3px; background: var(--navy-700)"><div style="width: 70%; height: 6px; border-radius: 3px; background: var(--gold-500)"></div></div>
+<div style="font-size: 12px; color: #C9CFD8">70 % de l’objectif de 3 500 000 FCFA</div>
+</div>
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: var(--ink-muted)">Encaissé aujourd’hui</div>
+<div style="white-space: nowrap"><span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em">185 000</span> <span style="font-size: 13px; color: var(--ink-muted)">FCFA</span></div>
+<div style="margin-top: auto; font-size: 12px; color: var(--ink-muted)">5 règlements · dernier à 11:42</div>
+</div>
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 13px; color: var(--ink-muted)">Reste à recouvrer</span><x-import component-from-global-scope="Kalaas.Badge" tone="danger">18 en retard</x-import></div>
+<div style="white-space: nowrap"><span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em">870 000</span> <span style="font-size: 13px; color: var(--ink-muted)">FCFA</span></div>
+<a href="#relances" style="margin-top: auto; font-size: 12px; font-weight: 600">Voir les relances →</a>
+</div>
+<div style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: var(--ink-muted)">Apprenants actifs</div>
+<div style="white-space: nowrap"><span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em">214</span> <span style="font-size: 13px; font-weight: 600; color: var(--success)">+8 cette semaine</span></div>
+<div style="margin-top: auto; font-size: 12px; color: var(--ink-muted)">8 formations actives</div>
+</div>
+</div>
+
+<!-- CHARTS -->
+<div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px">
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Encaissements des 6 derniers mois</h2><span style="font-size: 12px; color: var(--ink-muted)">en FCFA · octobre en cours</span></div>
+<svg role="img" aria-label="Encaissements mensuels : mai 1,9 M, juin 2,05 M, juillet 1,8 M, août 1,45 M, septembre 2,85 M, octobre 2,45 M en cours" width="100%" height="236" viewBox="0 0 580 236" style="display: block; margin-top: 12px">
+<g font-family="Poppins, sans-serif" font-size="11" fill="#5B6675">
+<text x="0" y="24">3 M</text><text x="0" y="84">2 M</text><text x="0" y="144">1 M</text><text x="0" y="204">0</text>
+</g>
+<g stroke="#E4DFD3" stroke-width="1"><line x1="36" y1="20" x2="580" y2="20" stroke-dasharray="3 4"></line><line x1="36" y1="80" x2="580" y2="80" stroke-dasharray="3 4"></line><line x1="36" y1="140" x2="580" y2="140" stroke-dasharray="3 4"></line><line x1="36" y1="200" x2="580" y2="200"></line></g>
+<g fill="#0D1B2A">
+<path class="bar" d="M58 200 V90 a4 4 0 0 1 4 -4 H98 a4 4 0 0 1 4 4 V200 Z"><title>Mai : 1 900 000 FCFA</title></path>
+<path class="bar" d="M148 200 V81 a4 4 0 0 1 4 -4 H188 a4 4 0 0 1 4 4 V200 Z"><title>Juin : 2 050 000 FCFA</title></path>
+<path class="bar" d="M238 200 V96 a4 4 0 0 1 4 -4 H278 a4 4 0 0 1 4 4 V200 Z"><title>Juillet : 1 800 000 FCFA</title></path>
+<path class="bar" d="M328 200 V117 a4 4 0 0 1 4 -4 H368 a4 4 0 0 1 4 4 V200 Z"><title>Août : 1 450 000 FCFA</title></path>
+<path class="bar" d="M418 200 V33 a4 4 0 0 1 4 -4 H458 a4 4 0 0 1 4 4 V200 Z"><title>Septembre : 2 850 000 FCFA</title></path>
+</g>
+<path class="bar" d="M508 200 V57 a4 4 0 0 1 4 -4 H548 a4 4 0 0 1 4 4 V200 Z" fill="#C4A35A"><title>Octobre (en cours) : 2 450 000 FCFA</title></path>
+<g font-family="Poppins, sans-serif" font-size="12" fill="#5B6675" text-anchor="middle">
+<text x="80" y="222">Mai</text><text x="170" y="222">Juin</text><text x="260" y="222">Juil.</text><text x="350" y="222">Août</text><text x="440" y="222">Sept.</text><text x="530" y="222" fill="#0D1B2A" font-weight="600">Oct.</text>
+<text x="440" y="22" fill="#0D1B2A" font-weight="600">2,85 M</text><text x="530" y="46" fill="#0D1B2A" font-weight="600">2,45 M</text>
+</g>
+</svg>
+</section>
+
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Modes de paiement</h2><span style="font-size: 12px; color: var(--ink-muted)">octobre</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span style="font-weight: 500">Wave</span><span><b style="font-weight: 600">1 029 000</b> <span style="color: var(--ink-muted)">· 42 %</span></span></div><div style="height: 10px; border-radius: 5px; background: var(--surface-100)"><div style="width: 100%; height: 10px; border-radius: 5px; background: var(--navy-900)"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span style="font-weight: 500">Orange Money</span><span><b style="font-weight: 600">735 000</b> <span style="color: var(--ink-muted)">· 30 %</span></span></div><div style="height: 10px; border-radius: 5px; background: var(--surface-100)"><div style="width: 71%; height: 10px; border-radius: 5px; background: var(--navy-900)"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span style="font-weight: 500">Espèces au guichet</span><span><b style="font-weight: 600">490 000</b> <span style="color: var(--ink-muted)">· 20 %</span></span></div><div style="height: 10px; border-radius: 5px; background: var(--surface-100)"><div style="width: 48%; height: 10px; border-radius: 5px; background: var(--navy-900)"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span style="font-weight: 500">Virement</span><span><b style="font-weight: 600">196 000</b> <span style="color: var(--ink-muted)">· 8 %</span></span></div><div style="height: 10px; border-radius: 5px; background: var(--surface-100)"><div style="width: 19%; height: 10px; border-radius: 5px; background: var(--navy-900)"></div></div></div>
+<div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 14px"><span style="color: var(--ink-muted)">Total</span><b style="font-weight: 600">2 450 000 FCFA</b></div>
+</section>
+</div>
+
+<!-- LISTS -->
+<div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px">
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 16px; font-weight: 600">Derniers paiements</h2><a href="#" style="font-size: 13px; font-weight: 600">Tout l’historique →</a></div>
+<x-import component-from-global-scope="Kalaas.Table" columns="{{cols}}" rows="{{rows}}"></x-import>
+</section>
+
+<section id="relances" style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px"><h2 style="margin: 0; font-size: 16px; font-weight: 600">À relancer</h2><span style="font-size: 13px; color: var(--ink-muted)">5 plus anciens sur 18</span></div>
+<sc-for list="{{late}}" as="p" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border)">
+<div style="flex-grow: 1; min-width: 0"><div style="font-size: 14px; font-weight: 600">{{p.nom}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{p.formation}} · <span style="color: var(--danger); font-weight: 600">{{p.du}}</span></div></div>
+<x-import component-from-global-scope="Kalaas.Badge" tone="warning">{{p.retard}}</x-import>
+<button type="button" aria-label="Relancer {{p.nom}} sur WhatsApp" style="width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-200); color: #1E7A4F; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></button>
+</div>
+</sc-for>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" style="width: 100%; margin-top: 12px">Relancer les 18 sur WhatsApp</x-import>
+</section>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { active: 'dash' }; }
+  renderVals() {
+    var h = window.React.createElement, K = window.Kalaas || {};
+    var tones = { Wave: 'info', 'Orange Money': 'warning', 'Espèces': 'neutral' };
+    return {
+      active: this.state.active,
+      select: (k) => this.setState({ active: k }),
+      sideFoot: 'Mohamed Fall · Directeur',
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Formations' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 18 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      cols: [
+        { key: 'recu', label: 'Reçu' },
+        { key: 'nom', label: 'Apprenant' },
+        { key: 'form', label: 'Formation' },
+        { key: 'mode', label: 'Mode', render: function (r) { return K.Badge ? h(K.Badge, { tone: tones[r.mode] }, r.mode) : r.mode; } },
+        { key: 'montant', label: 'Montant', align: 'right' },
+        { key: 'heure', label: 'Heure', align: 'right' }
+      ],
+      rows: [
+        { id: 1, recu: '0891', nom: 'Moussa Ndiaye', form: 'Licence 3 Informatique', mode: 'Wave', montant: '45 000', heure: '11:42' },
+        { id: 2, recu: '0890', nom: 'Awa Diop', form: 'BTS Comptabilité', mode: 'Orange Money', montant: '35 000', heure: '10:15' },
+        { id: 3, recu: '0889', nom: 'Cheikh Fall', form: 'Master 1 Réseaux', mode: 'Espèces', montant: '60 000', heure: '09:50' },
+        { id: 4, recu: '0888', nom: 'Fatou Sow', form: 'Licence 2 Gestion', mode: 'Wave', montant: '25 000', heure: '09:12' },
+        { id: 5, recu: '0887', nom: 'Aminata Ba', form: 'BTS Commerce', mode: 'Wave', montant: '20 000', heure: '08:30' }
+      ],
+      late: [
+        { nom: 'Ibrahima Sarr', formation: 'L3 Droit des affaires', du: '90 000 FCFA', retard: '14 j' },
+        { nom: 'Mariama Diallo', formation: 'BTS Communication', du: '45 000 FCFA', retard: '10 j' },
+        { nom: 'Babacar Seck', formation: 'L1 Marketing', du: '70 000 FCFA', retard: '8 j' },
+        { nom: 'Oumou K. Diouf', formation: 'M2 Finance', du: '120 000 FCFA', retard: '7 j' },
+        { nom: 'Abdoulaye Gueye', formation: 'BTS Logistique', du: '40 000 FCFA', retard: '5 j' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

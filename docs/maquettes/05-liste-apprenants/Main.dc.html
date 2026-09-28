@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Apprenants</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+.kl-table td{padding-top:10px;padding-bottom:10px}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1100px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<div style="width: 248px; flex-shrink: 0; height: 1100px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="app" footer="Mohamed Fall · Directeur" style="width: 248px; height: 1100px"></x-import>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="height: 72px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 12px">
+<div style="flex-grow: 1"><h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600">Apprenants</h1><div style="font-size: 13px; color: var(--ink-muted)">Année 2026-2027 · 214 inscrits</div></div>
+<x-import component-from-global-scope="Kalaas.Button" variant="ghost">Importer Excel</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary">Exporter</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary">+ Inscrire un apprenant</x-import>
+</header>
+
+<main style="flex-grow: 1; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; min-height: 0">
+
+<!-- status tabs = filters with counts -->
+<div style="display: flex; align-items: center; gap: 16px">
+<div role="tablist" aria-label="Filtrer par statut" style="display: flex; gap: 4px; padding: 4px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 12px">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+<sc-if value="{{t.on}}" hint-placeholder-val="{{ false }}"><button type="button" role="tab" aria-selected="true" onClick="{{t.pick}}" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border: 0; border-radius: 9px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{t.label}}<span style="font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--gold-500); color: var(--navy-900)">{{t.count}}</span></button></sc-if>
+<sc-if value="{{t.off}}" hint-placeholder-val="{{ true }}"><button type="button" role="tab" aria-selected="false" onClick="{{t.pick}}" style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; color: var(--ink); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer">{{t.label}}<span style="font-size: 12px; color: var(--ink-muted)">{{t.count}}</span></button></sc-if>
+</sc-for>
+</div>
+<span style="flex-grow: 1"></span>
+<div style="font-size: 14px; color: var(--ink-muted)">Recouvrement : <b style="color: var(--ink); font-weight: 600">82 %</b> · Reste dû : <b style="color: var(--danger); font-weight: 600">4 150 000 FCFA</b></div>
+</div>
+
+<!-- search + filters -->
+<div style="display: flex; gap: 12px; align-items: center">
+<label style="flex-grow: 1; max-width: 380px; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-200); color: var(--ink-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input type="search" aria-label="Rechercher un apprenant" placeholder="Nom, matricule ou téléphone" style="flex-grow: 1; border: 0; background: transparent; font-family: inherit; font-size: 14px; color: var(--ink); outline: none"></label>
+<select aria-label="Filière" class="kl-input kl-select" style="width: 220px; height: 44px"><option>Toutes les filières (8)</option></select>
+<select aria-label="Rentrée" class="kl-input kl-select" style="width: 200px; height: 44px"><option>Toutes les rentrées</option></select>
+</div>
+
+<!-- bulk bar -->
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
+<div role="region" aria-label="Actions groupées" style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--navy-900); color: #FFFFFF; border-radius: 12px; font-size: 14px">
+<b style="font-weight: 600">{{selCount}} sélectionné(s)</b><span style="flex-grow: 1"></span>
+<button type="button" style="height: 36px; padding: 0 14px; border: 1px solid var(--navy-700); border-radius: 8px; background: transparent; color: #FFFFFF; font-family: inherit; font-size: 13px; cursor: pointer">Exporter</button>
+<button type="button" style="height: 36px; padding: 0 14px; border: 0; border-radius: 8px; background: var(--gold-500); color: var(--navy-900); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer">Relancer sur WhatsApp</button>
+<button type="button" onClick="{{clearSel}}" style="height: 36px; padding: 0 10px; border: 0; background: transparent; color: #C9CFD8; font-family: inherit; font-size: 13px; cursor: pointer">Annuler</button>
+</div>
+</sc-if>
+
+<x-import component-from-global-scope="Kalaas.Table" columns="{{cols}}" rows="{{rows}}" empty="Aucun apprenant dans ce filtre"></x-import>
+
+<div style="display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--ink-muted)">
+<span>{{countLabel}}</span><span style="flex-grow: 1"></span>
+<select aria-label="Lignes par page" class="kl-input kl-select" style="width: 130px; height: 36px; padding-top: 4px; padding-bottom: 4px; font-size: 13px"><option>25 par page</option><option>50 par page</option></select>
+<div style="display: flex; gap: 4px">
+<button type="button" aria-label="Page précédente" style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-200); color: var(--ink-muted); cursor: pointer">‹</button>
+<button type="button" aria-current="page" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-weight: 600">1</button>
+<button type="button" style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-200); font-family: inherit; cursor: pointer">2</button>
+<button type="button" style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-200); font-family: inherit; cursor: pointer">…</button>
+<button type="button" style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-200); font-family: inherit; cursor: pointer">9</button>
+<button type="button" aria-label="Page suivante" style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-200); color: var(--ink); cursor: pointer">›</button>
+</div>
+</div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'all', sel: {} }; }
+  renderVals() {
+    var self = this, h = window.React.createElement, K = window.Kalaas || {};
+    var fmt = function (n) { return n.toLocaleString('fr-FR').replace(/ | /g, ' '); };
+    var data = [
+      ['Moussa Ndiaye', '0101', '77 645 28 19', 'Développement Web & Mobile', 'Oct. 2026', 300000, 450000, 0],
+      ['Awa Diop', '0102', '78 312 90 44', 'Comptabilité & Gestion', 'Oct. 2026', 210000, 350000, 0],
+      ['Cheikh Fall', '0103', '70 854 11 20', 'Réseaux & Télécoms', 'Janv. 2026', 500000, 500000, 0],
+      ['Fatou Sow', '0104', '76 439 77 15', 'Couture & Modélisme', 'Oct. 2026', 90000, 250000, 12],
+      ['Aminata Ba', '0105', '77 128 66 33', 'Marketing Digital', 'Oct. 2026', 180000, 300000, 0],
+      ['Ibrahima Sarr', '0106', '77 590 43 82', 'Développement Web & Mobile', 'Mars 2026', 150000, 450000, 18],
+      ['Mariama Diallo', '0107', '78 204 19 65', 'Comptabilité & Gestion', 'Oct. 2026', 140000, 350000, 10],
+      ['Babacar Seck', '0108', '76 991 30 08', 'Couture & Modélisme', 'Janv. 2026', 250000, 250000, 0],
+      ['Oumou K. Diouf', '0109', '70 412 88 76', 'Gestion de Projets', 'Oct. 2026', 200000, 400000, 7],
+      ['Abdoulaye Gueye', '0110', '77 834 50 12', 'Commerce International', 'Oct. 2026', 320000, 320000, 0],
+      ['Ramatoulaye Cissé', '0111', '78 119 45 23', 'Développement Web & Mobile', 'Oct. 2026', 300000, 450000, 0],
+      ['Mamadou L. Ndao', '0112', '76 775 62 90', 'Transport Logistique', 'Janv. 2026', 280000, 380000, 0]
+    ].map(function (d, i) {
+      var st = d[5] >= d[6] ? 'solde' : (d[7] > 0 ? 'retard' : 'ajour');
+      var ini = d[0].split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('');
+      return { id: 'r' + i, nom: d[0], mat: 'ITF-2026-' + d[1], tel: d[2], fil: d[3], rentree: d[4], paye: d[5], total: d[6], jours: d[7], st: st, ini: ini };
+    });
+    var tab = this.state.tab, sel = this.state.sel;
+    var rows = data.filter(function (r) { return tab === 'all' || r.st === tab; });
+    var toggle = function (id) { var s = Object.assign({}, self.state.sel); if (s[id]) delete s[id]; else s[id] = true; self.setState({ sel: s }); };
+    var allOn = rows.length > 0 && rows.every(function (r) { return sel[r.id]; });
+    var toggleAll = function () { var s = {}; if (!allOn) rows.forEach(function (r) { s[r.id] = true; }); self.setState({ sel: s }); };
+    var badge = function (r) {
+      if (!K.Badge) return r.st;
+      if (r.st === 'solde') return h(K.Badge, { tone: 'neutral' }, 'Soldé');
+      if (r.st === 'retard') return h(K.Badge, { tone: 'danger', dot: true }, 'Retard ' + r.jours + ' j');
+      return h(K.Badge, { tone: 'success', dot: true }, 'À jour');
+    };
+    var avatar = { ajour: ['#F5EDDB', '#7A5F22'], retard: ['#FDE8E6', '#B42318'], solde: ['#0D1B2A', '#C4A35A'] };
+    var cols = [
+      { key: 'sel', label: h('input', { type: 'checkbox', 'aria-label': 'Tout sélectionner', checked: allOn, onChange: toggleAll, style: { width: 18, height: 18, margin: 0, accentColor: '#0D1B2A' } }),
+        render: function (r) { return h('input', { type: 'checkbox', 'aria-label': 'Sélectionner ' + r.nom, checked: !!sel[r.id], onChange: function () { toggle(r.id); }, style: { width: 18, height: 18, margin: 0, accentColor: '#0D1B2A' } }); } },
+      { key: 'nom', label: 'Apprenant', render: function (r) { var c = avatar[r.st]; return h('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+          h('span', { style: { width: 36, height: 36, flexShrink: 0, borderRadius: '50%', background: c[0], color: c[1], fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' } }, r.ini),
+          h('div', null, h('div', { style: { fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' } }, r.nom), h('div', { style: { fontSize: 12, color: '#5B6675' } }, r.mat))); } },
+      { key: 'fil', label: 'Filière', render: function (r) { return h('div', null, h('div', { style: { fontSize: 13, fontWeight: 500 } }, r.fil), h('div', { style: { fontSize: 12, color: '#5B6675' } }, 'Rentrée ' + r.rentree)); } },
+      { key: 'tel', label: 'Téléphone', render: function (r) { return h('span', { style: { whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' } }, r.tel); } },
+      { key: 'paye', label: 'Payé', render: function (r) { var p = Math.round(r.paye / r.total * 100); return h('div', { style: { width: 150 } },
+          h('div', { style: { fontSize: 13, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' } }, fmt(r.paye), h('span', { style: { color: '#5B6675' } }, ' / ' + fmt(r.total))),
+          h('div', { style: { height: 5, borderRadius: 3, background: '#EEEAE1', marginTop: 5 } }, h('div', { style: { width: p + '%', height: 5, borderRadius: 3, background: '#0D1B2A' } }))); } },
+      { key: 'reste', label: 'Reste dû', align: 'right', render: function (r) { var d = r.total - r.paye; return d === 0 ? h('span', { style: { color: '#5B6675' } }, '—') : h('span', { style: { fontWeight: 600, whiteSpace: 'nowrap', color: r.st === 'retard' ? '#B42318' : '#0D1B2A' } }, fmt(d) + ' FCFA'); } },
+      { key: 'st', label: 'Statut', render: badge },
+      { key: 'act', label: 'Actions', align: 'right', render: function (r) {
+          var btn = r.st === 'retard'
+            ? h(K.Button || 'button', { variant: 'secondary', size: 'sm' }, 'Relancer')
+            : r.st === 'solde' ? h(K.Button || 'button', { variant: 'ghost', size: 'sm' }, 'Reçus') : h(K.Button || 'button', { variant: 'ghost', size: 'sm' }, 'Encaisser');
+          return h('div', { style: { display: 'flex', gap: 4, justifyContent: 'flex-end', alignItems: 'center' } }, btn,
+            h('button', { type: 'button', 'aria-label': 'Plus d’actions pour ' + r.nom, style: { width: 32, height: 32, border: 0, background: 'transparent', borderRadius: 6, cursor: 'pointer', color: '#5B6675', fontSize: 18 } }, '⋯')); } }
+    ];
+    var counts = { all: 214, ajour: 148, retard: 42, solde: 24 };
+    var dots = { ajour: '#1E7A4F', retard: '#B42318', solde: '#5B6675' };
+    var tabs = [['all', 'Tous'], ['ajour', 'À jour'], ['retard', 'En retard'], ['solde', 'Soldés']].map(function (t) {
+      return { label: t[1], count: counts[t[0]], on: tab === t[0], off: tab !== t[0],
+        pick: function () { self.setState({ tab: t[0], sel: {} }); } };
+    });
+    var n = Object.keys(sel).length;
+    return {
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Filières' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 42 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      tabs: tabs, cols: cols, rows: rows,
+      hasSel: n > 0, selCount: n,
+      clearSel: function () { self.setState({ sel: {} }); },
+      countLabel: '1 à ' + rows.length + ' sur ' + counts[tab] + ' apprenants'
+    };
+  }
+}
+</script>
+</body>
+</html>

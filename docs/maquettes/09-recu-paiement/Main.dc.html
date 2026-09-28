@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Reçu de paiement</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 390px; height: 1120px; display: flex; flex-direction: column; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<header style="background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 8px 12px; display: flex; align-items: center; gap: 4px">
+<a href="#" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<h1 style="margin: 0; font-size: 17px; font-weight: 600">Reçu REC-2027-0234</h1>
+</header>
+
+<main style="padding: 20px 16px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 14px">
+<span style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; background: var(--success-soft); color: var(--success); display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg></span>
+<div><div style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em">75 000 FCFA</div><div style="font-size: 13px; color: var(--ink-muted)">Paiement enregistré · 1er févr. 2027, 09:12</div></div>
+</div>
+
+<!-- the receipt, as the family receives it -->
+<section style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-card)">
+<div style="height: 5px; background: var(--gold-500)"></div>
+<div style="padding: 18px; display: flex; flex-direction: column; gap: 14px; font-size: 14px">
+<div style="display: flex; gap: 12px; align-items: center">
+<span style="width: 40px; height: 40px; border-radius: 8px; background: var(--navy-900); color: var(--gold-500); font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center">IT</span>
+<div><div style="font-size: 15px; font-weight: 600">Institut Teranga Formation</div><div style="font-size: 12px; color: var(--ink-muted)">Saint-Louis · NINEA [à compléter]</div></div>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 10px 12px; background: var(--surface-100); border-radius: 10px; font-size: 13px"><span style="font-weight: 600">REC-2027-0234</span><span style="color: var(--ink-muted)">1er févr. 2027</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span style="color: var(--ink-muted)">Apprenant</span><span style="text-align: right; font-weight: 500">Moussa Ndiaye<br><span style="font-size: 12px; color: var(--ink-muted); font-weight: 400">ITF-2026-0101 · Dév. Web &amp; Mobile</span></span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Objet</span><span style="font-weight: 500">Mensualité 5/6 · février</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Moyen</span><span style="font-weight: 500">Wave · T27A0231</span></div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; border-top: 1px dashed var(--border)"><span style="font-weight: 600">Montant payé</span><span style="font-size: 22px; font-weight: 700">75 000 FCFA</span></div>
+<div style="font-size: 12px; font-style: italic; color: var(--ink-muted)">Soixante-quinze mille francs CFA</div>
+<div style="padding: 12px; background: var(--surface-100); border-radius: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 13px">
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Total de la formation</span><span>450 000</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: var(--ink-muted)">Payé à ce jour</span><span>375 000</span></div>
+<div style="display: flex; justify-content: space-between; font-weight: 600"><span>Reste à payer</span><span>75 000 FCFA</span></div>
+<div style="font-size: 12px; color: var(--ink-muted)">1 mensualité restante · échéance le 5 mars 2027</div>
+</div>
+<div style="font-size: 12px; color: var(--ink-muted)">Encaissé par Fatou Kane (secrétariat)</div>
+</div>
+</section>
+
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 14px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
+<div style="flex-grow: 1; font-size: 13px; line-height: 19px"><b style="font-weight: 600">Envoyé sur WhatsApp</b><br><span style="color: var(--ink-muted)">+221 77 645 28 19 · à 09:12</span></div>
+<button type="button" style="height: 40px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer">Renvoyer</button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg" style="width: 100%">Imprimer</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg" style="width: 100%">PDF</x-import>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<x-import component-from-global-scope="Kalaas.Button" variant="ghost" size="lg" style="width: 100%">Retour à la caisse</x-import>
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg" style="width: 100%">Nouvel encaissement</x-import>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

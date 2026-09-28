@@ -1,0 +1,33 @@
+{
+ "v": 3,
+ "assetGroups": {},
+ "blobs": {},
+ "createdOnFiles": {
+  "at": "2026-09-27T19:36:40Z",
+  "v": 1
+ },
+ "docs": {
+  "sections": []
+ },
+ "groups": [],
+ "lastChange": {
+  "by": "Mohamed Cheikh",
+  "at": "2026-09-27T19:40:02Z",
+  "via": "Cowork",
+  "note": "Ajout de Input, Select, Table et Sidebar ; section Logo provisoire."
+ },
+ "layout": "files",
+ "libraries": [
+  {
+   "name": "react",
+   "version": "18"
+  },
+  {
+   "name": "react-dom",
+   "version": "18"
+  }
+ ],
+ "namespace": "Kalaas",
+ "sections": {},
+ "title": "Kalaas"
+}

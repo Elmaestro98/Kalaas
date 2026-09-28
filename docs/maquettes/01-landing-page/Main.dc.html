@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Landing desktop</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="width: 1440px; height: 6000px; display: flex; flex-direction: column; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<!-- NAV + HERO -->
+<header style="background: var(--navy-900); color: #FFFFFF; padding: 0 120px 96px; display: flex; flex-direction: column; gap: 72px">
+<nav aria-label="Navigation principale" style="height: 80px; display: flex; align-items: center; gap: 40px; border-bottom: 1px solid var(--navy-700)">
+<div style="font-size: 26px; font-weight: 700; letter-spacing: -0.02em">Kalaas<span style="color: var(--gold-500)">.</span></div>
+<div style="display: flex; gap: 32px; flex-grow: 1; font-size: 15px; font-weight: 500">
+<a href="#fonctionnalites" style="color: #C9CFD8; text-decoration: none">Fonctionnalités</a>
+<a href="#tarifs" style="color: #C9CFD8; text-decoration: none">Tarifs</a>
+<a href="#faq" style="color: #C9CFD8; text-decoration: none">Questions fréquentes</a>
+<a href="#contact" style="color: #C9CFD8; text-decoration: none">Contact</a>
+</div>
+<a href="#" style="color: #FFFFFF; font-size: 15px; font-weight: 500; text-decoration: none">Se connecter</a>
+<x-import component-from-global-scope="Kalaas.Button" variant="gold">Essai gratuit 14 jours</x-import>
+</nav>
+
+<div style="display: flex; gap: 64px; align-items: center">
+<div style="width: 580px; flex-shrink: 0; display: flex; flex-direction: column; gap: 28px">
+<div style="align-self: flex-start; display: flex; align-items: center; gap: 8px; padding: 6px 14px; border: 1px solid var(--navy-700); border-radius: 999px; font-size: 13px; font-weight: 500; color: #E6D3A3">
+<span style="width: 8px; height: 8px; border-radius: 50%; background: var(--gold-500)"></span>Conçu pour les instituts de formation du Sénégal
+</div>
+<h1 style="margin: 0; font-size: 60px; line-height: 66px; font-weight: 700; letter-spacing: -0.03em">Moins de relances.<br>Plus de mensualités <span style="color: var(--gold-500)">encaissées.</span></h1>
+<p style="margin: 0; font-size: 18px; line-height: 30px; color: #C9CFD8">Inscriptions, paiements Wave et Orange Money, reçus envoyés sur WhatsApp et présences : Kalaas réunit toute la gestion de votre institut, du BTS au Master, dans une seule application.</p>
+<div style="display: flex; gap: 16px; align-items: center">
+<x-import component-from-global-scope="Kalaas.Button" variant="gold" size="lg">Démarrer l’essai gratuit</x-import>
+<a href="#demo" style="display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 22px; border: 1px solid #5B6B80; border-radius: 10px; color: #FFFFFF; font-size: 15px; font-weight: 500; text-decoration: none">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M10 8l6 4-6 4z"></path></svg>Voir la démo (2 min)</a>
+</div>
+<div style="display: flex; gap: 24px; font-size: 14px; color: #A7B0BC">
+<span style="display: flex; align-items: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Sans carte bancaire</span>
+<span style="display: flex; align-items: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Prêt en 5 minutes</span>
+<span style="display: flex; align-items: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Accompagnement inclus</span>
+</div>
+</div>
+
+<!-- product visual -->
+<div style="position: relative; flex-grow: 1; height: 500px">
+<div style="position: absolute; left: 0; top: 10px; width: 560px; background: #FFFFFF; color: var(--ink); border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,0.45); overflow: hidden">
+<div style="height: 36px; background: #EDEAE3; display: flex; align-items: center; gap: 6px; padding: 0 14px">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #D5D0C5"></span><span style="width: 10px; height: 10px; border-radius: 50%; background: #D5D0C5"></span><span style="width: 10px; height: 10px; border-radius: 50%; background: #D5D0C5"></span>
+<span style="margin-left: 16px; font-size: 11px; color: var(--ink-muted)">app.kalaas.sn/tableau-de-bord</span>
+</div>
+<div style="padding: 22px; display: flex; flex-direction: column; gap: 16px; background: var(--surface-100)">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div><div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--gold-700)">OCTOBRE 2026</div><div style="font-size: 17px; font-weight: 600">Institut [NOM DE DÉMO]</div></div>
+<x-import component-from-global-scope="Kalaas.Badge" tone="success" dot="{{yes}}">À jour</x-import>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+<div style="background: var(--navy-900); color: #FFFFFF; border-radius: 12px; padding: 14px"><div style="font-size: 11px; color: #A7B0BC">Encaissé</div><div style="font-size: 20px; font-weight: 700; color: var(--gold-500)">2 450 000</div><div style="font-size: 11px; color: #A7B0BC">FCFA</div></div>
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; padding: 14px"><div style="font-size: 11px; color: var(--ink-muted)">Mensualités réglées</div><div style="font-size: 20px; font-weight: 700">87 %</div><div style="height: 6px; border-radius: 3px; background: var(--gold-100); margin-top: 6px"><div style="width: 87%; height: 6px; border-radius: 3px; background: var(--gold-500)"></div></div></div>
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; padding: 14px"><div style="font-size: 11px; color: var(--ink-muted)">Relances envoyées</div><div style="font-size: 20px; font-weight: 700">14</div><div style="font-size: 11px; color: var(--success)">automatiquement</div></div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px"><span style="font-weight: 600">Derniers paiements</span><span style="color: var(--ink-muted)">Aujourd’hui</span></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px"><span style="width: 30px; height: 30px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px">AD</span><span style="flex-grow: 1">Awa Diop · L3 Informatique</span><span style="font-weight: 600">45 000</span><x-import component-from-global-scope="Kalaas.Badge" tone="success">Wave</x-import></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px"><span style="width: 30px; height: 30px; border-radius: 50%; background: var(--info-soft); color: var(--info); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px">MS</span><span style="flex-grow: 1">Moussa Sarr · BTS Comptabilité</span><span style="font-weight: 600">35 000</span><x-import component-from-global-scope="Kalaas.Badge" tone="warning">Orange Money</x-import></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; font-size: 13px"><span style="width: 30px; height: 30px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11px">FB</span><span style="flex-grow: 1">Fatou Ba · M1 Finance</span><span style="font-weight: 600">45 000</span><x-import component-from-global-scope="Kalaas.Badge" tone="danger">Relancée</x-import></div>
+</div>
+</div>
+</div>
+<!-- phone -->
+<div style="position: absolute; right: 0; top: 150px; width: 230px; height: 350px; background: #111B21; border: 6px solid #22303C; border-radius: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); overflow: hidden; display: flex; flex-direction: column">
+<div style="background: #1F2C34; padding: 12px; display: flex; align-items: center; gap: 8px"><span style="width: 28px; height: 28px; border-radius: 50%; background: var(--gold-500); color: var(--navy-900); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center">K</span><div><div style="font-size: 12px; font-weight: 600; color: #FFFFFF">Institut [NOM]</div><div style="font-size: 10px; color: #8696A0">via Kalaas</div></div></div>
+<div style="flex-grow: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="background: #005C4B; color: #E9EDEF; border-radius: 10px; padding: 10px; font-size: 11px; line-height: 16px">Bonjour Mme Diop, nous confirmons le paiement de <b>45 000 FCFA</b> (mensualité d’octobre) pour Awa. Merci !</div>
+<div style="background: #005C4B; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 8px"><span style="width: 30px; height: 36px; background: #FFFFFF; border-radius: 4px; color: var(--danger); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center">PDF</span><div style="font-size: 11px; color: #E9EDEF"><div style="font-weight: 600">Reçu N° 2026-0142</div><div style="color: #A7C4BD">1 page · 48 Ko</div></div></div>
+<div style="align-self: flex-end; font-size: 10px; color: #8696A0">10:42 ✓✓</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+
+<!-- PAYMENT STRIP -->
+<section style="background: #FFFFFF; border-bottom: 1px solid var(--border); padding: 32px 120px; display: flex; align-items: center; justify-content: space-between; gap: 32px">
+<div style="font-size: 15px; font-weight: 500; color: var(--ink-muted)">Vos apprenants paient comme ils en ont l’habitude :</div>
+<div style="display: flex; gap: 12px">
+<span style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; font-size: 15px; font-weight: 600">Wave</span>
+<span style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; font-size: 15px; font-weight: 600">Orange Money</span>
+<span style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; font-size: 15px; font-weight: 600">Espèces au guichet</span>
+<span style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 999px; font-size: 15px; font-weight: 600">Virement</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E7A4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>Reçu envoyé sur WhatsApp</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="fonctionnalites" style="padding: 112px 120px; display: flex; flex-direction: column; gap: 56px">
+<div style="display: flex; flex-direction: column; gap: 14px; max-width: 720px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--gold-700)">COMMENT ÇA MARCHE</div>
+<h2 style="margin: 0; font-size: 42px; line-height: 50px; font-weight: 600; letter-spacing: -0.02em">Opérationnel dès aujourd’hui, en trois étapes.</h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 56px; line-height: 56px; font-weight: 700; color: var(--gold-500)">1</div>
+<h3 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Importez vos apprenants</h3>
+<p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Glissez votre fichier Excel : filières, niveaux (BTS, Licence, Master), apprenants et frais sont créés automatiquement.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 56px; line-height: 56px; font-weight: 700; color: var(--gold-500)">2</div>
+<h3 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Encaissez partout</h3>
+<p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Wave, Orange Money ou guichet : chaque paiement est rattaché au bon apprenant et le reçu part sur WhatsApp.</p>
+</div>
+<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 56px; line-height: 56px; font-weight: 700; color: var(--gold-500)">3</div>
+<h3 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Kalaas relance pour vous</h3>
+<p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Les retards déclenchent un rappel WhatsApp poli, au bon moment. Vous suivez tout depuis votre téléphone.</p>
+</div>
+</div>
+</section>
+
+<!-- PILLAR 1 -->
+<section style="padding: 0 120px 112px; display: flex; gap: 80px; align-items: center">
+<div style="width: 520px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px">
+<x-import component-from-global-scope="Kalaas.Badge" tone="gold" style="align-self: flex-start">Encaisser</x-import>
+<h2 style="margin: 0; font-size: 36px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em">Chaque franc retrouvé, chaque reçu envoyé.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 28px; color: var(--ink-muted)">Fini le rapprochement ligne par ligne entre le cahier de caisse, Wave et Orange Money. Kalaas associe chaque paiement à son apprenant et génère le reçu PDF conforme.</p>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 16px">
+<div style="display: flex; gap: 10px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A5F22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Frais d’inscription et mensualités par filière et par niveau</div>
+<div style="display: flex; gap: 10px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A5F22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Reçus numérotés, imprimables en A4 ou ticket</div>
+<div style="display: flex; gap: 10px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A5F22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>Clôture de caisse journalière en un clic</div>
+</div>
+</div>
+<div style="flex-grow: 1; background: var(--gold-100); border-radius: 24px; padding: 40px">
+<x-import component-from-global-scope="Kalaas.Table" columns="{{payCols}}" rows="{{payRows}}"></x-import>
+</div>
+</section>
+
+<!-- PILLAR 2 -->
+<section style="padding: 0 120px 112px; display: flex; gap: 80px; align-items: center">
+<div style="flex-grow: 1; height: 400px; background: var(--navy-900); border-radius: 24px; padding: 40px; display: flex; flex-direction: column; justify-content: center; gap: 14px; box-sizing: border-box">
+<div style="align-self: flex-start; max-width: 420px; background: #FFFFFF; border-radius: 14px 14px 14px 4px; padding: 16px 18px; font-size: 15px; line-height: 23px">Bonjour M. Sarr, la mensualité de novembre de Moussa (35 000 FCFA) arrive à échéance le 5. Vous pouvez régler par Wave ou Orange Money : <span style="color: var(--gold-700); font-weight: 600">pay.kalaas.sn/ms142</span></div>
+<div style="align-self: flex-end; background: #DCF8C6; border-radius: 14px 14px 4px 14px; padding: 12px 16px; font-size: 15px">C’est réglé, merci !</div>
+<div style="align-self: flex-start; background: #FFFFFF; border-radius: 14px 14px 14px 4px; padding: 12px 16px; font-size: 15px">Paiement reçu. Votre reçu N° 2026-0187 est joint.</div>
+</div>
+<div style="width: 520px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px">
+<x-import component-from-global-scope="Kalaas.Badge" tone="gold" style="align-self: flex-start">Relancer</x-import>
+<h2 style="margin: 0; font-size: 36px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em">Les relances partent toutes seules, sur WhatsApp.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 28px; color: var(--ink-muted)">Plus besoin d’appeler chaque parent. Kalaas envoie un rappel courtois avant et après l’échéance, avec un lien de paiement. Vous gardez la main sur le ton et le calendrier.</p>
+</div>
+</section>
+
+<!-- PILLAR 3 -->
+<section style="padding: 0 120px 112px; display: flex; gap: 80px; align-items: center">
+<div style="width: 520px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px">
+<x-import component-from-global-scope="Kalaas.Badge" tone="gold" style="align-self: flex-start">Piloter</x-import>
+<h2 style="margin: 0; font-size: 36px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em">Votre institut en un coup d’œil, même en déplacement.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 28px; color: var(--ink-muted)">Recettes du mois, taux de recouvrement, présences par filière : la direction voit l’essentiel, le secrétariat et la comptabilité travaillent chacun avec leurs accès.</p>
+</div>
+<div style="flex-grow: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+<x-import component-from-global-scope="Kalaas.Card" eyebrow="Recouvrement" title="Octobre 2026" accent="{{yes}}"><div style="font-size: 36px; font-weight: 700; color: var(--ink)">87 %</div><div>des mensualités réglées</div></x-import>
+<x-import component-from-global-scope="Kalaas.Card" eyebrow="Présences" title="Cette semaine"><div style="font-size: 36px; font-weight: 700; color: var(--ink)">94 %</div><div>d’assiduité moyenne</div></x-import>
+<x-import component-from-global-scope="Kalaas.Card" eyebrow="Filières" title="Cette année"><div style="font-size: 36px; font-weight: 700; color: var(--ink)">8</div><div>filières, du BTS au Master</div></x-import>
+<x-import component-from-global-scope="Kalaas.Card" eyebrow="Équipe" title="Accès"><div style="font-size: 36px; font-weight: 700; color: var(--ink)">4</div><div>rôles : direction, secrétariat, compta, formateur</div></x-import>
+</div>
+</section>
+
+<!-- SECONDARY FEATURES -->
+<section style="padding: 0 120px 112px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 24px; border-top: 2px solid var(--gold-500)"><h3 style="margin: 0; font-size: 17px; font-weight: 600">Émargement numérique</h3><p style="margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Appel en classe sur téléphone, alerte aux parents en cas d’absence.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 24px; border-top: 2px solid var(--gold-500)"><h3 style="margin: 0; font-size: 17px; font-weight: 600">Attestations et documents</h3><p style="margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Attestations d’inscription et de scolarité en PDF, à l’en-tête de votre institut.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 24px; border-top: 2px solid var(--gold-500)"><h3 style="margin: 0; font-size: 17px; font-weight: 600">Exports Excel et PDF</h3><p style="margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Pour votre comptable, vos partenaires ou l’administration.</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 24px; border-top: 2px solid var(--gold-500)"><h3 style="margin: 0; font-size: 17px; font-weight: 600">Données sauvegardées</h3><p style="margin: 0; font-size: 15px; line-height: 24px; color: var(--ink-muted)">Hébergement sécurisé, sauvegarde quotidienne, accès par rôle.</p></div>
+</section>
+
+<!-- PRICING -->
+<section id="tarifs" style="background: #FFFFFF; border-top: 1px solid var(--border); padding: 112px 120px; display: flex; flex-direction: column; gap: 56px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; max-width: 720px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--gold-700)">TARIFS</div>
+<h2 style="margin: 0; font-size: 42px; line-height: 50px; font-weight: 600; letter-spacing: -0.02em">Un prix clair, en FCFA, sans engagement.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 28px; color: var(--ink-muted)">14 jours d’essai gratuit sur toutes les formules. Abonnement réglable par Wave ou Orange Money.</p>
+</div>
+<div style="width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch">
+<div style="border: 1px solid var(--border); border-radius: 20px; padding: 36px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 20px; font-weight: 600">Essentiel</div><div style="font-size: 15px; color: var(--ink-muted); margin-top: 4px">Petits centres, jusqu’à 50 apprenants</div></div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 44px; font-weight: 700; letter-spacing: -0.02em">10 000</span><span style="font-size: 15px; color: var(--ink-muted)">FCFA / mois</span></div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex-grow: 1">
+<div>✓&#160; Inscriptions et échéanciers</div><div>✓&#160; Reçus PDF automatiques</div><div>✓&#160; Suivi des présences</div><div>✓&#160; Support par e-mail</div>
+</div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg">Essayer Essentiel</x-import>
+</div>
+<div style="position: relative; background: var(--navy-900); color: #FFFFFF; border-radius: 20px; padding: 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 24px 60px rgba(13,27,42,0.25)">
+<div style="position: absolute; top: -14px; left: 36px; background: var(--gold-500); color: var(--navy-900); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; padding: 5px 14px; border-radius: 999px">LE PLUS CHOISI</div>
+<div><div style="font-size: 20px; font-weight: 600">Pro</div><div style="font-size: 15px; color: #A7B0BC; margin-top: 4px">Instituts établis, jusqu’à 350 apprenants</div></div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 44px; font-weight: 700; letter-spacing: -0.02em; color: var(--gold-500)">20 000</span><span style="font-size: 15px; color: #A7B0BC">FCFA / mois</span></div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex-grow: 1; color: #E6E9EE">
+<div style="color: #E6D3A3; font-weight: 500">Tout Essentiel, plus :</div><div>✓&#160; Paiements Wave et Orange Money</div><div>✓&#160; Relances WhatsApp automatiques</div><div>✓&#160; Accès par rôle (direction, compta…)</div><div>✓&#160; Support prioritaire WhatsApp</div>
+</div>
+<x-import component-from-global-scope="Kalaas.Button" variant="gold" size="lg">Démarrer l’essai Pro</x-import>
+</div>
+<div style="border: 1px solid var(--border); border-radius: 20px; padding: 36px; display: flex; flex-direction: column; gap: 20px">
+<div><div style="font-size: 20px; font-weight: 600">Premium</div><div style="font-size: 15px; color: var(--ink-muted); margin-top: 4px">Multi-sites, apprenants illimités</div></div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 44px; font-weight: 700; letter-spacing: -0.02em">35 000</span><span style="font-size: 15px; color: var(--ink-muted)">FCFA / mois</span></div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex-grow: 1">
+<div style="color: var(--gold-700); font-weight: 500">Tout Pro, plus :</div><div>✓&#160; Plusieurs sites (Dakar, Saint-Louis…)</div><div>✓&#160; Attestations et certificats</div><div>✓&#160; Mise en place accompagnée</div>
+</div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="lg">Parler à un conseiller</x-import>
+</div>
+</div>
+</section>
+
+<!-- PILOT PROGRAM (replaces unverified testimonial) -->
+<section style="padding: 112px 120px">
+<div style="background: var(--gold-100); border-radius: 24px; padding: 56px 64px; display: flex; gap: 64px; align-items: center">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--gold-700)">PROGRAMME INSTITUTS PILOTES 2026</div>
+<h2 style="margin: 0; font-size: 36px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em">Construisons Kalaas avec vous.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 28px; color: var(--ink-muted); max-width: 620px">Les premiers instituts partenaires bénéficient d’une mise en place faite avec eux, d’un contact direct avec l’équipe produit et de [AVANTAGE TARIFAIRE PILOTE].</p>
+</div>
+<div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; align-items: stretch; width: 280px">
+<x-import component-from-global-scope="Kalaas.Button" variant="primary" size="lg">Devenir institut pilote</x-import>
+<div style="font-size: 14px; color: var(--ink-muted); text-align: center">[N] places restantes</div>
+</div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="padding: 0 120px 112px; display: flex; gap: 80px">
+<div style="width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: var(--gold-700)">QUESTIONS FRÉQUENTES</div>
+<h2 style="margin: 0; font-size: 36px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em">Vous vous demandez peut-être…</h2>
+<p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Une autre question ? Écrivez-nous sur WhatsApp, on répond dans la journée.</p>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column">
+<div style="padding: 24px 0; border-bottom: 1px solid var(--border)"><h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600">Je gère tout sur Excel aujourd’hui. Vais-je tout ressaisir ?</h3><p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Non. Vous importez votre fichier existant ; nous vous aidons à le mettre au bon format lors de l’essai.</p></div>
+<div style="padding: 24px 0; border-bottom: 1px solid var(--border)"><h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600">Les paiements Wave et Orange Money arrivent-ils sur mon compte ?</h3><p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">[À PRÉCISER : compte marchand de l’institut ou agrégateur, frais éventuels.]</p></div>
+<div style="padding: 24px 0; border-bottom: 1px solid var(--border)"><h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600">Mes données sont-elles en sécurité ?</h3><p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Chaque institut a son espace séparé, avec des accès par rôle et une sauvegarde quotidienne.</p></div>
+<div style="padding: 24px 0; border-bottom: 1px solid var(--border)"><h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600">Mon équipe n’est pas très à l’aise avec l’informatique.</h3><p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Kalaas s’utilise comme WhatsApp, sur téléphone ou ordinateur. Une prise en main est incluse.</p></div>
+<div style="padding: 24px 0"><h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600">Puis-je arrêter quand je veux ?</h3><p style="margin: 0; font-size: 16px; line-height: 26px; color: var(--ink-muted)">Oui, sans engagement. Vous exportez vos données en Excel à tout moment.</p></div>
+</div>
+</section>
+
+<!-- FINAL CTA + FOOTER -->
+<div style="flex-grow: 1; background: var(--navy-900); color: #FFFFFF; display: flex; flex-direction: column">
+<section id="contact" style="padding: 112px 120px 96px; display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center">
+<h2 style="margin: 0; font-size: 48px; line-height: 56px; font-weight: 700; letter-spacing: -0.02em; max-width: 900px">La fin du mois, sans le stress de la caisse.</h2>
+<p style="margin: 0; font-size: 18px; line-height: 30px; color: #C9CFD8; max-width: 640px">Essayez Kalaas 14 jours avec vos vraies données. Sans carte bancaire, avec un accompagnement humain.</p>
+<div style="display: flex; gap: 16px; margin-top: 8px">
+<x-import component-from-global-scope="Kalaas.Button" variant="gold" size="lg">Démarrer l’essai gratuit</x-import>
+<a href="#" style="display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 22px; border: 1px solid #5B6B80; border-radius: 10px; color: #FFFFFF; font-size: 15px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>Écrire sur WhatsApp</a>
+</div>
+</section>
+<footer style="margin-top: auto; border-top: 1px solid var(--navy-700); padding: 48px 120px; display: flex; gap: 64px; font-size: 14px; line-height: 24px; color: #A7B0BC">
+<div style="width: 360px; display: flex; flex-direction: column; gap: 10px"><div style="font-size: 22px; font-weight: 700; color: #FFFFFF">Kalaas<span style="color: var(--gold-500)">.</span></div><div>La gestion des instituts de formation, pensée au Sénégal.</div><div>Un produit AFRICATECHNOLOGIE</div></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="color: #FFFFFF; font-weight: 600">Produit</div><a href="#fonctionnalites" style="color: #A7B0BC; text-decoration: none">Fonctionnalités</a><a href="#tarifs" style="color: #A7B0BC; text-decoration: none">Tarifs</a><a href="#faq" style="color: #A7B0BC; text-decoration: none">Questions fréquentes</a></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="color: #FFFFFF; font-weight: 600">Légal</div><a href="#" style="color: #A7B0BC; text-decoration: none">Mentions légales</a><a href="#" style="color: #A7B0BC; text-decoration: none">Confidentialité</a><a href="#" style="color: #A7B0BC; text-decoration: none">CGU</a></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="color: #FFFFFF; font-weight: 600">Contact</div><div>+221 76 843 12 63</div><div>[contact@kalaas.sn]</div><div>Saint-Louis · Dakar, Sénégal</div></div>
+<div style="margin-left: auto; align-self: flex-end">© 2026 Kalaas</div>
+</footer>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":6000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var h = window.React.createElement, K = window.Kalaas || {};
+    var tone = { 'Payé': 'success', 'Partiel': 'warning', 'En retard': 'danger' };
+    return {
+      yes: true,
+      payCols: [
+        { key: 'nom', label: 'Apprenant' },
+        { key: 'moyen', label: 'Moyen' },
+        { key: 'montant', label: 'Montant', align: 'right' },
+        { key: 'statut', label: 'Statut', render: function (r) { return K.Badge ? h(K.Badge, { tone: tone[r.statut] }, r.statut) : r.statut; } }
+      ],
+      payRows: [
+        { id: 1, nom: 'Awa Diop', moyen: 'Wave', montant: '45 000 FCFA', statut: 'Payé' },
+        { id: 2, nom: 'Moussa Sarr', moyen: 'Orange Money', montant: '20 000 FCFA', statut: 'Partiel' },
+        { id: 3, nom: 'Fatou Ba', moyen: '—', montant: '45 000 FCFA', statut: 'En retard' },
+        { id: 4, nom: 'Ibrahima Gueye', moyen: 'Guichet', montant: '25 000 FCFA', statut: 'Payé' },
+        { id: 5, nom: 'Mariama Ndiaye', moyen: 'Wave', montant: '35 000 FCFA', statut: 'Payé' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

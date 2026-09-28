@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Impayés et relances</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+.row:hover{background:#FBF8F2}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1080px; display: flex; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+
+<div style="width: 248px; flex-shrink: 0; height: 1080px; display: flex">
+<x-import component-from-global-scope="Kalaas.Sidebar" sections="{{nav}}" active="imp" footer="Mohamed Fall · Directeur" style="width: 248px; height: 1080px"></x-import>
+</div>
+
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+<header style="height: 72px; flex-shrink: 0; background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; gap: 12px">
+<div style="flex-grow: 1"><h1 style="margin: 0; font-size: 22px; line-height: 30px; font-weight: 600">Impayés et relances</h1><div style="font-size: 13px; color: var(--ink-muted)">Samedi 10 octobre 2026 · année 2026-2027</div></div>
+<x-import component-from-global-scope="Kalaas.Button" variant="secondary">Exporter la liste</x-import>
+</header>
+
+<main style="flex-grow: 1; padding: 20px 32px; display: flex; gap: 20px; align-items: flex-start; min-height: 0">
+<div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+
+<!-- one summary strip -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 16px 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+<div><div style="font-size: 13px; color: var(--ink-muted)">En retard</div><div style="white-space: nowrap"><span style="font-size: 24px; font-weight: 700; color: var(--danger)">870 000</span> <span style="font-size: 12px; color: var(--ink-muted)">FCFA</span></div></div>
+<div style="padding-left: 20px; border-left: 1px solid var(--border)"><div style="font-size: 13px; color: var(--ink-muted)">Apprenants concernés</div><div style="font-size: 24px; font-weight: 700">23 <span style="font-size: 12px; font-weight: 400; color: var(--ink-muted)">sur 214</span></div></div>
+<div style="padding-left: 20px; border-left: 1px solid var(--border)"><div style="font-size: 13px; color: var(--ink-muted)">Promesses de paiement</div><div style="font-size: 24px; font-weight: 700">3 <span style="font-size: 12px; font-weight: 400; color: var(--ink-muted)">· 155 000 FCFA</span></div></div>
+<div style="padding-left: 20px; border-left: 1px solid var(--border)"><div style="font-size: 13px; color: var(--ink-muted)">Récupéré après relance (oct.)</div><div style="white-space: nowrap"><span style="font-size: 24px; font-weight: 700; color: var(--success)">320 000</span> <span style="font-size: 12px; color: var(--ink-muted)">FCFA</span></div></div>
+</section>
+
+<!-- tabs + filters -->
+<div style="display: flex; gap: 12px; align-items: center">
+<div role="tablist" style="display: flex; gap: 4px; padding: 4px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 12px; font-size: 14px">
+<button type="button" role="tab" aria-selected="true" style="height: 36px; padding: 0 14px; border: 0; border-radius: 9px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-weight: 600">En retard <span style="margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: var(--gold-500); color: var(--navy-900); font-size: 12px">23</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 36px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; font-family: inherit; color: var(--ink)">Échéance cette semaine <span style="color: var(--ink-muted); font-size: 12px">14</span></button>
+<button type="button" role="tab" aria-selected="false" style="height: 36px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; font-family: inherit; color: var(--ink)">Historique des relances</button>
+</div>
+<span style="flex-grow: 1"></span>
+<select aria-label="Filière" class="kl-input kl-select" style="width: 190px; height: 44px"><option>Toutes les filières</option></select>
+<select aria-label="Retard" class="kl-input kl-select" style="width: 170px; height: 44px"><option>Tous les retards</option><option>Plus de 30 jours</option></select>
+</div>
+
+<!-- bulk bar -->
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: var(--navy-900); color: #FFFFFF; border-radius: 12px; font-size: 14px">
+<div style="flex-grow: 1"><b style="font-weight: 600">{{selCount}} sélectionné(s)</b> <span style="color: #C9CFD8">· {{selTotal}} FCFA dus</span></div>
+<button type="button" onClick="{{clearSel}}" style="height: 38px; padding: 0 12px; border: 0; background: transparent; color: #C9CFD8; font-family: inherit; font-size: 13px; cursor: pointer">Désélectionner</button>
+<button type="button" style="height: 38px; padding: 0 16px; border: 0; border-radius: 8px; background: var(--gold-500); color: var(--navy-900); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Relancer sur WhatsApp ({{selCount}})</button>
+</div>
+</sc-if>
+
+<!-- table -->
+<section style="background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; overflow: hidden">
+<div style="display: grid; grid-template-columns: 40px minmax(0, 1.5fr) 110px 110px minmax(0, 1.3fr) 120px; gap: 12px; align-items: center; padding: 10px 16px; background: var(--surface-100); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink-muted)">
+<input type="checkbox" aria-label="Tout sélectionner" checked="{{allOn}}" onChange="{{toggleAll}}" style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">
+<span>APPRENANT</span><span style="text-align: right">DÛ (FCFA)</span><span>RETARD</span><span>DERNIÈRE RELANCE</span><span style="text-align: right">ACTION</span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+<div class="row" style="display: grid; grid-template-columns: 40px minmax(0, 1.5fr) 110px 110px minmax(0, 1.3fr) 120px; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px">
+<input type="checkbox" aria-label="Sélectionner {{r.nom}}" checked="{{r.on}}" onChange="{{r.toggle}}" style="width: 18px; height: 18px; margin: 0; accent-color: #0D1B2A">
+<div style="min-width: 0"><div style="font-size: 14px; font-weight: 600">{{r.nom}}</div><div style="font-size: 12px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.fil}} · échéance {{r.ech}}</div></div>
+<div style="text-align: right; font-weight: 600; font-variant-numeric: tabular-nums">{{r.du}}</div>
+<div>
+<sc-if value="{{r.mild}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Badge" tone="warning">{{r.jours}}</x-import></sc-if>
+<sc-if value="{{r.bad}}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="Kalaas.Badge" tone="danger">{{r.jours}}</x-import></sc-if>
+</div>
+<div style="min-width: 0"><div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.last}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{r.lastSub}}</div></div>
+<div style="display: flex; justify-content: flex-end"><x-import component-from-global-scope="Kalaas.Button" variant="secondary" size="sm">Relancer</x-import></div>
+</div>
+</sc-for>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; font-size: 13px; color: var(--ink-muted)"><span>1 à 7 sur 23 · triés par retard décroissant</span><span>Page 1 sur 4</span></div>
+</section>
+</div>
+
+<!-- AUTOMATION -->
+<aside style="width: 360px; flex-shrink: 0; background: var(--surface-200); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div><h2 style="margin: 0; font-size: 16px; font-weight: 600">Relances automatiques</h2><div style="font-size: 13px; color: var(--ink-muted)">Envoyées entre 9h et 19h, jamais le dimanche.</div></div>
+<sc-for list="{{rules}}" as="u" hint-placeholder-count="4">
+<label style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer">
+<span style="flex-grow: 1"><span style="display: block; font-size: 14px; font-weight: 600">{{u.when}}</span><span style="display: block; font-size: 12px; line-height: 17px; color: var(--ink-muted)">{{u.what}}</span></span>
+<input type="checkbox" checked="{{u.on}}" onChange="{{u.toggle}}" aria-label="Activer : {{u.when}}" style="width: 20px; height: 20px; margin: 0; accent-color: #0D1B2A">
+</label>
+</sc-for>
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px"><span style="font-size: 13px; font-weight: 600">Aperçu du message · J+1</span><a href="#" style="font-size: 13px; font-weight: 600">Modifier</a></div>
+<div style="background: #E9E4DA; border-radius: 12px; padding: 12px">
+<div style="background: #FFFFFF; border-radius: 10px 10px 10px 2px; padding: 10px 12px; font-size: 13px; line-height: 19px">Bonjour Awa, la mensualité de 66 667 FCFA à l’Institut Teranga Formation était due le 1er octobre. Vous pouvez la régler au guichet ou par Wave / Orange Money. Merci !<div style="text-align: right; font-size: 11px; color: var(--ink-muted); margin-top: 4px">09:00</div></div>
+</div>
+<div style="font-size: 12px; line-height: 18px; color: var(--ink-muted)">Exemple avec les données d’Awa Diop. Le modèle doit être validé par WhatsApp avant le premier envoi.</div>
+</aside>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { sel: { r1: true, r2: true, r6: true }, rules: { a: true, b: true, c: true, d: false } }; }
+  renderVals() {
+    var self = this, st = this.state;
+    var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); };
+    var data = [
+      ['r0', 'Mamadou L. Ndao', 'Transport Logistique BTS 1', '10/09', 50000, 30, 'WhatsApp · 5e relance, lue', 'Tuteur prévenu le 8 oct.'],
+      ['r1', 'Ibrahima Sarr', 'Dév. Web & Mobile', '15/09', 45000, 25, 'WhatsApp · 4e relance', 'Non lue · appeler ?'],
+      ['r2', 'Fatou Sow', 'Couture & Modélisme', '20/09', 80000, 20, 'Promesse : paiera le 15 oct.', 'Notée par Fatou K. le 7 oct.'],
+      ['r3', 'Awa Diop', 'Dév. Web & Mobile', '01/10', 66667, 9, 'WhatsApp · 8 oct., lue', '1 relance'],
+      ['r4', 'Oumou K. Diouf', 'Gestion de projets', '01/10', 33333, 9, 'Aucune relance', 'Numéro invalide à corriger'],
+      ['r5', 'Babacar Seck', 'Couture & Modélisme', '02/10', 40000, 8, 'WhatsApp · 3 oct., lue', '1 relance'],
+      ['r6', 'Mariama Diallo', 'Comptabilité & Gestion L2', '05/10', 35000, 5, 'WhatsApp · 6 oct., lue', '1 relance']
+    ];
+    var sel = st.sel;
+    var toggle = function (id) { var s = Object.assign({}, self.state.sel); if (s[id]) delete s[id]; else s[id] = true; self.setState({ sel: s }); };
+    var rows = data.map(function (d) { return { id: d[0], nom: d[1], fil: d[2], ech: d[3], du: fmt(d[4]), amount: d[4], jours: d[5] + ' jours', mild: d[5] < 8, bad: d[5] >= 8, last: d[6], lastSub: d[7], on: !!sel[d[0]], toggle: function () { toggle(d[0]); } }; });
+    var chosen = rows.filter(function (r) { return r.on; });
+    var total = chosen.reduce(function (a, r) { return a + r.amount; }, 0);
+    var allOn = chosen.length === rows.length;
+    var rl = st.rules;
+    var R = function (k, when, what) { return { when: when, what: what, on: !!rl[k], toggle: function () { var n = Object.assign({}, self.state.rules); n[k] = !n[k]; self.setState({ rules: n }); } }; };
+    return {
+      nav: [
+        { items: [{ key: 'dash', label: 'Tableau de bord' }] },
+        { title: 'Scolarité', items: [{ key: 'app', label: 'Apprenants' }, { key: 'ins', label: 'Inscriptions' }, { key: 'form', label: 'Filières' }, { key: 'pres', label: 'Présences' }] },
+        { title: 'Finances', items: [{ key: 'enc', label: 'Encaissements' }, { key: 'imp', label: 'Impayés et relances', count: 23 }, { key: 'rap', label: 'Rapports' }] },
+        { title: 'Réglages', items: [{ key: 'par', label: 'Paramètres' }] }
+      ],
+      rows: rows,
+      hasSel: chosen.length > 0, selCount: chosen.length, selTotal: fmt(total),
+      allOn: allOn,
+      toggleAll: function () { var s = {}; if (!allOn) data.forEach(function (d) { s[d[0]] = true; }); self.setState({ sel: s }); },
+      clearSel: function () { self.setState({ sel: {} }); },
+      rules: [
+        R('a', '3 jours avant l’échéance', 'Rappel amical à l’apprenant'),
+        R('b', '1 jour après', 'Rappel poli + moyens de paiement'),
+        R('c', '7 jours après', 'Relance + copie au tuteur'),
+        R('d', '15 jours après', 'Alerte au secrétariat pour un appel')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

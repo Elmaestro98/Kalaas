@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Kalaas — Sessions mobile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/kalaas/tokens.css">
+<link rel="stylesheet" href="ds/kalaas/components/bundle.css">
+<script src="ds/kalaas/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:"Poppins",system-ui,sans-serif;background:#F7F5F0;color:#0D1B2A}
+a{color:#7A5F22}a:hover{color:#0D1B2A}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1160px; display: flex; flex-direction: column; background: var(--surface-100); color: var(--ink); font-family: var(--font-sans); overflow: hidden">
+<header style="background: var(--surface-200); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div><h1 style="margin: 0; font-size: 20px; font-weight: 600">Formations</h1><div style="font-size: 12px; color: var(--ink-muted)">7 sessions actives · 133 inscrits</div></div>
+<div role="tablist" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: var(--surface-100); border: 1px solid var(--border); border-radius: 12px">
+<button type="button" role="tab" aria-selected="true" style="height: 38px; border: 0; border-radius: 9px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(13,27,42,0.12); font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink)">Sessions</button>
+<button type="button" role="tab" aria-selected="false" style="height: 38px; border: 0; border-radius: 9px; background: transparent; font-family: inherit; font-size: 14px; color: var(--ink-muted)">Catalogue</button>
+</div>
+</header>
+<main style="padding: 14px 16px 100px; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{sessions}}" as="s" hint-placeholder-count="7">
+<a href="#" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; background: var(--surface-200); border: 1px solid var(--border); border-radius: 14px; color: var(--ink); text-decoration: none">
+<div style="display: flex; justify-content: space-between; gap: 8px; align-items: flex-start">
+<div style="min-width: 0"><div style="font-size: 15px; font-weight: 600">{{s.form}}</div><div style="font-size: 12px; color: var(--ink-muted)">{{s.code}} · {{s.prof}}</div></div>
+<sc-if value="{{s.full}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Badge" tone="gold">Complet</x-import></sc-if>
+<sc-if value="{{s.start}}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="Kalaas.Badge" tone="info">Aujourd’hui</x-import></sc-if>
+</div>
+<div style="font-size: 12px; color: var(--ink-muted)">{{s.dates}} · {{s.hours}}</div>
+<div style="display: flex; align-items: center; gap: 10px"><div style="flex-grow: 1; height: 5px; border-radius: 3px; background: #EEEAE1"><div style="width: {{s.pct}}; height: 5px; border-radius: 3px; background: var(--navy-900)"></div></div><span style="font-size: 12px; font-weight: 600; white-space: nowrap">{{s.fill}}</span></div>
+</a>
+</sc-for>
+</main>
+<button type="button" aria-label="Nouvelle session" style="position: absolute; right: 16px; bottom: 24px; height: 56px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--navy-900); color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 600; box-shadow: 0 8px 24px rgba(13,27,42,0.3)">+ Session</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var S = [
+      ['DEV1', 'Dév. web & mobile · matin', '1 oct. → 31 mars', 'Lun–Ven 8h30–13h', 'M. Kane', 18, 25, 'run'],
+      ['DEV2', 'Dév. web & mobile · soir', '15 nov. → 15 mai', 'Lun–Ven 16h–20h', 'C. Diop', 24, 25, 'run'],
+      ['CPT1', 'Comptabilité & gestion', '15 oct. → 15 avr.', 'Lun–Jeu 9h–13h30', 'F. K. Ndiaye', 20, 20, 'run'],
+      ['MOD1', 'Couture & modélisme', '1 nov. → 30 avr.', 'Lun–Ven 8h30–14h', 'M. Diallo', 18, 20, 'run'],
+      ['ANG1', 'Anglais professionnel', '1 déc. → 31 mars', 'Mar, Jeu, Sam 17h–20h', 'A. Sy', 22, 25, 'run'],
+      ['EST1', 'Esthétique & soins', '15 janv. → 15 juil.', 'Lun–Ven 9h–13h', 'A. Sow', 19, 20, 'run'],
+      ['BUR1', 'Bureautique & secrétariat', '1 févr. → 30 avr.', 'Lun–Jeu 14h–18h', 'O. Diagne', 12, 20, 'start']
+    ];
+    return { sessions: S.map(function (s) { return { code: s[0], form: s[1], dates: s[2], hours: s[3], prof: s[4], fill: s[5] + '/' + s[6], pct: Math.round(s[5] / s[6] * 100) + '%', full: s[5] === s[6], start: s[7] === 'start' }; }) };
+  }
+}
+</script>
+</body>
+</html>

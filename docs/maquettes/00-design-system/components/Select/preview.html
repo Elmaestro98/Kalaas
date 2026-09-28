@@ -1,0 +1,13 @@
+<!-- @dsCard group="Formulaires" height=130 subtitle="placeholder · valeur · erreur" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Select</title></head>
+<body>
+<div id="root"></div>
+<script>
+var K=window.Kalaas,h=React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'kl-form'},
+ h(K.Select,{label:'Promotion',placeholder:'Choisir une promotion',options:['Développement Web 2026','Bureautique — Octobre','Infographie 2026']}),
+ h(K.Select,{label:'Mode de paiement',defaultValue:'wave',options:[{value:'wave',label:'Wave'},{value:'om',label:'Orange Money'},{value:'cash',label:'Espèces'}]}),
+ h(K.Select,{label:'Formateur',placeholder:'Choisir',required:true,error:'Sélectionnez un formateur.',options:['M. Ndiaye','Mme Fall']})));
+</script>
+</body></html>
