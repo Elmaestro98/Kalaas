@@ -18,7 +18,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-border bg-surface-200 px-4 lg:h-18 lg:px-8">
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-border bg-surface-200 px-4 lg:h-18 lg:px-8 print:hidden">
           <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/dashboard" />
           <div className="flex-1" />
           <Link
@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <UserButton />
         </header>
 
-        <main className="flex-1 px-4 pt-6 pb-28 lg:px-8 lg:py-8">{children}</main>
+        <main className="flex-1 px-4 pt-6 pb-28 lg:px-8 lg:py-8 print:p-0">{children}</main>
       </div>
 
       <MobileNav />

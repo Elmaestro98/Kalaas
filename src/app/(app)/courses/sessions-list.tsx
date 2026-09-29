@@ -5,6 +5,7 @@ export type LigneSession = {
   id: string;
   nom: string;
   formation: string;
+  annee: string | null;
   dateDebut: Date;
   dateFin: Date;
   horaires: string | null;
@@ -83,7 +84,7 @@ export default function SessionsList({ sessions }: { sessions: LigneSession[] })
               <tr key={s.id} className="hover:bg-gold-100/50">
                 <td className="px-4 py-3">
                   <p className="font-semibold">{s.nom}</p>
-                  <p className="text-xs text-ink-muted">{s.formation}</p>
+                  <p className="text-xs text-ink-muted">{s.formation}{s.annee && <> · {s.annee}</>}</p>
                 </td>
                 <td className="px-4 py-3">
                   <p className="whitespace-nowrap">
@@ -113,7 +114,7 @@ export default function SessionsList({ sessions }: { sessions: LigneSession[] })
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-semibold">{s.nom}</p>
-                <p className="text-xs text-ink-muted">{s.formation}</p>
+                <p className="text-xs text-ink-muted">{s.formation}{s.annee && <> · {s.annee}</>}</p>
               </div>
               <Statut debut={s.dateDebut} fin={s.dateFin} />
             </div>

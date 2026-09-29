@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen, Plus } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { CYCLES, ORDRE_CYCLES } from "@/lib/lmd";
 import CourseCard from "./course-card";
 import SessionsList, { type LigneSession } from "./sessions-list";
 
@@ -10,13 +11,14 @@ export default async function CoursesPage() {
   const [formations, sessions] = await Promise.all([
     db.formation.findMany({
       where: { active: true },
-      orderBy: { intitule: "asc" },
+      orderBy: [{ filiere: "asc" }, { niveau: "asc" }, { intitule: "asc" }],
       include: { _count: { select: { sessions: true } } },
     }),
     db.session.findMany({
       orderBy: { dateDebut: "desc" },
       include: {
         formation: { select: { intitule: true } },
+        anneeAcademique: { select: { libelle: true } },
         formateur: { include: { utilisateur: { select: { nom: true } } } },
         _count: { select: { inscriptions: { where: { statut: "ACTIVE" } } } },
       },
@@ -27,6 +29,7 @@ export default async function CoursesPage() {
     id: s.id,
     nom: s.nom,
     formation: s.formation.intitule,
+    annee: s.anneeAcademique?.libelle ?? null,
     dateDebut: s.dateDebut,
     dateFin: s.dateFin,
     horaires: s.horaires,
@@ -34,6 +37,13 @@ export default async function CoursesPage() {
     inscrits: s._count.inscriptions,
     capacite: s.capacite,
   }));
+
+  // Catalogue regroupé par cycle : Licence, Master, Doctorat, puis formations courtes
+  const groupes = ORDRE_CYCLES.map((cycle) => ({
+    cycle,
+    formations: formations.filter((f) => f.cycle === cycle),
+  })).filter((g) => g.formations.length > 0);
+  const afficherTitres = groupes.length > 1;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -72,7 +82,7 @@ export default async function CoursesPage() {
           </span>
           <p className="mt-4 font-semibold">Aucune formation pour l&apos;instant</p>
           <p className="mt-1 max-w-sm text-sm text-ink-muted">
-            Créez votre première formation : son prix et ses mensualités serviront à
+            Créez une formation courte, ou les niveaux de vos Licences et Masters : leur tarif servira à
             générer l&apos;échéancier de chaque apprenant.
           </p>
           <Link
@@ -84,20 +94,34 @@ export default async function CoursesPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {formations.map((formation) => (
-            <CourseCard
-              key={formation.id}
-              id={formation.id}
-              intitule={formation.intitule}
-              dureeMois={formation.dureeMois}
-              fraisInscription={formation.fraisInscription}
-              prixTotal={formation.prixTotal}
-              nbMensualites={formation.nbMensualites}
-              nbSessions={formation._count.sessions}
-            />
-          ))}
-        </div>
+        groupes.map((groupe) => (
+          <section key={groupe.cycle} className="mt-6">
+            {afficherTitres && (
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-muted">
+                {groupe.cycle === "FORMATION_COURTE" ? "Formations courtes" : CYCLES[groupe.cycle].label}
+                <span className="ml-2 font-normal normal-case tracking-normal">
+                  · {groupe.formations.length}
+                </span>
+              </h2>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {groupe.formations.map((formation) => (
+                <CourseCard
+                  key={formation.id}
+                  id={formation.id}
+                  intitule={formation.intitule}
+                  cycle={formation.cycle}
+                  niveau={formation.niveau}
+                  dureeMois={formation.dureeMois}
+                  fraisInscription={formation.fraisInscription}
+                  prixTotal={formation.prixTotal}
+                  nbMensualites={formation.nbMensualites}
+                  nbSessions={formation._count.sessions}
+                />
+              ))}
+            </div>
+          </section>
+        ))
       )}
 
       {formations.length > 0 && (

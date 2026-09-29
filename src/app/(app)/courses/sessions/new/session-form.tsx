@@ -4,19 +4,23 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { creerSession, type EtatSession } from "../actions";
 import Field, { classeChamp, idDescription } from "@/components/ui/field";
+import { estLmd, type Cycle } from "@/lib/lmd";
 
-type OptionFormation = { id: string; intitule: string; dureeMois: number };
+type OptionFormation = { id: string; intitule: string; dureeMois: number; cycle: Cycle };
 type OptionFormateur = { id: string; nom: string };
+type OptionAnnee = { id: string; libelle: string; dateDebut: string; dateFin: string; enCours: boolean };
 
 type SessionFormProps = {
   formations: OptionFormation[];
   formateurs: OptionFormateur[];
+  annees: OptionAnnee[];
   formationInitiale?: string;
 };
 
 const etatInitial: EtatSession = { erreurs: {}, erreurGenerale: null };
 
 const AIDE_FIN = "Calculée d'après la durée de la formation";
+const AIDE_FIN_LMD = "Reprise de l'année académique";
 const AIDE_HORAIRES = "Ex. Lun–Ven · 18h–20h";
 const AIDE_CAPACITE = "Laisser vide si pas de limite";
 
@@ -34,41 +38,74 @@ function calculerFin(debut: string, mois: number): string {
   return fin.toISOString().slice(0, 10);
 }
 
-export default function SessionForm({
-  formations,
-  formateurs,
-  formationInitiale,
-}: SessionFormProps) {
+type Calendrier = { anneeId: string; dateDebut: string; dateFin: string; nom: string };
+
+// Dates et nom proposés selon la formation (courte ou LMD) et l'année académique
+function proposer(
+  formation: OptionFormation | undefined,
+  annee: OptionAnnee | undefined,
+  debutActuel: string,
+): Calendrier {
+  if (formation && estLmd(formation.cycle) && annee) {
+    return {
+      anneeId: annee.id,
+      dateDebut: annee.dateDebut.slice(0, 10),
+      dateFin: annee.dateFin.slice(0, 10),
+      nom: `Promotion ${annee.libelle}`,
+    };
+  }
+  return {
+    anneeId: "",
+    dateDebut: debutActuel,
+    dateFin: formation ? calculerFin(debutActuel, formation.dureeMois) : "",
+    nom: "",
+  };
+}
+
+export default function SessionForm({ formations, formateurs, annees, formationInitiale }: SessionFormProps) {
   const [etat, envoyer, enCours] = useActionState(creerSession, etatInitial);
 
+  const anneeParDefaut = annees.find((a) => a.enCours) ?? annees[0];
+  const [initial] = useState(() =>
+    proposer(formations.find((f) => f.id === formationInitiale), anneeParDefaut, aujourdhui()),
+  );
+
   const [formationId, setFormationId] = useState(formationInitiale ?? "");
-  const [nom, setNom] = useState("");
-  const [dateDebut, setDateDebut] = useState(aujourdhui());
-  const [dateFin, setDateFin] = useState(() => {
-    const formation = formations.find((f) => f.id === formationInitiale);
-    return formation ? calculerFin(aujourdhui(), formation.dureeMois) : "";
-  });
+  const [anneeId, setAnneeId] = useState(initial.anneeId);
+  const [nom, setNom] = useState(initial.nom);
+  const [nomModifie, setNomModifie] = useState(false);
+  const [dateDebut, setDateDebut] = useState(initial.dateDebut);
+  const [dateFin, setDateFin] = useState(initial.dateFin);
   const [finModifiee, setFinModifiee] = useState(false);
   const [horaires, setHoraires] = useState("");
   const [capacite, setCapacite] = useState("");
   const [formateurId, setFormateurId] = useState("");
 
   const erreurs = etat.erreurs;
+  const formation = formations.find((f) => f.id === formationId);
+  const lmd = formation ? estLmd(formation.cycle) : false;
+  const sansAnnee = lmd && annees.length === 0;
 
-  function recalculerFin(idFormation: string, debut: string) {
-    if (finModifiee) {
-      return;
+  function appliquer(idFormation: string, idAnnee: string, debut: string) {
+    const f = formations.find((x) => x.id === idFormation);
+    const choixAnnee =
+      f && estLmd(f.cycle) ? (annees.find((a) => a.id === idAnnee) ?? anneeParDefaut) : undefined;
+    const p = proposer(f, choixAnnee, debut);
+
+    setAnneeId(p.anneeId);
+    if (!finModifiee) {
+      setDateDebut(p.dateDebut);
+      setDateFin(p.dateFin);
     }
-    const formation = formations.find((f) => f.id === idFormation);
-    setDateFin(formation ? calculerFin(debut, formation.dureeMois) : "");
+    if (!nomModifie) {
+      setNom(p.nom);
+    }
   }
 
   return (
     <form action={envoyer} className="space-y-8">
       <section className="space-y-5">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
-          Formation
-        </h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Formation</h2>
 
         <Field id="formationId" label="Formation" required error={erreurs.formationId}>
           <select
@@ -78,7 +115,7 @@ export default function SessionForm({
             value={formationId}
             onChange={(e) => {
               setFormationId(e.target.value);
-              recalculerFin(e.target.value, dateDebut);
+              appliquer(e.target.value, anneeId, dateDebut);
             }}
             aria-invalid={!!erreurs.formationId || undefined}
             aria-describedby={idDescription("formationId", erreurs.formationId)}
@@ -89,21 +126,56 @@ export default function SessionForm({
             </option>
             {formations.map((f) => (
               <option key={f.id} value={f.id}>
-                {f.intitule} ({f.dureeMois} mois)
+                {f.intitule}
+                {!estLmd(f.cycle) && ` (${f.dureeMois} mois)`}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field id="nom" label="Nom de la session" required error={erreurs.nom}>
+        {lmd &&
+          (sansAnnee ? (
+            <p className="rounded-md bg-warning-soft px-4 py-3 text-sm text-warning">
+              Créez d&apos;abord une année académique (ex. 2026-2027) dans{" "}
+              <Link href="/settings" className="font-semibold">
+                Paramètres
+              </Link>
+              .
+            </p>
+          ) : (
+            <Field id="anneeAcademiqueId" label="Année académique" required error={erreurs.anneeAcademiqueId}>
+              <select
+                id="anneeAcademiqueId"
+                name="anneeAcademiqueId"
+                required
+                value={anneeId}
+                onChange={(e) => appliquer(formationId, e.target.value, dateDebut)}
+                aria-invalid={!!erreurs.anneeAcademiqueId || undefined}
+                className={classeChamp(erreurs.anneeAcademiqueId)}
+              >
+                {annees.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.libelle}
+                    {a.enCours ? " (en cours)" : ""}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ))}
+        {!lmd && <input type="hidden" name="anneeAcademiqueId" value="" />}
+
+        <Field id="nom" label={lmd ? "Nom de la promotion" : "Nom de la session"} required error={erreurs.nom}>
           <input
             id="nom"
             name="nom"
             required
             maxLength={80}
-            placeholder="Ex. Promo octobre 2026 · soir"
+            placeholder={lmd ? "Ex. Promotion 2026-2027" : "Ex. Promo octobre 2026 · soir"}
             value={nom}
-            onChange={(e) => setNom(e.target.value)}
+            onChange={(e) => {
+              setNomModifie(true);
+              setNom(e.target.value);
+            }}
             aria-invalid={!!erreurs.nom || undefined}
             aria-describedby={idDescription("nom", erreurs.nom)}
             className={classeChamp(erreurs.nom)}
@@ -112,9 +184,7 @@ export default function SessionForm({
       </section>
 
       <section className="space-y-5">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
-          Calendrier
-        </h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Calendrier</h2>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Field id="dateDebut" label="Date de début" required error={erreurs.dateDebut}>
@@ -126,7 +196,9 @@ export default function SessionForm({
               value={dateDebut}
               onChange={(e) => {
                 setDateDebut(e.target.value);
-                recalculerFin(formationId, e.target.value);
+                if (!lmd && !finModifiee && formation) {
+                  setDateFin(calculerFin(e.target.value, formation.dureeMois));
+                }
               }}
               aria-invalid={!!erreurs.dateDebut || undefined}
               aria-describedby={idDescription("dateDebut", erreurs.dateDebut)}
@@ -134,7 +206,13 @@ export default function SessionForm({
             />
           </Field>
 
-          <Field id="dateFin" label="Date de fin" required hint={AIDE_FIN} error={erreurs.dateFin}>
+          <Field
+            id="dateFin"
+            label="Date de fin"
+            required
+            hint={lmd ? AIDE_FIN_LMD : AIDE_FIN}
+            error={erreurs.dateFin}
+          >
             <input
               id="dateFin"
               name="dateFin"
@@ -147,7 +225,7 @@ export default function SessionForm({
                 setDateFin(e.target.value);
               }}
               aria-invalid={!!erreurs.dateFin || undefined}
-              aria-describedby={idDescription("dateFin", erreurs.dateFin, AIDE_FIN)}
+              aria-describedby={idDescription("dateFin", erreurs.dateFin, lmd ? AIDE_FIN_LMD : AIDE_FIN)}
               className={classeChamp(erreurs.dateFin)}
             />
           </Field>
@@ -168,12 +246,10 @@ export default function SessionForm({
       </section>
 
       <section className="space-y-5">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
-          Organisation
-        </h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Organisation</h2>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field id="formateurId" label="Formateur" error={erreurs.formateurId}>
+          <Field id="formateurId" label={lmd ? "Responsable ou enseignant" : "Formateur"} error={erreurs.formateurId}>
             <select
               id="formateurId"
               name="formateurId"
@@ -225,8 +301,8 @@ export default function SessionForm({
         </Link>
         <button
           type="submit"
-          disabled={enCours}
-          className="h-12 cursor-pointer rounded-md bg-action px-6 font-medium text-on-action hover:bg-action-hover disabled:cursor-wait disabled:opacity-60"
+          disabled={enCours || sansAnnee}
+          className="h-12 cursor-pointer rounded-md bg-action px-6 font-medium text-on-action hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
           {enCours ? "Enregistrement…" : "Ouvrir la session"}
         </button>

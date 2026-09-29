@@ -20,7 +20,7 @@ export default function MobileNav() {
     <>
       <nav
         aria-label="Navigation principale"
-        className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 items-center border-t border-border bg-surface-200 text-[11px] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 grid h-18 grid-cols-5 items-center border-t border-border bg-surface-200 text-[11px] lg:hidden print:hidden"
       >
         {LIENS.map((lien, index) => {
           if (!lien) {
@@ -49,7 +49,7 @@ export default function MobileNav() {
       <Link
         href="/payments/new"
         aria-label="Nouvel encaissement"
-        className="fixed bottom-7 left-1/2 z-30 flex size-15 -translate-x-1/2 items-center justify-center rounded-full border-4 border-surface-100 bg-gold-500 text-navy-900 shadow-lg lg:hidden"
+        className="fixed bottom-7 left-1/2 z-30 flex size-15 -translate-x-1/2 items-center justify-center rounded-full border-4 border-surface-100 bg-gold-500 text-navy-900 shadow-lg lg:hidden print:hidden"
       >
         <Plus size={26} aria-hidden="true" />
       </Link>

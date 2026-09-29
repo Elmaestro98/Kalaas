@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { formatNombre } from "@/lib/format";
 import { repartirMontant } from "@/lib/echeancier";
+import { CYCLES, codeNiveau, estLmd, type Cycle } from "@/lib/lmd";
+import Badge from "@/components/ui/badge";
 
 type CourseCardProps = {
   id: string;
   intitule: string;
+  cycle: Cycle;
+  niveau: number | null;
   dureeMois: number;
   fraisInscription: number;
   prixTotal: number;
@@ -15,6 +19,8 @@ type CourseCardProps = {
 export default function CourseCard({
   id,
   intitule,
+  cycle,
+  niveau,
   dureeMois,
   fraisInscription,
   prixTotal,
@@ -31,13 +37,17 @@ export default function CourseCard({
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
           <h2 className="font-semibold leading-snug">{intitule}</h2>
-          <span className="shrink-0 rounded-full bg-surface-100 px-2.5 py-0.5 text-xs font-medium text-ink-muted">
-            {dureeMois} mois
-          </span>
+          {estLmd(cycle) ? (
+            <Badge ton={CYCLES[cycle].ton}>{codeNiveau(cycle, niveau)}</Badge>
+          ) : (
+            <span className="shrink-0 rounded-full bg-surface-100 px-2.5 py-0.5 text-xs font-medium text-ink-muted">
+              {dureeMois} mois
+            </span>
+          )}
         </div>
 
         <div>
-          <p className="text-xs text-ink-muted">Coût total</p>
+          <p className="text-xs text-ink-muted">{estLmd(cycle) ? "Coût annuel" : "Coût total"}</p>
           <p className="whitespace-nowrap">
             <span className="text-2xl font-bold tabular-nums">{formatNombre(total)}</span>{" "}
             <span className="text-sm text-ink-muted">FCFA</span>

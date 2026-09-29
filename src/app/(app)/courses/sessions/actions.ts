@@ -26,6 +26,7 @@ const schemaSession = z
         .optional(),
     ),
     formateurId: z.string(),
+    anneeAcademiqueId: z.string().optional(),
   })
   .refine((d) => d.dateFin > d.dateDebut, {
     message: "La date de fin doit être après la date de début.",
@@ -39,7 +40,8 @@ export type ChampSession =
   | "dateFin"
   | "horaires"
   | "capacite"
-  | "formateurId";
+  | "formateurId"
+  | "anneeAcademiqueId";
 
 export type EtatSession = {
   erreurs: Partial<Record<ChampSession, string>>;
@@ -73,6 +75,21 @@ export async function creerSession(
     return { erreurs: { formationId: "Formation introuvable." }, erreurGenerale: null };
   }
 
+  // En LMD, la session (la promotion) appartient obligatoirement à une année académique
+  let anneeAcademiqueId: string | null = null;
+  if (formation.cycle !== "FORMATION_COURTE") {
+    const annee = donnees.anneeAcademiqueId
+      ? await db.anneeAcademique.findFirst({ where: { id: donnees.anneeAcademiqueId } })
+      : null;
+    if (!annee) {
+      return {
+        erreurs: { anneeAcademiqueId: "Choisissez l'année académique." },
+        erreurGenerale: null,
+      };
+    }
+    anneeAcademiqueId = annee.id;
+  }
+
   if (donnees.formateurId) {
     const formateur = await db.membre.findFirst({
       where: { id: donnees.formateurId, actif: true },
@@ -88,6 +105,7 @@ export async function creerSession(
         institutId: institut.id,
         formationId: formation.id,
         formateurId: donnees.formateurId || null,
+        anneeAcademiqueId,
         nom: donnees.nom,
         dateDebut: new Date(donnees.dateDebut),
         dateFin: new Date(donnees.dateFin),

@@ -14,6 +14,8 @@ if (process.env.NODE_ENV !== "production") {
 // ─── Client limité à un institut ────────────────────────────
 
 const MODELES_INSTITUT = new Set<string>([
+  "AnneeAcademique",
+  "CompteurMatricule",
   "Membre",
   "Formation",
   "Session",

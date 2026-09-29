@@ -11,17 +11,26 @@ export default async function NewSessionPage({ searchParams }: NewSessionPagePro
   const { db } = await exigerRole("DIRECTEUR");
   const { formation } = await searchParams;
 
-  const [formations, membres] = await Promise.all([
+  const [formations, membres, anneesBrutes] = await Promise.all([
     db.formation.findMany({
       where: { active: true },
-      orderBy: { intitule: "asc" },
-      select: { id: true, intitule: true, dureeMois: true },
+      orderBy: [{ cycle: "asc" }, { filiere: "asc" }, { niveau: "asc" }, { intitule: "asc" }],
+      select: { id: true, intitule: true, dureeMois: true, cycle: true },
     }),
     db.membre.findMany({
       where: { actif: true, role: { in: ["FORMATEUR", "DIRECTEUR"] } },
       include: { utilisateur: { select: { nom: true } } },
     }),
+    db.anneeAcademique.findMany({ orderBy: { dateDebut: "desc" } }),
   ]);
+
+  const annees = anneesBrutes.map((a) => ({
+    id: a.id,
+    libelle: a.libelle,
+    dateDebut: a.dateDebut.toISOString(),
+    dateFin: a.dateFin.toISOString(),
+    enCours: a.enCours,
+  }));
 
   const formateurs = membres
     .map((m) => ({ id: m.id, nom: m.utilisateur.nom }))
@@ -54,6 +63,7 @@ export default async function NewSessionPage({ searchParams }: NewSessionPagePro
           <SessionForm
             formations={formations}
             formateurs={formateurs}
+            annees={annees}
             formationInitiale={formations.some((f) => f.id === formation) ? formation : undefined}
           />
         </div>

@@ -1,6 +1,8 @@
-# Kalaas — Cahier des charges MVP (Instituts de formation)
+# Kalaas — Cahier des charges MVP (Instituts de formation et enseignement supérieur LMD)
 
-**Version** 1.0 · **Date** 27 septembre 2026 · **Auteur** Mohamed Cheikh Samba · **Éditeur** AFRICATECHNOLOGIE
+**Version** 1.1 · **Date** 28 septembre 2026 · **Auteur** Mohamed Cheikh Samba · **Éditeur** AFRICATECHNOLOGIE
+
+> **Nouveautés de la version 1.1** : ouverture aux établissements d'enseignement supérieur privés qui suivent le système LMD (Licence, Master, Doctorat) — années académiques, cycles, filières et niveaux, matricule étudiant, réinscriptions annuelles. Nouvelle offre Campus.
 
 ## Sommaire
 
@@ -18,13 +20,19 @@
 
 ## 1. Présentation du projet
 
-Kalaas est un SaaS multi-tenant qui permet aux instituts de formation au Sénégal de gérer apprenants, inscriptions et paiements depuis un navigateur ou un téléphone. Le MVP vise un objectif simple : aider l'institut à mieux encaisser et à ne plus perdre de temps sur Excel et WhatsApp.
+Kalaas est un SaaS multi-tenant qui permet aux instituts de formation et aux établissements d'enseignement supérieur privés au Sénégal de gérer apprenants (ou étudiants), inscriptions et paiements depuis un navigateur ou un téléphone. Le MVP vise un objectif simple : aider l'établissement à mieux encaisser et à ne plus perdre de temps sur Excel et WhatsApp.
 
-**Cible du MVP** : instituts de formation professionnelle, centres de formation en informatique, langues, couture, esthétique, comptabilité, et écoles de formation privées de petite et moyenne taille (20 à 500 apprenants). Les écoles privées maternelle–lycée viendront en phase 2.
+**Cible du MVP** :
+
+- **Formation professionnelle** : centres de formation en informatique, langues, couture, esthétique, comptabilité, écoles de formation privées de petite et moyenne taille (20 à 500 apprenants). Formations de quelques mois, sessions qui démarrent toute l'année.
+- **Enseignement supérieur LMD** : instituts supérieurs, écoles de commerce et d'ingénieurs, universités privées qui délivrent des Licences, Masters ou Doctorats (100 à plusieurs milliers d'étudiants). Filières organisées en niveaux (L1 → L3, M1 → M2, D1 → D3), année académique d'octobre à juillet, inscription annuelle puis réinscription au niveau suivant.
+- **Établissements mixtes**, qui proposent les deux dans le même compte.
+
+Les écoles privées maternelle–lycée viendront en phase 2.
 
 **Objectifs mesurables du MVP**
 
-- Signer 5 instituts payants dans les 3 mois suivant le lancement
+- Signer 5 établissements payants dans les 3 mois suivant le lancement, dont au moins 1 en LMD
 - Réduire le temps de gestion des paiements d'un institut à moins de 15 minutes par jour
 - Garder un coût d'infrastructure inférieur à 30 000 FCFA par mois jusqu'à 50 instituts
 - Premier client test : E-DEV Academy
@@ -37,11 +45,11 @@ Le MVP ne crée des comptes que pour le personnel de l'institut : les apprenants
 | --- | --- | --- |
 | Super admin (Kalaas) | Toute la plateforme | Création des instituts, abonnements, support, statistiques globales |
 | Directeur / Promoteur | Son institut | Tout l'institut, tableau de bord financier, gestion des utilisateurs |
-| Secrétaire / Caissier | Son institut | Inscriptions, encaissements, reçus, relances |
-| Formateur | Ses sessions | Liste des apprenants, présences |
-| Apprenant (phase 2) | Son dossier | Reçus, solde restant, attestation |
+| Secrétaire / Caissier / Service de la scolarité | Son établissement | Inscriptions et réinscriptions, encaissements, reçus, relances |
+| Formateur / Enseignant | Ses sessions ou classes | Liste des apprenants, présences |
+| Apprenant / Étudiant (phase 2) | Son dossier | Reçus, solde restant, attestation |
 
-Un même utilisateur peut appartenir à plusieurs instituts (cas fréquent des formateurs vacataires).
+Un même utilisateur peut appartenir à plusieurs établissements (cas fréquent des formateurs et enseignants vacataires).
 
 ## 3. Périmètre fonctionnel du MVP
 
@@ -49,14 +57,18 @@ Le MVP tient en 6 modules centrés sur l'argent et les inscriptions ; tout le re
 
 ### M1 — Paramétrage de l'institut
 
-- Profil (nom, logo, adresse, NINEA, téléphones), personnalisation des reçus
+- Profil (nom, logo, adresse, NINEA, RCCM, téléphones), personnalisation des reçus, préfixe des matricules
 - Catalogue des formations : intitulé, durée, frais d'inscription, prix total, nombre de mensualités
-- Sessions (cohortes) : formation, dates, formateur, capacité, horaires
+- Pour le LMD : cycle (Licence, Master, Doctorat), filière et niveau de chaque formation — une formation correspond à un niveau d'une filière, avec son propre tarif (ex. « Licence Informatique de gestion — L2 »)
+- Années académiques (ex. 2026-2027, d'octobre à juillet), dont une marquée « en cours »
+- Sessions (cohortes ou classes) : formation, année académique (obligatoire pour le LMD), dates, formateur, capacité, horaires
 
 ### M2 — Apprenants et inscriptions
 
-- Fiche apprenant : nom, téléphone WhatsApp, pièce d'identité, tuteur éventuel, photo
+- Fiche apprenant : nom, téléphone WhatsApp, pièce d'identité, tuteur éventuel, photo ; pour le LMD : e-mail, date et lieu de naissance, sexe, diplôme d'accès (série et année du bac)
+- Matricule unique par établissement, attribué automatiquement à la première inscription et conservé pendant toute la scolarité (ex. `ITF-2026-0142`)
 - Inscription à une session avec génération automatique de l'échéancier (frais + mensualités)
+- Réinscription annuelle d'un apprenant existant : passage au niveau supérieur ou redoublement, reliée à l'inscription précédente qui passe au statut « terminée » ; l'historique financier de chaque année reste consultable
 - Remises et bourses (montant ou pourcentage), abandon et transfert de session
 - Import Excel des apprenants existants (indispensable pour l'adoption)
 
@@ -78,10 +90,10 @@ Le MVP tient en 6 modules centrés sur l'argent et les inscriptions ; tout le re
 
 ### M6 — Tableau de bord et exports
 
-- Encaissé du jour / du mois, reste à recouvrer, inscriptions par formation
-- Exports Excel et PDF ; attestation de formation PDF simple
+- Encaissé du jour / du mois, reste à recouvrer, inscriptions par formation (et par niveau et année académique pour le LMD)
+- Exports Excel et PDF ; attestation de formation PDF simple ; pour le LMD : attestation d'inscription et certificat de scolarité
 
-> **Hors MVP (version 2 et plus)** : notes et évaluations, emplois du temps, portail apprenant, écoles maternelle–lycée avec bulletins, comptabilité complète et dépenses, paie des formateurs, application mobile native, mode hors ligne.
+> **Hors MVP (version 2 et plus)** : notes et évaluations, semestres, unités d'enseignement (UE) et crédits ECTS, délibérations et procès-verbaux, relevés de notes et diplômes, emplois du temps, portail apprenant / étudiant, écoles maternelle–lycée avec bulletins, comptabilité complète et dépenses, paie des formateurs, application mobile native, mode hors ligne.
 
 ## 4. Architecture backend à moindre coût
 
@@ -148,13 +160,14 @@ Le cœur du modèle est la chaîne Inscription → Échéance → Paiement : c'e
 
 | Entité | Champs clés | Relations |
 | --- | --- | --- |
-| Institut | nom, logo, NINEA, téléphone, sous-domaine, statut | a un Abonnement, des Membres, des Formations |
+| Institut | nom, logo, NINEA, RCCM, téléphone, sous-domaine, préfixe des matricules, statut | a un Abonnement, des Membres, des Formations |
 | Abonnement | offre, date de début, date de fin, statut | appartient à un Institut |
 | Membre | utilisateur, rôle (directeur, caissier, formateur) | relie un Utilisateur à un Institut |
-| Formation | intitulé, durée, frais d'inscription, prix total, nombre de mensualités | a des Sessions |
-| Session | dates, horaires, capacité, formateur | appartient à une Formation, a des Inscriptions et des Séances |
-| Apprenant | nom, téléphone WhatsApp, pièce d'identité, tuteur | a des Inscriptions |
-| Inscription | date, remise, statut (active, abandon, terminée) | relie un Apprenant à une Session, a des Échéances |
+| AnneeAcademique | libellé (2026-2027), date de début, date de fin, en cours | regroupe des Sessions |
+| Formation | intitulé, cycle (formation courte, Licence, Master, Doctorat), filière, niveau, durée, frais d'inscription, prix total, nombre de mensualités | a des Sessions |
+| Session | dates, horaires, capacité, formateur | appartient à une Formation et (en LMD) à une Année académique, a des Inscriptions et des Séances |
+| Apprenant | matricule, nom, téléphone WhatsApp, e-mail, naissance, sexe, diplôme d'accès, pièce d'identité, tuteur | a des Inscriptions |
+| Inscription | date, type (nouvelle, réinscription, redoublement), remise, statut (active, abandon, terminée) | relie un Apprenant à une Session, pointe vers l'inscription précédente, a des Échéances |
 | Échéance | libellé, montant dû, date limite, montant payé, statut | appartient à une Inscription |
 | Paiement | montant, mode (espèces, Wave, OM, virement), référence, n° de reçu, caissier | règle une ou plusieurs Échéances |
 | Annulation | paiement annulé, motif, auteur | écriture inverse d'un Paiement |
@@ -208,13 +221,14 @@ Sources : [tarifs Clerk](https://clerk.com/pricing), [tarifs Vercel](https://ver
 
 ## 8. Offres tarifaires (proposition)
 
-Trois offres de 10 000 à 35 000 FCFA par mois : trois clients Essentiel suffisent à couvrir l'infrastructure jusqu'à 50 instituts.
+Trois offres de 10 000 à 35 000 FCFA par mois, plus une offre Campus sur devis pour les grands établissements LMD : trois clients Essentiel suffisent à couvrir l'infrastructure jusqu'à 50 établissements.
 
 | Offre | Prix mensuel | Apprenants actifs | Utilisateurs | Contenu |
 | --- | --- | --- | --- | --- |
 | Essentiel | 10 000 FCFA | jusqu'à 100 | 2 | Inscriptions, échéanciers, encaissements, reçus PDF envoyés par lien WhatsApp, exports |
-| **Pro** (recommandé) | 20 000 FCFA | jusqu'à 300 | 5 | Essentiel + relances automatiques WhatsApp (quota mensuel), présences, paiement en ligne Wave / Orange Money |
-| Premium | 35 000 FCFA | illimité | illimité | Pro + SMS, plusieurs sites, attestations personnalisées, support prioritaire |
+| **Pro** (recommandé) | 20 000 FCFA | jusqu'à 300 | 5 | Essentiel + relances automatiques WhatsApp (quota mensuel), présences, paiement en ligne Wave / Orange Money, gestion LMD (années académiques, réinscriptions) |
+| Premium | 35 000 FCFA | jusqu'à 1 000 | illimité | Pro + SMS, plusieurs sites, attestations et certificats personnalisés, support prioritaire |
+| Campus | sur devis | plus de 1 000 | illimité | Premium + accompagnement à la reprise des données, formation des équipes de scolarité |
 
 - Paiement annuel : 2 mois offerts
 - Frais de mise en place optionnels (import Excel des apprenants + formation du personnel) : 25 000 FCFA
@@ -228,10 +242,10 @@ Le MVP se livre en environ 10 semaines pour un développeur à temps plein, pilo
 | Phase | Semaines | Contenu |
 | --- | --- | --- |
 | Fondations | 1–2 | Schéma Prisma, auth + instituts, isolation des données, déploiement Vercel |
-| Cœur métier | 3–5 | Formations, sessions, apprenants, inscriptions, échéanciers, import Excel |
+| Cœur métier | 3–5 | Formations, sessions, apprenants, inscriptions, échéanciers, import Excel ; structure LMD (années académiques, cycles, filières, niveaux, matricule, réinscriptions) |
 | Paiements | 6–7 | Encaissements, reçus PDF, clôture de caisse, relances wa.me |
-| Pilotage | 8 | Présences, tableau de bord, exports, attestations |
-| Pilote | 9–10 | E-DEV Academy + 2 instituts, corrections |
+| Pilotage | 8 | Présences, tableau de bord, exports, attestations d'inscription et certificats de scolarité |
+| Pilote | 9–10 | E-DEV Academy + 2 établissements (dont au moins un en LMD), corrections |
 
 **Porte de lancement commercial** : 3 instituts utilisent Kalaas chaque jour.
 

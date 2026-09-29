@@ -25,6 +25,25 @@ enum Offre {
   ESSENTIEL
   PRO
   PREMIUM
+  CAMPUS
+}
+
+enum CycleFormation {
+  FORMATION_COURTE
+  LICENCE
+  MASTER
+  DOCTORAT
+}
+
+enum TypeInscription {
+  NOUVELLE
+  REINSCRIPTION
+  REDOUBLEMENT
+}
+
+enum Sexe {
+  F
+  M
 }
 
 enum StatutAbonnement {
@@ -100,41 +119,43 @@ enum StatutJob {
 // ─── Plateforme : instituts, comptes, rôles ────────
 
 model Institut {
-  id          String         @id @default(cuid())
-  clerkOrgId  String         @unique
-  nom         String
-  logoUrl     String?
-  adresse     String?
-  ville       String?
-  ninea       String?
-  rccm        String?
-  telephone   String?
-  telephone2  String?
-  sousDomaine String?        @unique
-  piedRecu    String?
-  
-  statut      StatutInstitut @default(ACTIF)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id               String         @id @default(cuid())
+  clerkOrgId       String         @unique
+  nom              String
+  logoUrl          String?
+  adresse          String?
+  ville            String?
+  ninea            String?
+  rccm             String?
+  telephone        String?
+  telephone2       String?
+  sousDomaine      String?        @unique
+  piedRecu         String?
+  prefixeMatricule String?
+  statut           StatutInstitut @default(ACTIF)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
-  abonnements    Abonnement[]
-  membres        Membre[]
-  formations     Formation[]
-  sessions       Session[]
-  apprenants     Apprenant[]
-  inscriptions   Inscription[]
-  echeances      Echeance[]
-  paiements      Paiement[]
-  repartitions   PaiementEcheance[]
-  annulations    Annulation[]
-  compteursRecu  CompteurRecu[]
-  cloturesCaisse ClotureCaisse[]
-  seances        Seance[]
-  presences      Presence[]
-  modelesRelance ModeleRelance[]
-  relances       Relance[]
-  journalAudit   JournalAudit[]
-  jobs           Job[]
+  abonnements        Abonnement[]
+  membres            Membre[]
+  formations         Formation[]
+  sessions           Session[]
+  apprenants         Apprenant[]
+  inscriptions       Inscription[]
+  echeances          Echeance[]
+  paiements          Paiement[]
+  repartitions       PaiementEcheance[]
+  annulations        Annulation[]
+  compteursRecu      CompteurRecu[]
+  cloturesCaisse     ClotureCaisse[]
+  seances            Seance[]
+  presences          Presence[]
+  modelesRelance     ModeleRelance[]
+  relances           Relance[]
+  journalAudit       JournalAudit[]
+  jobs               Job[]
+  anneesAcademiques  AnneeAcademique[]
+  compteursMatricule CompteurMatricule[]
 }
 
 model Abonnement {
@@ -184,96 +205,132 @@ model Membre {
   @@index([utilisateurId])
 }
 
-// ─── Catalogue : formations et sessions ────────────
+// ─── Catalogue : années, formations et sessions ────
 
+// Année académique LMD (ex. 2026-2027, d'octobre à juillet)
+model AnneeAcademique {
+  id         String   @id @default(cuid())
+  institutId String
+  libelle    String
+  dateDebut  DateTime @db.Date
+  dateFin    DateTime @db.Date
+  enCours    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  institut Institut  @relation(fields: [institutId], references: [id])
+  sessions Session[]
+
+  @@unique([institutId, libelle])
+}
+
+// En LMD, une formation = un niveau d'une filière (ex. Licence Informatique — L2)
 model Formation {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   institutId       String
   intitule         String
+  cycle            CycleFormation @default(FORMATION_COURTE)
+  filiere          String?
+  niveau           Int?
   dureeMois        Int
   fraisInscription Int
   prixTotal        Int
   nbMensualites    Int
-  active           Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  active           Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   institut Institut  @relation(fields: [institutId], references: [id])
   sessions Session[]
 
   @@index([institutId])
+  @@index([institutId, cycle, filiere, niveau])
 }
 
 model Session {
-  id          String   @id @default(cuid())
-  institutId  String
-  formationId String
-  formateurId String?
-  nom         String
-  dateDebut   DateTime @db.Date
-  dateFin     DateTime @db.Date
-  horaires    String?
-  capacite    Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  institutId        String
+  formationId       String
+  formateurId       String?
+  anneeAcademiqueId String?
+  nom               String
+  dateDebut         DateTime @db.Date
+  dateFin           DateTime @db.Date
+  horaires          String?
+  capacite          Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  institut     Institut      @relation(fields: [institutId], references: [id])
-  formation    Formation     @relation(fields: [formationId], references: [id])
-  formateur    Membre?       @relation(fields: [formateurId], references: [id])
-  inscriptions Inscription[]
-  seances      Seance[]
+  institut        Institut         @relation(fields: [institutId], references: [id])
+  formation       Formation        @relation(fields: [formationId], references: [id])
+  formateur       Membre?          @relation(fields: [formateurId], references: [id])
+  anneeAcademique AnneeAcademique? @relation(fields: [anneeAcademiqueId], references: [id])
+  inscriptions    Inscription[]
+  seances         Seance[]
 
   @@index([institutId])
   @@index([formationId])
   @@index([formateurId])
+  @@index([anneeAcademiqueId])
 }
 
 // ─── Apprenants, inscriptions, échéancier ──────────
 
 model Apprenant {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   institutId      String
+  matricule       String?
   prenom          String
   nom             String
   telephone       String
+  email           String?
+  dateNaissance   DateTime? @db.Date
+  lieuNaissance   String?
+  sexe            Sexe?
+  diplomeAcces    String?
   pieceIdentite   String?
   tuteurNom       String?
   tuteurTelephone String?
   photoUrl        String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   institut     Institut      @relation(fields: [institutId], references: [id])
   inscriptions Inscription[]
   paiements    Paiement[]
 
+  @@unique([institutId, matricule])
   @@index([institutId, nom])
   @@index([institutId, telephone])
 }
 
 model Inscription {
-  id           String            @id @default(cuid())
-  institutId   String
-  apprenantId  String
-  sessionId    String
-  date         DateTime          @default(now())
-  remiseType   TypeRemise?
-  remiseValeur Int               @default(0)
-  motifRemise  String?
-  statut       StatutInscription @default(ACTIVE)
-  dateSortie   DateTime?         @db.Date
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id                      String            @id @default(cuid())
+  institutId              String
+  apprenantId             String
+  sessionId               String
+  type                    TypeInscription   @default(NOUVELLE)
+  inscriptionPrecedenteId String?
+  date                    DateTime          @default(now())
+  remiseType              TypeRemise?
+  remiseValeur            Int               @default(0)
+  motifRemise             String?
+  statut                  StatutInscription @default(ACTIVE)
+  dateSortie              DateTime?         @db.Date
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
 
-  institut  Institut   @relation(fields: [institutId], references: [id])
-  apprenant Apprenant  @relation(fields: [apprenantId], references: [id])
-  session   Session    @relation(fields: [sessionId], references: [id])
-  echeances Echeance[]
-  presences Presence[]
+  institut   Institut      @relation(fields: [institutId], references: [id])
+  apprenant  Apprenant     @relation(fields: [apprenantId], references: [id])
+  session    Session       @relation(fields: [sessionId], references: [id])
+  precedente Inscription?  @relation("Parcours", fields: [inscriptionPrecedenteId], references: [id])
+  suivantes  Inscription[] @relation("Parcours")
+  echeances  Echeance[]
+  presences  Presence[]
 
   @@index([institutId])
   @@index([apprenantId])
   @@index([sessionId])
+  @@index([inscriptionPrecedenteId])
 }
 
 model Echeance {
@@ -361,6 +418,17 @@ model Annulation {
 }
 
 model CompteurRecu {
+  institutId String
+  annee      Int
+  dernier    Int    @default(0)
+
+  institut Institut @relation(fields: [institutId], references: [id])
+
+  @@id([institutId, annee])
+}
+
+// Matricules étudiants : un compteur par établissement et par année d'entrée
+model CompteurMatricule {
   institutId String
   annee      Int
   dernier    Int    @default(0)

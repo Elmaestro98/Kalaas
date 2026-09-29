@@ -10,7 +10,7 @@ export default function Sidebar({ role, footer }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-62 shrink-0 flex-col bg-navy-900 text-white lg:flex">
+    <aside className="hidden w-62 shrink-0 flex-col bg-navy-900 text-white lg:flex print:hidden">
       <div className="px-6 py-6 text-2xl font-bold">
         Kalaas<span className="text-gold-500">.</span>
       </div>
