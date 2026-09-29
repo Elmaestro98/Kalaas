@@ -4,6 +4,7 @@ import { formatFcfa, formatNombre } from "@/lib/format";
 import { dateDuJour } from "@/lib/echeancier";
 import { LABEL_MODE, TON_MODE } from "@/lib/paiements";
 import Badge from "@/components/ui/badge";
+import TrainerDashboard from "./trainer-dashboard";
 
 const formateurHeure = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
@@ -15,6 +16,11 @@ const formateurMois = new Intl.DateTimeFormat("fr-FR", { month: "long", timeZone
 
 export default async function DashboardPage() {
   const { institut, membre, db } = await getContexte();
+
+  // Un formateur voit sa semaine de cours, jamais les chiffres financiers
+  if (membre.role === "FORMATEUR") {
+    return <TrainerDashboard />;
+  }
 
   const aujourdhui = dateDuJour();
   const demain = new Date(aujourdhui.getTime() + 24 * 60 * 60 * 1000);

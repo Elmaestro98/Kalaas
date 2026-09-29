@@ -25,7 +25,7 @@ export const NAV_SECTIONS: NavSection[] = [
         href: "/dashboard",
         label: "Tableau de bord",
         icon: LayoutDashboard,
-        roles: BUREAU,
+        roles: TOUS,
       },
     ],
   },

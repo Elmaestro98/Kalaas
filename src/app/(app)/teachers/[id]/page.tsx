@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Download, Link2, MessageCircle } from "lucide-react";
+import { ArrowLeft, CalendarDays, Download, Link2, MessageCircle, Send } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { formatFcfa } from "@/lib/format";
-import { dureeTotaleHebdo } from "@/lib/emploi-du-temps";
+import {
+  ETAT_VOLUME,
+  dureeTotaleHebdo,
+  etatVolume,
+  messageProgrammation,
+  minutesHebdo,
+  nbSemaines,
+} from "@/lib/emploi-du-temps";
+import { chargerEmploiDuTemps } from "@/lib/emploi-du-temps-donnees";
 import { STATUT_ENSEIGNANT, initialesEnseignant, nomEnseignant } from "@/lib/enseignants";
 import { lienWhatsApp } from "@/lib/telephone";
 import Badge from "@/components/ui/badge";
@@ -16,7 +24,7 @@ type TeacherPageProps = {
 };
 
 export default async function TeacherPage({ params }: TeacherPageProps) {
-  const { membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const { institut, membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
   const estDirecteur = membre.role === "DIRECTEUR";
   const { id } = await params;
 
@@ -28,17 +36,22 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
     notFound();
   }
 
-  const [affectations, creneaux, membres] = await Promise.all([
+  const [affectations, creneaux, membres, programmation] = await Promise.all([
     db.affectation.findMany({
       where: { enseignantId: enseignant.id, session: { dateFin: { gte: dateDuJour() } } },
       orderBy: { matiere: "asc" },
-      include: { session: { select: { id: true, nom: true, formation: { select: { intitule: true } } } } },
+      include: {
+        session: {
+          select: { id: true, nom: true, dateDebut: true, dateFin: true, formation: { select: { intitule: true } } },
+        },
+      },
     }),
     db.creneau.findMany({
       where: { enseignantId: enseignant.id, session: { dateFin: { gte: dateDuJour() } } },
       select: {
         heureDebut: true,
         heureFin: true,
+        matiere: true,
         session: { select: { id: true, nom: true, formation: { select: { intitule: true } } } },
       },
     }),
@@ -52,7 +65,25 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
           include: { utilisateur: { select: { nom: true } } },
         })
       : Promise.resolve([]),
+    chargerEmploiDuTemps(db, "enseignant", enseignant.id),
   ]);
+
+  // Heures programmées sur toute la session, pour chaque matière affectée
+  const suivi = affectations.map((a) => {
+    const cours = creneaux.filter(
+      (c) => c.session.id === a.session.id && c.matiere.toLowerCase() === a.matiere.toLowerCase(),
+    );
+    const programmees = Math.round((minutesHebdo(cours) / 60) * nbSemaines(a.session.dateDebut, a.session.dateFin));
+    return { ...a, hebdo: dureeTotaleHebdo(cours), programmees, etat: etatVolume(programmees, a.volumeHoraire) };
+  });
+
+  // Message WhatsApp prêt à envoyer : ses cours jour par jour
+  const lienProgrammation =
+    enseignant.telephone && programmation && programmation.creneaux.length > 0
+      ? `${lienWhatsApp(enseignant.telephone)}?text=${encodeURIComponent(
+          messageProgrammation(enseignant.prenom, institut.nom, programmation.creneaux),
+        )}`
+      : null;
 
   // Classes où il enseigne, avec le volume hebdomadaire de chacune
   const classes = [...new Map(creneaux.map((c) => [c.session.id, c.session])).values()].map((s) => ({
@@ -114,6 +145,17 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
             <CalendarDays size={18} aria-hidden="true" />
             Sa programmation
           </Link>
+          {lienProgrammation && (
+            <a
+              href={lienProgrammation}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-11 items-center gap-2 rounded-md border border-success/40 bg-success-soft px-4 font-medium text-success hover:opacity-90"
+            >
+              <Send size={18} aria-hidden="true" />
+              Envoyer sa programmation
+            </a>
+          )}
           <a
             href={`/timetable/pdf?vue=enseignant&id=${enseignant.id}`}
             className="flex h-11 items-center gap-2 rounded-md bg-gold-500 px-4 font-medium text-navy-900 hover:opacity-90"
@@ -151,14 +193,14 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
         <div className="space-y-6">
         <section className="rounded-lg border border-border bg-surface-200 p-5">
           <h2 className="font-semibold">Matières affectées</h2>
-          {affectations.length === 0 ? (
+          {suivi.length === 0 ? (
             <p className="mt-3 text-sm text-ink-muted">
               Aucune matière. Affectez-le depuis l&apos;emploi du temps d&apos;une classe (« Professeurs de la
               classe »).
             </p>
           ) : (
             <ul className="mt-3 divide-y divide-border text-sm">
-              {affectations.map((a) => (
+              {suivi.map((a) => (
                 <li key={a.id} className="flex items-center justify-between gap-3 py-2.5">
                   <Link href={`/timetable?vue=classe&id=${a.session.id}`} className="min-w-0 text-ink">
                     <span className="block truncate font-medium">{a.matiere}</span>
@@ -166,8 +208,17 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
                       {a.session.formation.intitule} · {a.session.nom}
                     </span>
                   </Link>
-                  <span className="shrink-0 text-xs text-ink-muted tabular-nums">
-                    {a.volumeHoraire ? `${a.volumeHoraire} h prévues` : "Volume libre"}
+                  <span className="shrink-0 text-right">
+                    <span className="block text-xs text-ink-muted tabular-nums">{a.hebdo} / semaine</span>
+                    <span
+                      className={`mt-0.5 inline-block rounded-full px-2 text-xs tabular-nums ${ETAT_VOLUME[a.etat].classe}`}
+                    >
+                      {a.volumeHoraire
+                        ? `${a.programmees} / ${a.volumeHoraire} h${
+                            ETAT_VOLUME[a.etat].label ? ` · ${ETAT_VOLUME[a.etat].label}` : ""
+                          }`
+                        : `${a.programmees} h sur la session`}
+                    </span>
                   </span>
                 </li>
               ))}

@@ -59,3 +59,71 @@ export function dureeTotaleHebdo(creneaux: { heureDebut: number; heureFin: numbe
   const m = minutes % 60;
   return m ? `${h} h ${String(m).padStart(2, "0")}` : `${h} h`;
 }
+
+// ─── Suivi des heures ──────────────────────────────
+
+// Nombre de semaines de cours d'une session (au moins 1)
+export function nbSemaines(debut: Date, fin: Date): number {
+  const jours = Math.round((fin.getTime() - debut.getTime()) / 86_400_000) + 1;
+  return Math.max(1, Math.round(jours / 7));
+}
+
+export function minutesHebdo(creneaux: { heureDebut: number; heureFin: number }[]): number {
+  return creneaux.reduce((s, c) => s + (c.heureFin - c.heureDebut), 0);
+}
+
+export type EtatVolume = "SANS_OBJECTIF" | "INSUFFISANT" | "CONFORME" | "DEPASSEMENT";
+
+// Compare les heures programmées sur la session aux heures prévues (tolérance de 10 %)
+export function etatVolume(heuresProgrammees: number, heuresPrevues: number | null): EtatVolume {
+  if (!heuresPrevues) {
+    return "SANS_OBJECTIF";
+  }
+  if (heuresProgrammees < heuresPrevues * 0.9) {
+    return "INSUFFISANT";
+  }
+  if (heuresProgrammees > heuresPrevues * 1.1) {
+    return "DEPASSEMENT";
+  }
+  return "CONFORME";
+}
+
+export const ETAT_VOLUME: Record<EtatVolume, { label: string; classe: string }> = {
+  SANS_OBJECTIF: { label: "", classe: "bg-surface-200 text-ink-muted" },
+  INSUFFISANT: { label: "Insuffisant", classe: "bg-warning-soft text-warning" },
+  CONFORME: { label: "Conforme", classe: "bg-success-soft text-success" },
+  DEPASSEMENT: { label: "Dépassement", classe: "bg-danger-soft text-danger" },
+};
+
+// ─── Jour courant et message WhatsApp ──────────────
+
+const JOURS_JS: Jour[] = ["DIMANCHE", "LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI"];
+
+// Jour de la semaine à Dakar (UTC+0 toute l'année)
+export function jourActuel(maintenant = new Date()): Jour {
+  return JOURS_JS[maintenant.getUTCDay()];
+}
+
+export function messageProgrammation(
+  prenom: string,
+  etablissement: string,
+  creneaux: CreneauAffiche[],
+): string {
+  const lignes = [`Bonjour ${prenom},`, `Voici votre programmation hebdomadaire – ${etablissement} :`, ""];
+
+  for (const j of joursAffiches(creneaux)) {
+    const cours = creneauxDuJour(creneaux, j.valeur);
+    if (cours.length === 0) {
+      continue;
+    }
+    lignes.push(`*${j.label}*`);
+    for (const c of cours) {
+      const details = c.details.length ? ` (${c.details.join(" · ")})` : "";
+      lignes.push(`• ${formatHeure(c.heureDebut)}–${formatHeure(c.heureFin)} ${c.matiere}${details}`);
+    }
+    lignes.push("");
+  }
+
+  lignes.push(`Total : ${dureeTotaleHebdo(creneaux)} par semaine.`);
+  return lignes.join("\n");
+}

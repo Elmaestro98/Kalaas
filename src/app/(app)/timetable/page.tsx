@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Download } from "lucide-react";
 import { getContexte } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
-import { dureeTotaleHebdo } from "@/lib/emploi-du-temps";
+import { dureeTotaleHebdo, minutesHebdo, nbSemaines } from "@/lib/emploi-du-temps";
 import { chargerEmploiDuTemps, type Vue } from "@/lib/emploi-du-temps-donnees";
 import { nomEnseignant } from "@/lib/enseignants";
 import AssignmentsPanel, { type LigneAffectation } from "./assignments-panel";
@@ -84,16 +84,23 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
           include: { enseignant: { select: { prenom: true, nom: true } } },
         })
       : [];
-  const affectations: LigneAffectation[] = affectationsBrutes.map((a) => ({
-    id: a.id,
-    matiere: a.matiere,
-    enseignantId: a.enseignantId,
-    enseignant: nomEnseignant(a.enseignant),
-    volumeHoraire: a.volumeHoraire,
-    heuresHebdo: dureeTotaleHebdo(
-      (emploi?.creneaux ?? []).filter((c) => c.matiere.toLowerCase() === a.matiere.toLowerCase()),
-    ),
-  }));
+  const sessionChoisie = vue === "classe" ? sessions.find((s) => s.id === id) : undefined;
+  const semaines = sessionChoisie ? nbSemaines(sessionChoisie.dateDebut, sessionChoisie.dateFin) : 0;
+
+  const affectations: LigneAffectation[] = affectationsBrutes.map((a) => {
+    const coursMatiere = (emploi?.creneaux ?? []).filter(
+      (c) => c.matiere.toLowerCase() === a.matiere.toLowerCase(),
+    );
+    return {
+      id: a.id,
+      matiere: a.matiere,
+      enseignantId: a.enseignantId,
+      enseignant: nomEnseignant(a.enseignant),
+      volumeHoraire: a.volumeHoraire,
+      heuresHebdo: dureeTotaleHebdo(coursMatiere),
+      heuresProgrammees: Math.round((minutesHebdo(coursMatiere) / 60) * semaines),
+    };
+  });
 
   // Matières déjà saisies (cours et affectations), proposées pour éviter les fautes de frappe
   const matieres =

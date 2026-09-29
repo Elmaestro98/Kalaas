@@ -2,6 +2,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { supprimerAffectation } from "./assignment-actions";
 import AssignmentForm from "./assignment-form";
+import { ETAT_VOLUME, etatVolume } from "@/lib/emploi-du-temps";
 
 export type LigneAffectation = {
   id: string;
@@ -10,7 +11,24 @@ export type LigneAffectation = {
   enseignant: string;
   volumeHoraire: number | null;
   heuresHebdo: string; // heures programmées dans la semaine type (ex. « 4 h »)
+  heuresProgrammees: number; // heures hebdomadaires × nombre de semaines de la session
 };
+
+// « 4 h/sem. · 120 h / 60 h prévues » avec une couleur selon l'écart
+function SuiviVolume({ a }: { a: LigneAffectation }) {
+  const etat = etatVolume(a.heuresProgrammees, a.volumeHoraire);
+  const { label, classe } = ETAT_VOLUME[etat];
+  const titre = a.volumeHoraire
+    ? `${a.heuresProgrammees} h programmées sur la session pour ${a.volumeHoraire} h prévues${label ? ` : ${label.toLowerCase()}` : ""}`
+    : `${a.heuresProgrammees} h programmées sur la session`;
+
+  return (
+    <span title={titre} className={`rounded-full px-2 text-xs tabular-nums ${classe}`}>
+      {a.heuresHebdo}/sem.
+      {a.volumeHoraire ? ` · ${a.heuresProgrammees} / ${a.volumeHoraire} h` : ""}
+    </span>
+  );
+}
 
 type AssignmentsPanelProps = {
   sessionId: string;
@@ -32,7 +50,9 @@ export default function AssignmentsPanel({
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">Professeurs de la classe</h2>
         <p className="text-xs text-ink-muted">
-          Une matière = un professeur. Il est proposé automatiquement quand vous ajoutez un cours.
+          Une matière = un professeur, proposé automatiquement quand vous ajoutez un cours. Heures :{" "}
+          <span className="text-success">conforme</span> · <span className="text-warning">insuffisant</span> ·{" "}
+          <span className="text-danger">dépassement</span>
         </p>
       </div>
 
@@ -50,9 +70,7 @@ export default function AssignmentsPanel({
               <Link href={`/teachers/${a.enseignantId}`} className="text-ink hover:underline">
                 {a.enseignant}
               </Link>
-              <span className="rounded-full bg-surface-200 px-2 text-xs text-ink-muted tabular-nums">
-                {a.heuresHebdo}/sem.{a.volumeHoraire ? ` · ${a.volumeHoraire} h prévues` : ""}
-              </span>
+              <SuiviVolume a={a} />
               {peutModifier ? (
                 <form action={supprimerAffectation}>
                   <input type="hidden" name="id" value={a.id} />
