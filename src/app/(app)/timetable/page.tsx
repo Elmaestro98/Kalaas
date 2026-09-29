@@ -1,0 +1,197 @@
+import Link from "next/link";
+import { Download } from "lucide-react";
+import { getContexte } from "@/lib/tenant";
+import { dateDuJour } from "@/lib/echeancier";
+import { dureeTotaleHebdo } from "@/lib/emploi-du-temps";
+import { chargerEmploiDuTemps, type Vue } from "@/lib/emploi-du-temps-donnees";
+import EntitySelect from "./entity-select";
+import SlotForm from "./slot-form";
+import WeekGrid from "./week-grid";
+
+type TimetablePageProps = {
+  searchParams: Promise<{ vue?: string; id?: string }>;
+};
+
+const ONGLETS: { vue: Vue; label: string }[] = [
+  { vue: "classe", label: "Classes" },
+  { vue: "enseignant", label: "Enseignants" },
+  { vue: "salle", label: "Salles" },
+];
+
+export default async function TimetablePage({ searchParams }: TimetablePageProps) {
+  const { membre, db } = await getContexte();
+  const params = await searchParams;
+
+  const estFormateur = membre.role === "FORMATEUR";
+  const estDirecteur = membre.role === "DIRECTEUR";
+
+  // Un formateur ne voit que son propre emploi du temps
+  const vue: Vue = estFormateur
+    ? "enseignant"
+    : params.vue === "enseignant" || params.vue === "salle"
+      ? params.vue
+      : "classe";
+
+  const [sessions, membres, salles] = await Promise.all([
+    db.session.findMany({
+      where: { dateFin: { gte: dateDuJour() } },
+      orderBy: [{ dateDebut: "asc" }],
+      include: {
+        formation: { select: { intitule: true } },
+        anneeAcademique: { select: { libelle: true } },
+      },
+    }),
+    db.membre.findMany({
+      where: { actif: true, role: { in: ["FORMATEUR", "DIRECTEUR"] } },
+      include: { utilisateur: { select: { nom: true } } },
+    }),
+    db.salle.findMany({ where: { active: true }, orderBy: { nom: "asc" } }),
+  ]);
+
+  const enseignants = membres
+    .map((m) => ({ id: m.id, nom: m.utilisateur.nom }))
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+
+  // Options de la liste selon la vue
+  let groupes: { label: string; options: { id: string; label: string }[] }[];
+  if (vue === "classe") {
+    const parAnnee = new Map<string, { id: string; label: string }[]>();
+    for (const s of sessions) {
+      const cle = s.anneeAcademique ? `Année ${s.anneeAcademique.libelle}` : "Formations courtes";
+      parAnnee.set(cle, [...(parAnnee.get(cle) ?? []), { id: s.id, label: `${s.formation.intitule} · ${s.nom}` }]);
+    }
+    groupes = [...parAnnee.entries()].map(([label, options]) => ({ label, options }));
+  } else if (vue === "enseignant") {
+    groupes = [{ label: "", options: enseignants.map((e) => ({ id: e.id, label: e.nom })) }];
+  } else {
+    groupes = [{ label: "", options: salles.map((s) => ({ id: s.id, label: s.nom })) }];
+  }
+
+  const idsPossibles = groupes.flatMap((g) => g.options.map((o) => o.id));
+  const id = estFormateur
+    ? membre.id
+    : params.id && idsPossibles.includes(params.id)
+      ? params.id
+      : idsPossibles[0];
+
+  const emploi = id ? await chargerEmploiDuTemps(db, vue, id) : null;
+
+  // Matières déjà saisies, proposées pour éviter les fautes de frappe
+  const matieres =
+    vue === "classe" && estDirecteur
+      ? (
+          await db.creneau.findMany({ distinct: ["matiere"], select: { matiere: true }, orderBy: { matiere: "asc" } })
+        ).map((m) => m.matiere)
+      : [];
+
+  const messageVide =
+    vue === "classe"
+      ? "Aucune session en cours. Ouvrez une session depuis les formations."
+      : vue === "enseignant"
+        ? "Aucun enseignant. Invitez vos formateurs dans l'équipe."
+        : "Aucune salle. Ajoutez vos salles dans les Paramètres.";
+
+  return (
+    <div className="mx-auto max-w-7xl">
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold lg:text-3xl">Emplois du temps</h1>
+          <p className="mt-1 text-sm text-ink-muted">
+            Semaine type, répétée chaque semaine pendant toute la session.
+          </p>
+        </div>
+        {emploi && id && (
+          <a
+            href={`/timetable/pdf?vue=${vue}&id=${id}`}
+            className="flex h-11 items-center gap-2 rounded-md bg-gold-500 px-5 font-medium text-navy-900 hover:opacity-90"
+          >
+            <Download size={18} aria-hidden="true" />
+            Télécharger le PDF
+          </a>
+        )}
+      </div>
+
+      {!estFormateur && (
+        <nav aria-label="Type d'emploi du temps" className="mt-6 inline-flex gap-1 rounded-md border border-border bg-surface-200 p-1">
+          {ONGLETS.map((o) => (
+            <Link
+              key={o.vue}
+              href={`/timetable?vue=${o.vue}`}
+              aria-current={vue === o.vue ? "page" : undefined}
+              className={`flex h-9 items-center rounded-sm px-4 text-sm ${
+                vue === o.vue ? "bg-navy-900 font-semibold text-white" : "text-ink-muted hover:text-ink"
+              }`}
+            >
+              {o.label}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      {!id ? (
+        <div className="mt-6 rounded-lg border border-dashed border-border bg-surface-200 p-10 text-center">
+          <p className="text-sm text-ink-muted">{messageVide}</p>
+          {vue === "salle" && estDirecteur && (
+            <Link href="/settings" className="mt-2 inline-block text-sm font-semibold">
+              Ajouter des salles →
+            </Link>
+          )}
+        </div>
+      ) : (
+        <>
+          {!estFormateur && (
+            <div className="mt-4">
+              <EntitySelect
+                vue={vue}
+                valeur={id}
+                groupes={groupes}
+                label={vue === "classe" ? "Classe" : vue === "enseignant" ? "Enseignant" : "Salle"}
+              />
+            </div>
+          )}
+
+          {emploi && (
+            <div className="mt-6">
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-semibold">{emploi.titre}</h2>
+                  <p className="text-sm text-ink-muted">{emploi.sousTitre}</p>
+                </div>
+                <p className="text-sm text-ink-muted">
+                  {emploi.creneaux.length} cours · {dureeTotaleHebdo(emploi.creneaux)} par semaine
+                </p>
+              </div>
+
+              {vue === "classe" && estDirecteur && (
+                <details
+                  open={emploi.creneaux.length === 0}
+                  className="group mb-5 rounded-lg border border-border bg-surface-200"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 font-semibold">
+                    <span className="flex items-center gap-2">
+                      <span className="flex size-7 items-center justify-center rounded-full bg-gold-500 text-navy-900">+</span>
+                      Ajouter un cours
+                    </span>
+                    <span className="text-sm font-normal text-ink-muted group-open:hidden">Afficher le formulaire</span>
+                    <span className="hidden text-sm font-normal text-ink-muted group-open:inline">Replier</span>
+                  </summary>
+                  <div className="border-t border-border p-5">
+                    <SlotForm
+                      key={id}
+                      sessionId={id}
+                      enseignants={enseignants}
+                      salles={salles.map((s) => ({ id: s.id, nom: s.nom }))}
+                      matieres={matieres}
+                    />
+                  </div>
+                </details>
+              )}
+
+              <WeekGrid creneaux={emploi.creneaux} peutModifier={vue === "classe" && estDirecteur} />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

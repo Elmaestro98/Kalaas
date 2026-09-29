@@ -129,3 +129,55 @@ export async function modifierPrefixeMatricule(
   revalidatePath("/settings");
   return { erreur: null, succes: true };
 }
+
+// ─── Salles (emplois du temps) ─────────────────────
+
+const schemaSalle = z.object({
+  nom: z.string().trim().min(1, "Indiquez le nom de la salle.").max(40, "40 caractères maximum."),
+  capacite: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.coerce.number().int("Nombre entier.").min(1, "Au moins 1 place.").max(2000).optional(),
+  ),
+});
+
+export type EtatSalle = { erreur: string | null; succes: number };
+
+export async function ajouterSalle(etat: EtatSalle, formData: FormData): Promise<EtatSalle> {
+  const { institut, db } = await exigerRole("DIRECTEUR");
+
+  const resultat = schemaSalle.safeParse(Object.fromEntries(formData));
+  if (!resultat.success) {
+    return { erreur: resultat.error.issues[0].message, succes: etat.succes };
+  }
+  const { nom, capacite } = resultat.data;
+
+  const existe = await db.salle.findFirst({ where: { nom: { equals: nom, mode: "insensitive" } } });
+  if (existe) {
+    if (!existe.active) {
+      await db.salle.update({ where: { id: existe.id }, data: { active: true, capacite: capacite ?? existe.capacite } });
+      revalidatePath("/settings");
+      return { erreur: null, succes: etat.succes + 1 };
+    }
+    return { erreur: "Une salle porte déjà ce nom.", succes: etat.succes };
+  }
+
+  await db.salle.create({ data: { institutId: institut.id, nom, capacite: capacite ?? null } });
+  revalidatePath("/settings");
+  revalidatePath("/timetable");
+  return { erreur: null, succes: etat.succes + 1 };
+}
+
+// Une salle n'est jamais supprimée (elle peut figurer dans d'anciens emplois du temps) :
+// elle est désactivée et n'est plus proposée.
+export async function desactiverSalle(formData: FormData): Promise<void> {
+  const { db } = await exigerRole("DIRECTEUR");
+  const id = String(formData.get("id") ?? "");
+
+  const salle = await db.salle.findFirst({ where: { id } });
+  if (!salle) {
+    return;
+  }
+  await db.salle.update({ where: { id: salle.id }, data: { active: false } });
+  revalidatePath("/settings");
+  revalidatePath("/timetable");
+}

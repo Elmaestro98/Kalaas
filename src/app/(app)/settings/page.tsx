@@ -2,17 +2,25 @@ import { exigerRole } from "@/lib/tenant";
 import { formatDate } from "@/lib/format";
 import { prefixeParDefaut } from "@/lib/lmd";
 import Badge from "@/components/ui/badge";
-import { definirAnneeEnCours } from "./actions";
+import { definirAnneeEnCours, desactiverSalle } from "./actions";
 import AcademicYearForm from "./academic-year-form";
 import PrefixForm from "./prefix-form";
+import RoomForm from "./room-form";
 
 export default async function SettingsPage() {
   const { institut, db } = await exigerRole("DIRECTEUR");
 
-  const annees = await db.anneeAcademique.findMany({
-    orderBy: { dateDebut: "desc" },
-    include: { _count: { select: { sessions: true } } },
-  });
+  const [annees, salles] = await Promise.all([
+    db.anneeAcademique.findMany({
+      orderBy: { dateDebut: "desc" },
+      include: { _count: { select: { sessions: true } } },
+    }),
+    db.salle.findMany({
+      where: { active: true },
+      orderBy: { nom: "asc" },
+      include: { _count: { select: { creneaux: true } } },
+    }),
+  ]);
 
   const maintenant = new Date();
   const anneeScolaire = maintenant.getMonth() >= 7 ? maintenant.getFullYear() : maintenant.getFullYear() - 1;
@@ -63,6 +71,37 @@ export default async function SettingsPage() {
             anneeProposee={anneeProposee}
             premiereAnnee={annees.length === 0}
           />
+        </div>
+      </section>
+
+      <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
+        <h2 className="font-semibold">Salles</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Utilisées dans les emplois du temps. Kalaas empêche de réserver une salle déjà occupée.
+        </p>
+
+        {salles.length > 0 && (
+          <ul className="mt-4 divide-y divide-border rounded-md border border-border">
+            {salles.map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+                <span className="min-w-24 font-semibold">{s.nom}</span>
+                <span className="flex-1 text-ink-muted">
+                  {s.capacite ? `${s.capacite} places · ` : ""}
+                  {s._count.creneaux} cours par semaine
+                </span>
+                <form action={desactiverSalle}>
+                  <input type="hidden" name="id" value={s.id} />
+                  <button type="submit" className="cursor-pointer text-sm font-medium text-danger hover:underline">
+                    Retirer
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-4">
+          <RoomForm />
         </div>
       </section>
 

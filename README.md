@@ -31,9 +31,10 @@ Un même établissement peut donc proposer « Licence Informatique de gestion �
 | M3 bis | Reçu PDF, clôture de caisse journalière, paiement en ligne par lien Wave | 🔜 |
 | M4 — Relances | Liste des impayés, relances WhatsApp / SMS manuelles ou automatiques (J-3, J+1, J+7) | 🔜 |
 | M5 — Présences | Appel par séance sur mobile, taux d'assiduité | 🔜 |
+| M5 bis — Emplois du temps | Semaine type par classe (plusieurs cours par jour, horaires précis), salles, détection des conflits (classe, enseignant, salle), vues par classe / enseignant / salle, téléchargement PDF | ✅ |
 | M6 — Tableau de bord et documents | Encaissé du jour / du mois, reste à recouvrer ✅ · exports Excel et PDF, attestation d'inscription, certificat de scolarité 🔜 | 🟡 |
 
-> **Hors MVP (phase 2)** : notes et évaluations, semestres, unités d'enseignement (UE) et crédits ECTS, délibérations et procès-verbaux, relevés de notes, emplois du temps, portail étudiant, application mobile native.
+> **Hors MVP (phase 2)** : notes et évaluations, semestres, unités d'enseignement (UE) et crédits ECTS, délibérations et procès-verbaux, relevés de notes, exceptions d'emploi du temps (cours annulés ou déplacés à une date précise), portail étudiant, application mobile native.
 
 ## Le système LMD dans Kalaas
 
@@ -99,6 +100,7 @@ Ces ajouts sont compatibles avec les données existantes : toutes les nouvelles 
 | Authentification | Clerk + Organizations (1 organisation = 1 établissement) |
 | Validation | Zod 4 |
 | Icônes | lucide-react |
+| PDF | @react-pdf/renderer (emplois du temps ; reçus à venir) |
 | Hébergement | Vercel (Hobby en développement, Pro en production) |
 | Tâches planifiées | Vercel Cron + table `Job` |
 | Paiements en ligne | API Wave Business, Orange Money (webhooks) |
@@ -158,7 +160,8 @@ kalaas/
 │   │       ├── students/           # apprenants et fiche apprenant
 │   │       ├── enrollments/        # inscriptions et réinscriptions
 │   │       ├── payments/           # encaissements, reçus, journal de caisse
-│   │       └── settings/           # années académiques, préfixe des matricules
+│   │       ├── timetable/          # emplois du temps + route pdf/ (téléchargement)
+│   │       └── settings/           # années académiques, salles, préfixe des matricules
 │   ├── components/
 │   │   ├── ui/                     # Field, MoneyInput, Badge
 │   │   ├── sidebar.tsx, mobile-nav.tsx, navigations.tsx
@@ -169,6 +172,8 @@ kalaas/
 │   │   ├── paiements.ts            # répartition des paiements, règles d'annulation
 │   │   ├── recus.ts                # numérotation des reçus par établissement et par année
 │   │   ├── lmd.ts, matricules.ts   # cycles, niveaux, intitulés, matricules
+│   │   ├── emploi-du-temps*.ts     # jours, heures, chargement des emplois du temps
+│   │   ├── pdf/                    # documents PDF (@react-pdf/renderer)
 │   │   └── format.ts, lettres.ts, telephone.ts, sessions.ts
 │   └── proxy.ts                    # proxy Clerk (ex-middleware)
 └── AGENTS.md / CLAUDE.md           # consignes pour les assistants IA

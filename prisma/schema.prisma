@@ -116,6 +116,16 @@ enum StatutJob {
   ECHEC
 }
 
+enum JourSemaine {
+  LUNDI
+  MARDI
+  MERCREDI
+  JEUDI
+  VENDREDI
+  SAMEDI
+  DIMANCHE
+}
+
 // ─── Plateforme : instituts, comptes, rôles ────────
 
 model Institut {
@@ -156,6 +166,8 @@ model Institut {
   jobs               Job[]
   anneesAcademiques  AnneeAcademique[]
   compteursMatricule CompteurMatricule[]
+  salles             Salle[]
+  creneaux           Creneau[]
 }
 
 model Abonnement {
@@ -200,6 +212,7 @@ model Membre {
   annulations        Annulation[]
   cloturesCaisse     ClotureCaisse[]
   relancesEnvoyees   Relance[]
+  creneaux           Creneau[]
 
   @@unique([institutId, utilisateurId])
   @@index([utilisateurId])
@@ -266,11 +279,55 @@ model Session {
   anneeAcademique AnneeAcademique? @relation(fields: [anneeAcademiqueId], references: [id])
   inscriptions    Inscription[]
   seances         Seance[]
+  creneaux        Creneau[]
 
   @@index([institutId])
   @@index([formationId])
   @@index([formateurId])
   @@index([anneeAcademiqueId])
+}
+
+// ─── Emplois du temps (semaine type) ───────────────
+
+model Salle {
+  id         String   @id @default(cuid())
+  institutId String
+  nom        String
+  capacite   Int?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  institut Institut  @relation(fields: [institutId], references: [id])
+  creneaux Creneau[]
+
+  @@unique([institutId, nom])
+}
+
+// Un cours hebdomadaire d'une session : il se répète chaque semaine
+// entre la date de début et la date de fin de la session.
+// Les heures sont en minutes depuis minuit (8h30 → 510).
+model Creneau {
+  id           String      @id @default(cuid())
+  institutId   String
+  sessionId    String
+  jour         JourSemaine
+  heureDebut   Int
+  heureFin     Int
+  matiere      String
+  enseignantId String?
+  salleId      String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  institut   Institut @relation(fields: [institutId], references: [id])
+  session    Session  @relation(fields: [sessionId], references: [id])
+  enseignant Membre?  @relation(fields: [enseignantId], references: [id])
+  salle      Salle?   @relation(fields: [salleId], references: [id])
+
+  @@index([institutId, jour])
+  @@index([sessionId])
+  @@index([enseignantId])
+  @@index([salleId])
 }
 
 // ─── Apprenants, inscriptions, échéancier ──────────
