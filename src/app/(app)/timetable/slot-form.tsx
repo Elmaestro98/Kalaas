@@ -12,6 +12,7 @@ type SlotFormProps = {
   enseignants: Option[];
   salles: Option[];
   matieres: string[];
+  affectations: { matiere: string; enseignantId: string }[];
 };
 
 const etatInitial: EtatCreneau = { erreurs: {}, erreurGenerale: null, succes: 0 };
@@ -22,7 +23,7 @@ function decaler(heure: string, minutes: number): string {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-export default function SlotForm({ sessionId, enseignants, salles, matieres }: SlotFormProps) {
+export default function SlotForm({ sessionId, enseignants, salles, matieres, affectations }: SlotFormProps) {
   const [etat, envoyer, enCours] = useActionState(ajouterCreneau, etatInitial);
 
   const [jour, setJour] = useState<Jour>("LUNDI");
@@ -44,6 +45,18 @@ export default function SlotForm({ sessionId, enseignants, salles, matieres }: S
   }
 
   const erreurs = etat.erreurs;
+
+  // Matière affectée à un professeur dans cette classe → il est choisi automatiquement
+  function changerMatiere(valeur: string) {
+    setMatiere(valeur);
+    const affectation = affectations.find((a) => a.matiere.toLowerCase() === valeur.trim().toLowerCase());
+    if (affectation) {
+      setEnseignantId(affectation.enseignantId);
+    }
+  }
+
+  const profAffecte = affectations.find((a) => a.matiere.toLowerCase() === matiere.trim().toLowerCase());
+  const nomProfAffecte = profAffecte ? enseignants.find((e) => e.id === profAffecte.enseignantId)?.nom : undefined;
 
   return (
     <form action={envoyer} className="space-y-4">
@@ -106,7 +119,7 @@ export default function SlotForm({ sessionId, enseignants, salles, matieres }: S
               autoComplete="off"
               placeholder="Ex. Algorithmique, Comptabilité générale, Anglais"
               value={matiere}
-              onChange={(e) => setMatiere(e.target.value)}
+              onChange={(e) => changerMatiere(e.target.value)}
               aria-invalid={!!erreurs.matiere || undefined}
               aria-describedby={idDescription("matiere", erreurs.matiere)}
               className={classeChamp(erreurs.matiere)}
@@ -121,7 +134,12 @@ export default function SlotForm({ sessionId, enseignants, salles, matieres }: S
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-        <Field id="enseignantId" label="Enseignant" error={erreurs.enseignantId}>
+        <Field
+          id="enseignantId"
+          label="Enseignant"
+          hint={nomProfAffecte ? `Affecté à cette matière : ${nomProfAffecte}` : undefined}
+          error={erreurs.enseignantId}
+        >
           <select
             id="enseignantId"
             name="enseignantId"

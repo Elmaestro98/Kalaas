@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { exigerRole } from "@/lib/tenant";
 import { JOURS, formatHeure, heureVersMinutes } from "@/lib/emploi-du-temps";
+import { nomEnseignant } from "@/lib/enseignants";
 
 const HEURE_MIN = 6 * 60; // 06h00
 const HEURE_MAX = 23 * 60; // 23h00
@@ -69,7 +70,7 @@ export async function ajouterCreneau(_etat: EtatCreneau, formData: FormData): Pr
   if (!session) {
     return echec({ erreurGenerale: "Session introuvable." });
   }
-  if (d.enseignantId && !(await db.membre.findFirst({ where: { id: d.enseignantId, actif: true } }))) {
+  if (d.enseignantId && !(await db.enseignant.findFirst({ where: { id: d.enseignantId, actif: true } }))) {
     return echec({ erreurs: { enseignantId: "Enseignant introuvable." } });
   }
   if (d.salleId && !(await db.salle.findFirst({ where: { id: d.salleId, active: true } }))) {
@@ -92,7 +93,7 @@ export async function ajouterCreneau(_etat: EtatCreneau, formData: FormData): Pr
     },
     include: {
       session: { select: { nom: true, formation: { select: { intitule: true } } } },
-      enseignant: { select: { utilisateur: { select: { nom: true } } } },
+      enseignant: { select: { prenom: true, nom: true } },
       salle: { select: { nom: true } },
     },
   });
@@ -104,7 +105,7 @@ export async function ajouterCreneau(_etat: EtatCreneau, formData: FormData): Pr
     if (conflit.sessionId === session.id) {
       message = `Cette classe a déjà « ${conflit.matiere} » le ${jour} de ${horaire}.`;
     } else if (d.enseignantId && conflit.enseignantId === d.enseignantId) {
-      message = `${conflit.enseignant?.utilisateur.nom} enseigne déjà « ${conflit.matiere} » (${conflit.session.formation.intitule}) le ${jour} de ${horaire}.`;
+      message = `${conflit.enseignant ? nomEnseignant(conflit.enseignant) : "Ce professeur"} enseigne déjà « ${conflit.matiere} » (${conflit.session.formation.intitule}) le ${jour} de ${horaire}.`;
     } else {
       message = `La salle ${conflit.salle?.nom} est déjà occupée le ${jour} de ${horaire} (${conflit.session.formation.intitule}).`;
     }

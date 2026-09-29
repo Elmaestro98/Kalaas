@@ -5,6 +5,7 @@ import {
   BookOpen,
   CalendarCheck,
   CalendarDays,
+  GraduationCap,
   ClipboardList,
   LayoutDashboard,
   Settings,
@@ -49,6 +50,12 @@ export const NAV_SECTIONS: NavSection[] = [
         label: "Présences",
         icon: CalendarCheck,
         roles: TOUS,
+      },
+      {
+        href: "/teachers",
+        label: "Professeurs",
+        icon: GraduationCap,
+        roles: BUREAU,
       },
       {
         href: "/timetable",

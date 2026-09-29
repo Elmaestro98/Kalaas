@@ -4,6 +4,8 @@ import { getContexte } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { dureeTotaleHebdo } from "@/lib/emploi-du-temps";
 import { chargerEmploiDuTemps, type Vue } from "@/lib/emploi-du-temps-donnees";
+import { nomEnseignant } from "@/lib/enseignants";
+import AssignmentsPanel, { type LigneAffectation } from "./assignments-panel";
 import EntitySelect from "./entity-select";
 import SlotForm from "./slot-form";
 import WeekGrid from "./week-grid";
@@ -32,7 +34,7 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
       ? params.vue
       : "classe";
 
-  const [sessions, membres, salles] = await Promise.all([
+  const [sessions, fiches, salles, maFiche] = await Promise.all([
     db.session.findMany({
       where: { dateFin: { gte: dateDuJour() } },
       orderBy: [{ dateDebut: "asc" }],
@@ -41,16 +43,13 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
         anneeAcademique: { select: { libelle: true } },
       },
     }),
-    db.membre.findMany({
-      where: { actif: true, role: { in: ["FORMATEUR", "DIRECTEUR"] } },
-      include: { utilisateur: { select: { nom: true } } },
-    }),
+    db.enseignant.findMany({ where: { actif: true }, orderBy: [{ nom: "asc" }, { prenom: "asc" }] }),
     db.salle.findMany({ where: { active: true }, orderBy: { nom: "asc" } }),
+    // Fiche professeur reliée au compte connecté (pour un formateur)
+    db.enseignant.findFirst({ where: { membreId: membre.id } }),
   ]);
 
-  const enseignants = membres
-    .map((m) => ({ id: m.id, nom: m.utilisateur.nom }))
-    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  const enseignants = fiches.map((e) => ({ id: e.id, nom: nomEnseignant(e) }));
 
   // Options de la liste selon la vue
   let groupes: { label: string; options: { id: string; label: string }[] }[];
@@ -69,26 +68,52 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
 
   const idsPossibles = groupes.flatMap((g) => g.options.map((o) => o.id));
   const id = estFormateur
-    ? membre.id
+    ? maFiche?.id
     : params.id && idsPossibles.includes(params.id)
       ? params.id
       : idsPossibles[0];
 
   const emploi = id ? await chargerEmploiDuTemps(db, vue, id) : null;
 
-  // Matières déjà saisies, proposées pour éviter les fautes de frappe
+  // Professeurs affectés à la classe (une matière = un professeur)
+  const affectationsBrutes =
+    vue === "classe" && id
+      ? await db.affectation.findMany({
+          where: { sessionId: id },
+          orderBy: { matiere: "asc" },
+          include: { enseignant: { select: { prenom: true, nom: true } } },
+        })
+      : [];
+  const affectations: LigneAffectation[] = affectationsBrutes.map((a) => ({
+    id: a.id,
+    matiere: a.matiere,
+    enseignantId: a.enseignantId,
+    enseignant: nomEnseignant(a.enseignant),
+    volumeHoraire: a.volumeHoraire,
+    heuresHebdo: dureeTotaleHebdo(
+      (emploi?.creneaux ?? []).filter((c) => c.matiere.toLowerCase() === a.matiere.toLowerCase()),
+    ),
+  }));
+
+  // Matières déjà saisies (cours et affectations), proposées pour éviter les fautes de frappe
   const matieres =
     vue === "classe" && estDirecteur
-      ? (
-          await db.creneau.findMany({ distinct: ["matiere"], select: { matiere: true }, orderBy: { matiere: "asc" } })
-        ).map((m) => m.matiere)
+      ? [
+          ...new Set([
+            ...affectationsBrutes.map((a) => a.matiere),
+            ...(
+              await db.creneau.findMany({ distinct: ["matiere"], select: { matiere: true } })
+            ).map((m) => m.matiere),
+          ]),
+        ].sort((a, b) => a.localeCompare(b, "fr"))
       : [];
 
-  const messageVide =
-    vue === "classe"
+  const messageVide = estFormateur
+    ? "Votre compte n'est pas encore relié à une fiche professeur. Demandez à la direction de le faire."
+    : vue === "classe"
       ? "Aucune session en cours. Ouvrez une session depuis les formations."
       : vue === "enseignant"
-        ? "Aucun enseignant. Invitez vos formateurs dans l'équipe."
+        ? "Aucun professeur. Ajoutez vos professeurs dans le menu Professeurs."
         : "Aucune salle. Ajoutez vos salles dans les Paramètres.";
 
   return (
@@ -136,6 +161,11 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
               Ajouter des salles →
             </Link>
           )}
+          {vue === "enseignant" && !estFormateur && (
+            <Link href="/teachers" className="mt-2 inline-block text-sm font-semibold">
+              Ajouter des professeurs →
+            </Link>
+          )}
         </div>
       ) : (
         <>
@@ -162,6 +192,16 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
                 </p>
               </div>
 
+              {vue === "classe" && (
+                <AssignmentsPanel
+                  sessionId={id}
+                  affectations={affectations}
+                  enseignants={enseignants}
+                  matieres={matieres}
+                  peutModifier={estDirecteur}
+                />
+              )}
+
               {vue === "classe" && estDirecteur && (
                 <details
                   open={emploi.creneaux.length === 0}
@@ -182,6 +222,7 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
                       enseignants={enseignants}
                       salles={salles.map((s) => ({ id: s.id, nom: s.nom }))}
                       matieres={matieres}
+                      affectations={affectations.map((a) => ({ matiere: a.matiere, enseignantId: a.enseignantId }))}
                     />
                   </div>
                 </details>

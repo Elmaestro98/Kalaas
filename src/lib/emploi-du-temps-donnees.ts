@@ -4,6 +4,7 @@ import type { DbInstitut } from "@/lib/prisma";
 import { dateDuJour } from "@/lib/echeancier";
 import { formatDate } from "@/lib/format";
 import type { CreneauAffiche } from "@/lib/emploi-du-temps";
+import { nomEnseignant } from "@/lib/enseignants";
 
 export type Vue = "classe" | "enseignant" | "salle";
 
@@ -21,9 +22,13 @@ const INCLURE = {
       anneeAcademique: { select: { libelle: true } },
     },
   },
-  enseignant: { select: { utilisateur: { select: { nom: true } } } },
+  enseignant: { select: { prenom: true, nom: true } },
   salle: { select: { nom: true } },
 } satisfies Prisma.CreneauInclude;
+
+function nomProf(c: CreneauCharge): string | undefined {
+  return c.enseignant ? nomEnseignant(c.enseignant) : undefined;
+}
 
 type CreneauCharge = Prisma.CreneauGetPayload<{ include: typeof INCLURE }>;
 
@@ -70,16 +75,13 @@ export async function chargerEmploiDuTemps(
       ]
         .filter(Boolean)
         .join(" · "),
-      creneaux: creneaux.map((c) => versAffichage(c, [c.enseignant?.utilisateur.nom, c.salle?.nom])),
+      creneaux: creneaux.map((c) => versAffichage(c, [nomProf(c), c.salle?.nom])),
     };
   }
 
   if (vue === "enseignant") {
-    const membre = await db.membre.findFirst({
-      where: { id },
-      include: { utilisateur: { select: { nom: true } } },
-    });
-    if (!membre) {
+    const enseignant = await db.enseignant.findFirst({ where: { id } });
+    if (!enseignant) {
       return null;
     }
     const creneaux = await db.creneau.findMany({
@@ -88,8 +90,14 @@ export async function chargerEmploiDuTemps(
       orderBy: TRI,
     });
     return {
-      titre: membre.utilisateur.nom,
-      sousTitre: "Emploi du temps de l'enseignant · toutes classes",
+      titre: nomEnseignant(enseignant),
+      sousTitre: [
+        "Programmation hebdomadaire",
+        enseignant.specialite,
+        enseignant.statut === "VACATAIRE" ? "Vacataire" : "Permanent",
+      ]
+        .filter(Boolean)
+        .join(" · "),
       creneaux: creneaux.map((c) => versAffichage(c, [c.session.formation.intitule, c.salle?.nom])),
     };
   }
@@ -107,7 +115,7 @@ export async function chargerEmploiDuTemps(
     titre: salle.nom,
     sousTitre: `Occupation de la salle${salle.capacite ? ` · ${salle.capacite} places` : ""}`,
     creneaux: creneaux.map((c) =>
-      versAffichage(c, [c.session.formation.intitule, c.enseignant?.utilisateur.nom]),
+      versAffichage(c, [c.session.formation.intitule, nomProf(c)]),
     ),
   };
 }

@@ -7,7 +7,7 @@ import EmploiDuTempsPdf from "@/lib/pdf/emploi-du-temps-pdf";
 
 const SURTITRES: Record<Vue, string> = {
   classe: "Emploi du temps",
-  enseignant: "Emploi du temps enseignant",
+  enseignant: "Programmation du professeur",
   salle: "Occupation de salle",
 };
 
@@ -38,8 +38,11 @@ export async function GET(request: NextRequest) {
   const id = params.get("id") ?? "";
 
   // Un formateur ne peut télécharger que son propre emploi du temps
-  if (membre.role === "FORMATEUR" && (vue !== "enseignant" || id !== membre.id)) {
-    return new Response("Accès refusé", { status: 403 });
+  if (membre.role === "FORMATEUR") {
+    const maFiche = await db.enseignant.findFirst({ where: { membreId: membre.id } });
+    if (vue !== "enseignant" || !maFiche || id !== maFiche.id) {
+      return new Response("Accès refusé", { status: 403 });
+    }
   }
 
   // Filtré par établissement : impossible de télécharger celui d'un autre institut

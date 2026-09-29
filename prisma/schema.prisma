@@ -116,6 +116,11 @@ enum StatutJob {
   ECHEC
 }
 
+enum StatutEnseignant {
+  PERMANENT
+  VACATAIRE
+}
+
 enum JourSemaine {
   LUNDI
   MARDI
@@ -168,6 +173,8 @@ model Institut {
   compteursMatricule CompteurMatricule[]
   salles             Salle[]
   creneaux           Creneau[]
+  enseignants        Enseignant[]
+  affectations       Affectation[]
 }
 
 model Abonnement {
@@ -212,7 +219,7 @@ model Membre {
   annulations        Annulation[]
   cloturesCaisse     ClotureCaisse[]
   relancesEnvoyees   Relance[]
-  creneaux           Creneau[]
+  ficheEnseignant    Enseignant?
 
   @@unique([institutId, utilisateurId])
   @@index([utilisateurId])
@@ -280,6 +287,7 @@ model Session {
   inscriptions    Inscription[]
   seances         Seance[]
   creneaux        Creneau[]
+  affectations    Affectation[]
 
   @@index([institutId])
   @@index([formationId])
@@ -288,6 +296,30 @@ model Session {
 }
 
 // ─── Emplois du temps (semaine type) ───────────────
+
+// Professeur : une fiche, avec ou sans compte Kalaas (membreId facultatif)
+model Enseignant {
+  id           String           @id @default(cuid())
+  institutId   String
+  prenom       String
+  nom          String
+  telephone    String?
+  email        String?
+  specialite   String?
+  statut       StatutEnseignant @default(VACATAIRE)
+  tarifHoraire Int?
+  membreId     String?          @unique
+  actif        Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  institut     Institut      @relation(fields: [institutId], references: [id])
+  membre       Membre?       @relation(fields: [membreId], references: [id])
+  creneaux     Creneau[]
+  affectations Affectation[]
+
+  @@index([institutId, nom])
+}
 
 model Salle {
   id         String   @id @default(cuid())
@@ -319,10 +351,10 @@ model Creneau {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  institut   Institut @relation(fields: [institutId], references: [id])
-  session    Session  @relation(fields: [sessionId], references: [id])
-  enseignant Membre?  @relation(fields: [enseignantId], references: [id])
-  salle      Salle?   @relation(fields: [salleId], references: [id])
+  institut   Institut    @relation(fields: [institutId], references: [id])
+  session    Session     @relation(fields: [sessionId], references: [id])
+  enseignant Enseignant? @relation(fields: [enseignantId], references: [id])
+  salle      Salle?      @relation(fields: [salleId], references: [id])
 
   @@index([institutId, jour])
   @@index([sessionId])
@@ -616,4 +648,23 @@ model Job {
   institut Institut? @relation(fields: [institutId], references: [id])
 
   @@index([statut, executerApres])
+}
+
+// Une matière d'une classe, confiée à un professeur
+model Affectation {
+  id            String   @id @default(cuid())
+  institutId    String
+  sessionId     String
+  enseignantId  String
+  matiere       String
+  volumeHoraire Int?
+  createdAt     DateTime @default(now())
+
+  institut   Institut   @relation(fields: [institutId], references: [id])
+  session    Session    @relation(fields: [sessionId], references: [id])
+  enseignant Enseignant @relation(fields: [enseignantId], references: [id])
+
+  @@unique([sessionId, matiere])
+  @@index([institutId])
+  @@index([enseignantId])
 }
