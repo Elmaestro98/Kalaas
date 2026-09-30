@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { CalendarDays, Download, MapPin } from "lucide-react";
+import { CalendarDays, ClipboardCheck, Download, MapPin } from "lucide-react";
+import { dateDuJour } from "@/lib/echeancier";
+import { dateIso } from "@/lib/presences";
 import { getContexte } from "@/lib/tenant";
 import {
   JOURS,
@@ -95,6 +97,13 @@ export default async function TrainerDashboard() {
                         {c.details[1]}
                       </span>
                     )}
+                    <Link
+                      href={`/attendance/call?creneau=${c.id}&date=${dateIso(dateDuJour())}`}
+                      className="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-action px-4 text-sm font-medium text-on-action hover:bg-action-hover sm:w-auto"
+                    >
+                      <ClipboardCheck size={16} aria-hidden="true" />
+                      Faire l&apos;appel
+                    </Link>
                   </li>
                 ))}
               </ol>

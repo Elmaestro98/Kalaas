@@ -227,6 +227,7 @@ model Membre {
   cloturesCaisse     ClotureCaisse[]
   relancesEnvoyees   Relance[]
   ficheEnseignant    Enseignant?
+  appels             Seance[]
 
   @@unique([institutId, utilisateurId])
   @@index([utilisateurId])
@@ -363,6 +364,7 @@ model Creneau {
   session    Session     @relation(fields: [sessionId], references: [id])
   enseignant Enseignant? @relation(fields: [enseignantId], references: [id])
   salle      Salle?      @relation(fields: [salleId], references: [id])
+  seances    Seance[]
 
   @@index([institutId, jour])
   @@index([sessionId])
@@ -554,19 +556,30 @@ model ClotureCaisse {
 
 // ─── Présences ─────────────────────────────────────
 
+// Un appel : un cours (créneau de l'emploi du temps) à une date donnée.
+// Matière et horaires sont recopiés : l'historique reste juste même si
+// le cours est ensuite modifié ou retiré de l'emploi du temps.
 model Seance {
   id         String   @id @default(cuid())
   institutId String
   sessionId  String
+  creneauId  String?
   date       DateTime @db.Date
+  matiere    String?
+  heureDebut Int?
+  heureFin   Int?
+  appelParId String?
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   institut  Institut   @relation(fields: [institutId], references: [id])
   session   Session    @relation(fields: [sessionId], references: [id])
+  creneau   Creneau?   @relation(fields: [creneauId], references: [id], onDelete: SetNull)
+  appelPar  Membre?    @relation(fields: [appelParId], references: [id])
   presences Presence[]
 
-  @@unique([sessionId, date])
-  @@index([institutId])
+  @@unique([sessionId, date, creneauId])
+  @@index([institutId, date])
 }
 
 model Presence {

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MessageCircle, RefreshCw, Wallet } from "lucide-react";
 import { TYPE_INSCRIPTION } from "@/lib/lmd";
 import { DECLENCHEURS, type Declencheur } from "@/lib/relances";
+import { classeTaux, compter, tauxAssiduite } from "@/lib/presences";
 
 const LABEL_DECLENCHEUR = Object.fromEntries(DECLENCHEURS.map((d) => [d.valeur, d.label])) as Record<
   Declencheur,
@@ -60,6 +61,14 @@ export default async function StudentPage({ params }: StudentPageProps) {
     .filter((i) => i.statut === "ACTIVE" || i.statut === "TERMINEE")
     .flatMap((i) => i.echeances);
   const resume = resumeFinancier(echeancesEnCours);
+
+  // Assiduité sur toutes ses classes
+  const presences = await db.presence.findMany({
+    where: { inscription: { apprenantId: apprenant.id } },
+    select: { statut: true },
+  });
+  const compteursPresence = compter(presences.map((p) => p.statut));
+  const assiduite = tauxAssiduite(compteursPresence);
 
   // Historique des relances : une relance groupée (plusieurs échéances) = une seule ligne
   const lignesRelance = await db.relance.findMany({
@@ -311,6 +320,21 @@ export default async function StudentPage({ params }: StudentPageProps) {
                   {apprenant.tuteurTelephone}
                 </a>
               )}
+            </div>
+          )}
+
+          <h2 className="mt-6 font-semibold">Assiduité</h2>
+          {assiduite === null ? (
+            <p className="mt-2 text-sm text-ink-muted">Aucun appel enregistré pour l&apos;instant.</p>
+          ) : (
+            <div className="mt-2 rounded-md bg-surface-100 px-3 py-2">
+              <p className={`text-2xl font-bold tabular-nums ${classeTaux(assiduite)}`}>{assiduite} %</p>
+              <p className="text-xs text-ink-muted">
+                {presences.length} séance{presences.length > 1 ? "s" : ""} · {compteursPresence.ABSENT} absence
+                {compteursPresence.ABSENT > 1 ? "s" : ""} · {compteursPresence.RETARD} retard
+                {compteursPresence.RETARD > 1 ? "s" : ""}
+                {compteursPresence.EXCUSE > 0 && <> · {compteursPresence.EXCUSE} excusée{compteursPresence.EXCUSE > 1 ? "s" : ""}</>}
+              </p>
             </div>
           )}
 

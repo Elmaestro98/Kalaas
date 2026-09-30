@@ -26,11 +26,11 @@ Un même établissement peut donc proposer « Licence Informatique de gestion �
 | M1 — Paramétrage | Profil de l'établissement (NINEA, RCCM, pied de reçu), catalogue des formations, sessions | ✅ |
 | M1 bis — Structure LMD | Années académiques, cycles (Licence, Master, Doctorat), filières et niveaux, tarif par niveau | ✅ |
 | M2 — Apprenants et inscriptions | Fiche apprenant, inscription avec échéancier automatique, remises et bourses tracées | ✅ |
-| M2 bis — Réinscriptions | Réinscription annuelle (passage au niveau supérieur, redoublement), matricule étudiant ✅ · import Excel 🔜 | 🟡 |
+| M2 bis — Réinscriptions et import | Réinscription annuelle (passage au niveau supérieur, redoublement), matricule étudiant, import Excel / CSV avec aperçu, doublons, inscription et reprise du « déjà payé » | ✅ |
 | M3 — Paiements et caisse | Espèces, Wave, Orange Money, virement ; paiements partiels répartis sur les échéances ; reçus numérotés ; annulation tracée ; journal de caisse | ✅ |
-| M3 bis | Reçu PDF, clôture de caisse journalière, paiement en ligne par lien Wave | 🔜 |
-| M4 — Relances | Liste des impayés, relances WhatsApp / SMS manuelles ou automatiques (J-3, J+1, J+7) | 🔜 |
-| M5 — Présences | Appel par séance sur mobile, taux d'assiduité | 🔜 |
+| M3 bis | Reçu PDF (A5, filigrane si annulé) ✅ · clôture de caisse journalière par caissier (écart, commentaire obligatoire, blocage des espèces après clôture, vue direction) ✅ · paiement en ligne par lien Wave 🔜 | 🟡 |
+| M4 — Relances | Liste des impayés par ancienneté, relances WhatsApp en un clic (apprenant ou tuteur), liste du jour J-3 / J+1 / J+7, modèles de messages modifiables, historique ✅ · envoi automatique (WhatsApp Cloud API, SMS) 🔜 | 🟡 |
+| M5 — Présences | Appel par cours (d'après l'emploi du temps) sur mobile, présent / absent / retard / excusé, rattrapage jusqu'à 7 jours pour le formateur, taux d'assiduité sur la fiche apprenant | ✅ |
 | M5 bis — Emplois du temps | Semaine type par classe (plusieurs cours par jour, horaires précis), salles, détection des conflits (classe, enseignant, salle), vues par classe / enseignant / salle, téléchargement PDF | ✅ |
 | Équipe | Invitation par e-mail (Caissier, Formateur, Directeur), acceptation automatique à la première connexion, changement de rôle, retrait d'accès, liaison compte ↔ fiche professeur | ✅ |
 | M5 ter — Professeurs | Fiches professeurs (permanents et vacataires, avec ou sans compte), affectation par matière et par classe, suivi des heures programmées / prévues, programmation envoyée par WhatsApp, « Ma semaine » pour le professeur connecté | ✅ |
@@ -102,7 +102,8 @@ Ces ajouts sont compatibles avec les données existantes : toutes les nouvelles 
 | Authentification | Clerk + Organizations (1 organisation = 1 établissement) |
 | Validation | Zod 4 |
 | Icônes | lucide-react |
-| PDF | @react-pdf/renderer (emplois du temps ; reçus à venir) |
+| PDF | @react-pdf/renderer (emplois du temps, reçus) |
+| Excel | exceljs (import des apprenants, modèle à télécharger) |
 | Hébergement | Vercel (Hobby en développement, Pro en production) |
 | Tâches planifiées | Vercel Cron + table `Job` |
 | Paiements en ligne | API Wave Business, Orange Money (webhooks) |
@@ -162,6 +163,8 @@ kalaas/
 │   │       ├── students/           # apprenants et fiche apprenant
 │   │       ├── enrollments/        # inscriptions et réinscriptions
 │   │       ├── payments/           # encaissements, reçus, journal de caisse
+│   │       ├── attendance/         # présences : cours du jour, écran d'appel
+│   │       ├── unpaid/             # impayés, relances WhatsApp, modèles de messages
 │   │       ├── team/               # équipe : invitations, rôles, accès
 │   │       ├── teachers/           # professeurs (fiches, matières, volume horaire)
 │   │       ├── timetable/          # emplois du temps, affectations + route pdf/ (téléchargement)

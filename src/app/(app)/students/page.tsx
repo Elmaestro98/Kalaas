@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { FileSpreadsheet, Plus, Search } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatFcfa, formatNombre } from "@/lib/format";
 import {
@@ -117,6 +117,13 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <Link
+            href="/students/import"
+            className="flex h-11 items-center gap-2 rounded-md px-4 font-medium text-ink hover:bg-surface-100"
+          >
+            <FileSpreadsheet size={18} aria-hidden="true" />
+            Importer Excel
+          </Link>
           <Link
             href="/enrollments/new?mode=reinscription"
             className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-5 font-medium text-ink hover:bg-surface-100"

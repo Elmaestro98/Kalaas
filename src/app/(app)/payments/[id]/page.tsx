@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, MessageCircle, Plus } from "lucide-react";
+import { CheckCircle2, Download, MessageCircle, Plus } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatDate, formatFcfa, formatNombre } from "@/lib/format";
 import { nombreEnLettres } from "@/lib/lettres";
@@ -104,6 +104,13 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
       {/* Actions (écran uniquement) */}
       <div className="mb-4 flex flex-wrap items-center gap-3 print:hidden">
         <PrintButton />
+        <a
+          href={`/payments/${paiement.id}/pdf`}
+          className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
+        >
+          <Download size={18} aria-hidden="true" />
+          PDF
+        </a>
         {!annule && (
           <a
             href={lienPartage}

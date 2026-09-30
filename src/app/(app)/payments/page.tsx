@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Lock, Plus } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatDate, formatFcfa, formatNombre } from "@/lib/format";
 import { dateDuJour } from "@/lib/echeancier";
@@ -71,6 +71,13 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             Afficher
           </button>
         </form>
+        <Link
+          href="/payments/closing"
+          className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
+        >
+          <Lock size={18} aria-hidden="true" />
+          Clôture de caisse
+        </Link>
         <Link
           href="/payments/new"
           className="flex h-11 items-center gap-2 rounded-md bg-gold-500 px-5 font-medium text-navy-900 hover:opacity-90"

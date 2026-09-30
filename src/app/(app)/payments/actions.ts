@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { prochainNumeroRecu } from "@/lib/recus";
+import { caisseCloturee } from "@/lib/caisse";
+import { dateDuJour } from "@/lib/echeancier";
 import {
   peutAnnulerPaiement,
   referenceObligatoire,
@@ -74,6 +76,14 @@ export async function enregistrerPaiement(
   const apprenant = await db.apprenant.findFirst({ where: { id: d.apprenantId } });
   if (!apprenant) {
     return { erreurs: {}, erreurGenerale: "Apprenant introuvable." };
+  }
+
+  // Caisse clôturée : plus d'espèces ce jour-là pour ce caissier (le comptage est figé)
+  if (d.mode === "ESPECES" && (await caisseCloturee(db, membre.id, dateDuJour()))) {
+    return {
+      erreurs: { mode: "Votre caisse est clôturée pour aujourd'hui : encaissez en Wave, Orange Money ou virement." },
+      erreurGenerale: null,
+    };
   }
 
   const reference = referenceObligatoire(d.mode) ? d.reference.toUpperCase() : null;
