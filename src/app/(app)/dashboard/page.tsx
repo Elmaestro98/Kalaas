@@ -99,7 +99,7 @@ export default async function DashboardPage() {
             <span className="text-3xl font-bold tabular-nums">{formatNombre(resteARecouvrer)}</span>{" "}
             <span className="text-sm text-ink-muted">FCFA</span>
           </p>
-          <Link href="/students?statut=EN_RETARD" className="mt-1 inline-block text-xs font-semibold">
+          <Link href="/unpaid" className="mt-1 inline-block text-xs font-semibold">
             Voir les retards →
           </Link>
         </div>

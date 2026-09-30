@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import type { Role } from "@prisma/client";
 import { prisma, dbInstitut } from "@/lib/prisma";
+import { accepterInvitation } from "@/lib/invitations";
 
 export const getContexte = cache(async () => {
   const { userId, orgId } = await auth.protect();
@@ -23,7 +24,7 @@ export const getContexte = cache(async () => {
     throw new Error("Cet institut est suspendu. Contactez le support Kalaas.");
   }
 
-  const membre = await prisma.membre.findFirst({
+  const membreActif = await prisma.membre.findFirst({
     where: {
       institutId: institut.id,
       actif: true,
@@ -32,8 +33,13 @@ export const getContexte = cache(async () => {
     include: { utilisateur: true },
   });
 
+  // Première connexion d'une personne invitée : son accès est créé à partir de l'invitation
+  const membre = membreActif ?? (await accepterInvitation(institut.id, userId));
+
   if (!membre) {
-    throw new Error("Vous n'avez pas accès à cet institut.");
+    throw new Error(
+      "Vous n'avez pas accès à cet établissement. Demandez à la direction de vous inviter depuis la page Équipe.",
+    );
   }
 
   return { institut, membre, db: dbInstitut(institut.id) };

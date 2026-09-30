@@ -9,6 +9,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   Settings,
+  UserCog,
   Users,
   Wallet,
 } from "lucide-react";
@@ -91,6 +92,12 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Réglages",
     items: [
+      {
+        href: "/team",
+        label: "Équipe",
+        icon: UserCog,
+        roles: ["DIRECTEUR"],
+      },
       {
         href: "/settings",
         label: "Paramètres",

@@ -2,6 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MessageCircle, RefreshCw, Wallet } from "lucide-react";
 import { TYPE_INSCRIPTION } from "@/lib/lmd";
+import { DECLENCHEURS, type Declencheur } from "@/lib/relances";
+
+const LABEL_DECLENCHEUR = Object.fromEntries(DECLENCHEURS.map((d) => [d.valeur, d.label])) as Record<
+  Declencheur,
+  string
+>;
 import { exigerRole } from "@/lib/tenant";
 import { formatDate, formatFcfa, formatNombre } from "@/lib/format";
 import { lienWhatsApp } from "@/lib/telephone";
@@ -54,6 +60,34 @@ export default async function StudentPage({ params }: StudentPageProps) {
     .filter((i) => i.statut === "ACTIVE" || i.statut === "TERMINEE")
     .flatMap((i) => i.echeances);
   const resume = resumeFinancier(echeancesEnCours);
+
+  // Historique des relances : une relance groupée (plusieurs échéances) = une seule ligne
+  const lignesRelance = await db.relance.findMany({
+    where: { statut: "ENVOYEE", echeance: { inscription: { apprenantId: apprenant.id } } },
+    orderBy: { envoyeeLe: "desc" },
+    take: 30,
+    include: { auteur: { select: { utilisateur: { select: { nom: true } } } } },
+  });
+  const relances = [
+    ...lignesRelance
+      .reduce((groupes, r) => {
+        const cle = `${r.envoyeeLe?.toISOString()}-${r.declencheur}`;
+        const groupe = groupes.get(cle);
+        if (groupe) {
+          groupe.nbEcheances += 1;
+        } else {
+          groupes.set(cle, {
+            cle,
+            declencheur: r.declencheur,
+            date: r.envoyeeLe,
+            auteur: r.auteur?.utilisateur.nom ?? null,
+            nbEcheances: 1,
+          });
+        }
+        return groupes;
+      }, new Map<string, { cle: string; declencheur: Declencheur; date: Date | null; auteur: string | null; nbEcheances: number }>())
+      .values(),
+  ].slice(0, 5);
   const statut = statutFinancier(resume);
   const pourcentage = resume.total > 0 ? Math.round((resume.paye / resume.total) * 100) : 0;
 
@@ -278,6 +312,24 @@ export default async function StudentPage({ params }: StudentPageProps) {
                 </a>
               )}
             </div>
+          )}
+
+          <h2 className="mt-6 font-semibold">Relances</h2>
+          {relances.length === 0 ? (
+            <p className="mt-2 text-sm text-ink-muted">Aucune relance envoyée.</p>
+          ) : (
+            <ul className="mt-2 space-y-2 text-sm">
+              {relances.map((r) => (
+                <li key={r.cle} className="rounded-md bg-surface-100 px-3 py-2">
+                  <p className="font-medium">{LABEL_DECLENCHEUR[r.declencheur]}</p>
+                  <p className="text-xs text-ink-muted">
+                    {r.date ? formatDate(r.date) : "—"}
+                    {r.auteur && <> · par {r.auteur}</>}
+                    {r.nbEcheances > 1 && <> · {r.nbEcheances} échéances</>}
+                  </p>
+                </li>
+              ))}
+            </ul>
           )}
         </aside>
       </div>

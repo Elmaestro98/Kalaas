@@ -32,6 +32,7 @@ Un même établissement peut donc proposer « Licence Informatique de gestion �
 | M4 — Relances | Liste des impayés, relances WhatsApp / SMS manuelles ou automatiques (J-3, J+1, J+7) | 🔜 |
 | M5 — Présences | Appel par séance sur mobile, taux d'assiduité | 🔜 |
 | M5 bis — Emplois du temps | Semaine type par classe (plusieurs cours par jour, horaires précis), salles, détection des conflits (classe, enseignant, salle), vues par classe / enseignant / salle, téléchargement PDF | ✅ |
+| Équipe | Invitation par e-mail (Caissier, Formateur, Directeur), acceptation automatique à la première connexion, changement de rôle, retrait d'accès, liaison compte ↔ fiche professeur | ✅ |
 | M5 ter — Professeurs | Fiches professeurs (permanents et vacataires, avec ou sans compte), affectation par matière et par classe, suivi des heures programmées / prévues, programmation envoyée par WhatsApp, « Ma semaine » pour le professeur connecté | ✅ |
 | M6 — Tableau de bord et documents | Encaissé du jour / du mois, reste à recouvrer ✅ · exports Excel et PDF, attestation d'inscription, certificat de scolarité 🔜 | 🟡 |
 
@@ -161,6 +162,7 @@ kalaas/
 │   │       ├── students/           # apprenants et fiche apprenant
 │   │       ├── enrollments/        # inscriptions et réinscriptions
 │   │       ├── payments/           # encaissements, reçus, journal de caisse
+│   │       ├── team/               # équipe : invitations, rôles, accès
 │   │       ├── teachers/           # professeurs (fiches, matières, volume horaire)
 │   │       ├── timetable/          # emplois du temps, affectations + route pdf/ (téléchargement)
 │   │       └── settings/           # années académiques, salles, préfixe des matricules

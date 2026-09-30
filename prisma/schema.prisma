@@ -116,6 +116,12 @@ enum StatutJob {
   ECHEC
 }
 
+enum StatutInvitation {
+  EN_ATTENTE
+  ACCEPTEE
+  REVOQUEE
+}
+
 enum StatutEnseignant {
   PERMANENT
   VACATAIRE
@@ -175,6 +181,7 @@ model Institut {
   creneaux           Creneau[]
   enseignants        Enseignant[]
   affectations       Affectation[]
+  invitations        Invitation[]
 }
 
 model Abonnement {
@@ -317,6 +324,7 @@ model Enseignant {
   membre       Membre?       @relation(fields: [membreId], references: [id])
   creneaux     Creneau[]
   affectations Affectation[]
+  invitations  Invitation[]
 
   @@index([institutId, nom])
 }
@@ -667,4 +675,24 @@ model Affectation {
   @@unique([sessionId, matiere])
   @@index([institutId])
   @@index([enseignantId])
+}
+
+// Invitation d'un membre de l'équipe : acceptée automatiquement à sa première
+// connexion (e-mail identique), elle crée son accès avec le rôle choisi.
+model Invitation {
+  id                String           @id @default(cuid())
+  institutId        String
+  email             String
+  role              Role
+  enseignantId      String?
+  clerkInvitationId String?
+  statut            StatutInvitation @default(EN_ATTENTE)
+  inviteParId       String?
+  createdAt         DateTime         @default(now())
+  accepteeLe        DateTime?
+
+  institut   Institut    @relation(fields: [institutId], references: [id])
+  enseignant Enseignant? @relation(fields: [enseignantId], references: [id])
+
+  @@index([institutId, email])
 }
