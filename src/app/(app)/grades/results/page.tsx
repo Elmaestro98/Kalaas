@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileDown } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { LIBELLE_DECISION, SEUIL_VALIDATION, formatNote } from "@/lib/notes";
 import { chargerResultatsClasse, classesPourNotes, cleSemestre } from "@/lib/notes-donnees";
@@ -51,9 +51,27 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
       </p>
 
       {session && (
-        <div className="mt-4">
-          <ClassSelect valeur={session.id} chemin="/grades/results" classes={classes} />
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="min-w-64 flex-1">
+            <ClassSelect valeur={session.id} chemin="/grades/results" classes={classes} />
+          </div>
+          {resultats && resultats.nbEvaluations > 0 && resultats.lignes.length > 0 && (
+            <a
+              href={`/grades/transcript?session=${session.id}`}
+              download
+              className="flex h-11 items-center gap-2 rounded-md bg-action px-4 font-medium text-on-action hover:bg-action-hover"
+            >
+              <FileDown size={18} aria-hidden="true" />
+              Relevés de toute la classe (PDF)
+            </a>
+          )}
         </div>
+      )}
+      {resultats && resultats.nbEvaluations > 0 && !resultats.toutVerrouille && (
+        <p className="mt-3 rounded-sm bg-warning-soft px-4 py-2 text-sm text-warning">
+          Certaines évaluations ne sont pas verrouillées : les relevés porteront la mention « PROVISOIRE ». Verrouillez-les
+          dans « Notes » pour éditer des relevés définitifs.
+        </p>
       )}
 
       {!resultats || resultats.lignes.length === 0 ? (
@@ -116,7 +134,18 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
                       return (
                         <tr key={l.inscriptionId} className="hover:bg-gold-100/40">
                           <th scope="row" className="sticky left-0 bg-surface-200 px-3 py-2 text-left font-medium">
-                            {l.nom}
+                            <span className="flex items-center gap-2">
+                              {l.nom}
+                              <a
+                                href={`/grades/transcript?session=${session?.id}&inscription=${l.inscriptionId}`}
+                                download
+                                title="Relevé de notes (PDF)"
+                                aria-label={`Relevé de notes de ${l.nom}`}
+                                className="text-ink-muted hover:text-gold-700"
+                              >
+                                <FileDown size={15} aria-hidden="true" />
+                              </a>
+                            </span>
                             {l.matricule && <span className="block font-mono text-xs font-normal text-ink-muted">{l.matricule}</span>}
                           </th>
                           {bloc.ues.map((u) => {

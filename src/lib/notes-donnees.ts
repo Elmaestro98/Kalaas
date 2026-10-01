@@ -1,9 +1,10 @@
 import "server-only";
 import type { DbInstitut } from "@/lib/prisma";
 import { dateDuJour } from "@/lib/echeancier";
-import { estLmd } from "@/lib/lmd";
+import { codeNiveau, estLmd } from "@/lib/lmd";
 import {
   moyenneMatiere,
+  rang,
   resultatSemestre,
   type MoyenneMatiere,
   type ResultatSemestre,
@@ -78,6 +79,7 @@ export type ResultatsClasse = {
   blocs: BlocSemestre[];
   lignes: LigneResultat[];
   nbEvaluations: number;
+  toutVerrouille: boolean; // toutes les évaluations verrouillées par la direction
 };
 
 export const cleSemestre = (s: number | null) => (s ? `S${s}` : "S?");
@@ -101,7 +103,7 @@ export async function chargerResultatsClasse(db: DbInstitut, sessionId: string):
     }),
     db.evaluation.findMany({
       where: { sessionId },
-      select: { matiereId: true, poids: true, bareme: true, notes: { select: { inscriptionId: true, statut: true, valeur: true } } },
+      select: { matiereId: true, poids: true, bareme: true, verrouillee: true, notes: { select: { inscriptionId: true, statut: true, valeur: true } } },
     }),
     db.inscription.findMany({
       where: { sessionId, statut: { in: ["ACTIVE", "TERMINEE"] } },
@@ -174,5 +176,87 @@ export async function chargerResultatsClasse(db: DbInstitut, sessionId: string):
     })
     .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
 
-  return { lmd, blocs, lignes, nbEvaluations: evaluations.length };
+  return {
+    lmd,
+    blocs,
+    lignes,
+    nbEvaluations: evaluations.length,
+    toutVerrouille: evaluations.length > 0 && evaluations.every((e) => e.verrouillee),
+  };
+}
+
+// ─── Relevés de notes ──────────────────────────────
+
+export type EnTeteReleve = {
+  formation: string;
+  classe: string;
+  anneeAcademique: string | null;
+  niveau: string | null; // « L1 », « M2 »…
+};
+
+export type Releve = {
+  inscriptionId: string;
+  apprenant: {
+    nom: string;
+    matricule: string | null;
+    dateNaissance: Date | null;
+    lieuNaissance: string | null;
+  };
+  ligne: LigneResultat;
+  rangs: Record<string, number | null>; // par semestre
+  effectif: number;
+};
+
+// Relevés d'une classe (ou d'un seul inscrit si inscriptionId est fourni)
+export async function chargerReleves(db: DbInstitut, sessionId: string, inscriptionId?: string) {
+  const [resultats, session, inscriptions] = await Promise.all([
+    chargerResultatsClasse(db, sessionId),
+    db.session.findFirst({
+      where: { id: sessionId },
+      include: {
+        formation: { select: { intitule: true, cycle: true, niveau: true } },
+        anneeAcademique: { select: { libelle: true } },
+      },
+    }),
+    db.inscription.findMany({
+      where: { sessionId, ...(inscriptionId ? { id: inscriptionId } : {}) },
+      include: { apprenant: { select: { dateNaissance: true, lieuNaissance: true } } },
+    }),
+  ]);
+  if (!resultats || !session) return null;
+
+  const enTete: EnTeteReleve = {
+    formation: session.formation.intitule,
+    classe: session.nom,
+    anneeAcademique: session.anneeAcademique?.libelle ?? null,
+    niveau: codeNiveau(session.formation.cycle, session.formation.niveau) || null,
+  };
+
+  const releves: Releve[] = resultats.lignes
+    .filter((l) => !inscriptionId || l.inscriptionId === inscriptionId)
+    .map((l) => {
+      const naissance = inscriptions.find((i) => i.id === l.inscriptionId)?.apprenant;
+      const rangs: Record<string, number | null> = {};
+      for (const b of resultats.blocs) {
+        const cle = cleSemestre(b.semestre);
+        rangs[cle] = rang(
+          resultats.lignes.map((x) => x.semestres[cle]?.moyenne ?? null),
+          l.semestres[cle]?.moyenne ?? null,
+        );
+      }
+      return {
+        inscriptionId: l.inscriptionId,
+        apprenant: {
+          nom: l.nom,
+          matricule: l.matricule,
+          dateNaissance: naissance?.dateNaissance ?? null,
+          lieuNaissance: naissance?.lieuNaissance ?? null,
+        },
+        ligne: l,
+        rangs,
+        effectif: resultats.lignes.length,
+      };
+    });
+
+  return { resultats, enTete, releves };
 }

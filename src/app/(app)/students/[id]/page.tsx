@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MessageCircle, RefreshCw, Wallet } from "lucide-react";
+import { ArrowLeft, FileDown, MessageCircle, RefreshCw, Wallet } from "lucide-react";
 import { TYPE_INSCRIPTION } from "@/lib/lmd";
 import { DECLENCHEURS, type Declencheur } from "@/lib/relances";
 import { classeTaux, compter, tauxAssiduite } from "@/lib/presences";
@@ -49,6 +49,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
             },
           },
           echeances: { orderBy: { ordre: "asc" } },
+          _count: { select: { notes: true } },
         },
       },
     },
@@ -218,6 +219,16 @@ export default async function StudentPage({ params }: StudentPageProps) {
                 <Badge ton={STATUT_INSCRIPTION[inscription.statut].ton}>
                   {STATUT_INSCRIPTION[inscription.statut].label}
                 </Badge>
+                {inscription._count.notes > 0 && (
+                  <a
+                    href={`/grades/transcript?session=${inscription.sessionId}&inscription=${inscription.id}`}
+                    download
+                    className="flex h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-surface-100"
+                  >
+                    <FileDown size={16} aria-hidden="true" />
+                    Relevé de notes
+                  </a>
+                )}
               </div>
 
               {inscription.remiseType && (

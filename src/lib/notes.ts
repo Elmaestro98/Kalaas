@@ -159,3 +159,18 @@ export const LIBELLE_DECISION: Record<Decision, { label: string; classe: string 
   COMPENSEE: { label: "Compensée", classe: "bg-info-soft text-info" },
   NON_VALIDEE: { label: "Non validée", classe: "bg-danger-soft text-danger" },
 };
+
+// Mention d'après la moyenne sur 20 (usage courant au Sénégal)
+export function mention(moyenne: number | null): string | null {
+  if (moyenne === null || moyenne < SEUIL_VALIDATION) return null;
+  if (moyenne >= 16) return "Très bien";
+  if (moyenne >= 14) return "Bien";
+  if (moyenne >= 12) return "Assez bien";
+  return "Passable";
+}
+
+// Rang d'une moyenne dans la classe (ex aequo : même rang), null sans moyenne
+export function rang(moyennes: (number | null)[], moyenne: number | null): number | null {
+  if (moyenne === null) return null;
+  return moyennes.filter((m) => m !== null && m > moyenne).length + 1;
+}
