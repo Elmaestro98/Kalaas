@@ -8,6 +8,7 @@ import {
   GraduationCap,
   ClipboardList,
   LayoutDashboard,
+  PenLine,
   Settings,
   UserCog,
   Users,
@@ -51,6 +52,12 @@ export const NAV_SECTIONS: NavSection[] = [
         label: "Présences",
         icon: CalendarCheck,
         roles: TOUS,
+      },
+      {
+        href: "/grades",
+        label: "Notes",
+        icon: PenLine,
+        roles: ["DIRECTEUR", "FORMATEUR"],
       },
       {
         href: "/teachers",

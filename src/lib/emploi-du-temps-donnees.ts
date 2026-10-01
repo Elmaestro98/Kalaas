@@ -41,6 +41,7 @@ function versAffichage(c: CreneauCharge, details: (string | null | undefined)[])
     heureDebut: c.heureDebut,
     heureFin: c.heureFin,
     matiere: c.matiere,
+    matiereId: c.matiereId,
     details: details.filter((d): d is string => Boolean(d)),
   };
 }

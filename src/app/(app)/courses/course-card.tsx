@@ -14,6 +14,7 @@ type CourseCardProps = {
   prixTotal: number;
   nbMensualites: number;
   nbSessions: number;
+  nbMatieres: number;
 };
 
 export default function CourseCard({
@@ -26,6 +27,7 @@ export default function CourseCard({
   prixTotal,
   nbMensualites,
   nbSessions,
+  nbMatieres,
 }: CourseCardProps) {
   const total = fraisInscription + prixTotal;
   const [mensualite = 0] = repartirMontant(prixTotal, nbMensualites);
@@ -36,7 +38,11 @@ export default function CourseCard({
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="font-semibold leading-snug">{intitule}</h2>
+          <h2 className="font-semibold leading-snug">
+            <Link href={`/courses/${id}`} className="text-ink hover:underline">
+              {intitule}
+            </Link>
+          </h2>
           {estLmd(cycle) ? (
             <Badge ton={CYCLES[cycle].ton}>{codeNiveau(cycle, niveau)}</Badge>
           ) : (
@@ -69,12 +75,12 @@ export default function CourseCard({
           </dl>
         </div>
 
-        <div className="mt-auto flex items-center justify-between border-t border-border pt-4 text-sm">
-          <span className="text-ink-muted">
-            {nbSessions} session{nbSessions > 1 ? "s" : ""}
-          </span>
-          <Link href={`/courses/sessions/new?formation=${id}`} className="font-semibold">
-            Ouvrir une session →
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-sm">
+          <Link href={`/courses/${id}`} className="font-semibold">
+            Programme · {nbMatieres} matière{nbMatieres > 1 ? "s" : ""}
+          </Link>
+          <Link href={`/courses/sessions/new?formation=${id}`} className="text-ink-muted hover:text-ink">
+            {nbSessions} session{nbSessions > 1 ? "s" : ""} · ouvrir →
           </Link>
         </div>
       </div>

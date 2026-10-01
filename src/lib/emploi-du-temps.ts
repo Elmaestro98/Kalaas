@@ -39,6 +39,7 @@ export type CreneauAffiche = {
   heureDebut: number;
   heureFin: number;
   matiere: string;
+  matiereId: string | null;
   // Lignes d'information selon la vue (classe, enseignant, salle)
   details: string[];
 };

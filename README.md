@@ -24,6 +24,7 @@ Un même établissement peut donc proposer « Licence Informatique de gestion �
 | Module | Contenu | État |
 | --- | --- | --- |
 | M1 — Paramétrage | Profil de l'établissement (NINEA, RCCM, pied de reçu), catalogue des formations, sessions | ✅ |
+| M1 ter — Matières | Programme de chaque formation (volume, CM/TD/TP, coefficient, crédits, semestre, UE, professeur habituel), listes déroulantes dans l'emploi du temps et les affectations, « + Nouvelle matière » depuis l'emploi du temps, reprise du programme en un clic, heures prévues / programmées / réalisées (d'après les appels) | ✅ |
 | M1 bis — Structure LMD | Années académiques, cycles (Licence, Master, Doctorat), filières et niveaux, tarif par niveau | ✅ |
 | M2 — Apprenants et inscriptions | Fiche apprenant, inscription avec échéancier automatique, remises et bourses tracées | ✅ |
 | M2 bis — Réinscriptions et import | Réinscription annuelle (passage au niveau supérieur, redoublement), matricule étudiant, import Excel / CSV avec aperçu, doublons, inscription et reprise du « déjà payé » | ✅ |
@@ -34,9 +35,10 @@ Un même établissement peut donc proposer « Licence Informatique de gestion �
 | M5 bis — Emplois du temps | Semaine type par classe (plusieurs cours par jour, horaires précis), salles, détection des conflits (classe, enseignant, salle), vues par classe / enseignant / salle, téléchargement PDF | ✅ |
 | Équipe | Invitation par e-mail (Caissier, Formateur, Directeur), acceptation automatique à la première connexion, changement de rôle, retrait d'accès, liaison compte ↔ fiche professeur | ✅ |
 | M5 ter — Professeurs | Fiches professeurs (permanents et vacataires, avec ou sans compte), affectation par matière et par classe, suivi des heures programmées / prévues, programmation envoyée par WhatsApp, « Ma semaine » pour le professeur connecté | ✅ |
+| M7 — Notes et UE | Unités d'enseignement par formation (code, semestre, crédits), coefficient par matière, évaluations pondérées (devoir, examen, TP… poids total 100 %, barème libre), grille de saisie des notes sur mobile (absent = 0, dispensé), saisie par le professeur de ses matières ou par la direction, verrouillage par la direction, résultats de la classe : moyenne par matière, UE (coefficients) et semestre (crédits), UE validée à 10 ou par compensation, crédits acquis, moyennes provisoires signalées | ✅ |
 | M6 — Tableau de bord et documents | Encaissé du jour / du mois, reste à recouvrer ✅ · exports Excel et PDF, attestation d'inscription, certificat de scolarité 🔜 | 🟡 |
 
-> **Hors MVP (phase 2)** : notes et évaluations, semestres, unités d'enseignement (UE) et crédits ECTS, délibérations et procès-verbaux, relevés de notes, exceptions d'emploi du temps (cours annulés ou déplacés à une date précise), portail étudiant, application mobile native.
+> **Hors MVP (phase 2)** : délibérations (jury, rattrapages) et procès-verbaux, relevés de notes, exceptions d'emploi du temps (cours annulés ou déplacés à une date précise), portail étudiant, application mobile native.
 
 ## Le système LMD dans Kalaas
 
@@ -166,7 +168,8 @@ kalaas/
 │   │       ├── attendance/         # présences : cours du jour, écran d'appel
 │   │       ├── unpaid/             # impayés, relances WhatsApp, modèles de messages
 │   │       ├── team/               # équipe : invitations, rôles, accès
-│   │       ├── teachers/           # professeurs (fiches, matières, volume horaire)
+│   │       ├── grades/             # notes : évaluations, entry/ (grille de saisie), results/ (moyennes UE et semestre)
+│   │       ├── teachers/           # professeurs (fiches, matières, volume horaire) + hours/ (état des heures, export Excel)
 │   │       ├── timetable/          # emplois du temps, affectations + route pdf/ (téléchargement)
 │   │       └── settings/           # années académiques, salles, préfixe des matricules
 │   ├── components/
@@ -222,7 +225,7 @@ const apprenants = await db.apprenant.findMany(); // filtré automatiquement sur
 | --- | --- |
 | Directeur | Tout l'établissement, tableau de bord financier, gestion de l'équipe, annulation des paiements |
 | Caissier / Scolarité | Inscriptions et réinscriptions, encaissements, reçus, relances |
-| Formateur / Enseignant | Ses sessions (ou classes) et les présences |
+| Formateur / Enseignant | Ses sessions (ou classes), les présences et les notes de ses matières |
 
 Un même utilisateur peut appartenir à plusieurs établissements (cas fréquent des enseignants vacataires).
 
@@ -245,6 +248,7 @@ npx prisma migrate dev --name xxx # nouvelle migration
 - [x] **LMD** : années académiques, cycles / filières / niveaux, matricule, réinscriptions
 - [x] **Paiements** : encaissements, répartition, reçus numérotés, annulation, journal de caisse
 - [ ] Paiements (reste) : reçu PDF, clôture de caisse, relances wa.me, import Excel
+- [x] **Notes** : UE, coefficients, évaluations pondérées, saisie, résultats par semestre
 - [ ] **Pilotage** : présences, exports, attestations d'inscription et certificats de scolarité
 - [ ] **Pilote** : E-DEV Academy + 2 établissements (dont au moins un en LMD), corrections
 

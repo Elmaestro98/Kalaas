@@ -75,45 +75,51 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
 
   const emploi = id ? await chargerEmploiDuTemps(db, vue, id) : null;
 
-  // Professeurs affectés à la classe (une matière = un professeur)
-  const affectationsBrutes =
-    vue === "classe" && id
-      ? await db.affectation.findMany({
-          where: { sessionId: id },
-          orderBy: { matiere: "asc" },
-          include: { enseignant: { select: { prenom: true, nom: true } } },
-        })
-      : [];
   const sessionChoisie = vue === "classe" ? sessions.find((s) => s.id === id) : undefined;
   const semaines = sessionChoisie ? nbSemaines(sessionChoisie.dateDebut, sessionChoisie.dateFin) : 0;
 
+  // Classe : programme de sa formation, affectations et séances réellement faites (appels)
+  const [programme, affectationsBrutes, seancesFaites] = sessionChoisie
+    ? await Promise.all([
+        db.matiere.findMany({
+          where: { formationId: sessionChoisie.formationId, active: true },
+          orderBy: [{ semestre: "asc" }, { ordre: "asc" }, { intitule: "asc" }],
+          select: { id: true, intitule: true, volumeHoraire: true, enseignantHabituelId: true },
+        }),
+        db.affectation.findMany({
+          where: { sessionId: sessionChoisie.id },
+          orderBy: { matiere: "asc" },
+          include: { enseignant: { select: { prenom: true, nom: true } } },
+        }),
+        db.seance.findMany({
+          where: { sessionId: sessionChoisie.id, matiereId: { not: null } },
+          select: { matiereId: true, heureDebut: true, heureFin: true },
+        }),
+      ])
+    : [[], [], []];
+
   const affectations: LigneAffectation[] = affectationsBrutes.map((a) => {
-    const coursMatiere = (emploi?.creneaux ?? []).filter(
-      (c) => c.matiere.toLowerCase() === a.matiere.toLowerCase(),
+    const coursMatiere = (emploi?.creneaux ?? []).filter((c) =>
+      a.matiereId ? c.matiereId === a.matiereId : c.matiere.toLowerCase() === a.matiere.toLowerCase(),
     );
+    const minutesRealisees = seancesFaites
+      .filter((s) => s.matiereId === a.matiereId)
+      .reduce((t, s) => t + ((s.heureFin ?? 0) - (s.heureDebut ?? 0)), 0);
     return {
       id: a.id,
       matiere: a.matiere,
+      matiereId: a.matiereId,
       enseignantId: a.enseignantId,
       enseignant: nomEnseignant(a.enseignant),
       volumeHoraire: a.volumeHoraire,
       heuresHebdo: dureeTotaleHebdo(coursMatiere),
       heuresProgrammees: Math.round((minutesHebdo(coursMatiere) / 60) * semaines),
+      heuresRealisees: Math.round((minutesRealisees / 60) * 10) / 10,
     };
   });
 
-  // Matières déjà saisies (cours et affectations), proposées pour éviter les fautes de frappe
-  const matieres =
-    vue === "classe" && estDirecteur
-      ? [
-          ...new Set([
-            ...affectationsBrutes.map((a) => a.matiere),
-            ...(
-              await db.creneau.findMany({ distinct: ["matiere"], select: { matiere: true } })
-            ).map((m) => m.matiere),
-          ]),
-        ].sort((a, b) => a.localeCompare(b, "fr"))
-      : [];
+  // Matières du programme sans professeur dans cette classe
+  const nonAffectees = programme.filter((m) => !affectations.some((a) => a.matiereId === m.id));
 
   const messageVide = estFormateur
     ? "Votre compte n'est pas encore relié à une fiche professeur. Demandez à la direction de le faire."
@@ -202,9 +208,15 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
               {vue === "classe" && (
                 <AssignmentsPanel
                   sessionId={id}
+                  formationId={sessionChoisie?.formationId ?? ""}
                   affectations={affectations}
                   enseignants={enseignants}
-                  matieres={matieres}
+                  programme={programme}
+                  nonAffectees={nonAffectees.map((m) => ({
+                    id: m.id,
+                    intitule: m.intitule,
+                    habituel: enseignants.find((e) => e.id === m.enseignantHabituelId)?.nom ?? null,
+                  }))}
                   peutModifier={estDirecteur}
                 />
               )}
@@ -228,8 +240,9 @@ export default async function TimetablePage({ searchParams }: TimetablePageProps
                       sessionId={id}
                       enseignants={enseignants}
                       salles={salles.map((s) => ({ id: s.id, nom: s.nom }))}
-                      matieres={matieres}
-                      affectations={affectations.map((a) => ({ matiere: a.matiere, enseignantId: a.enseignantId }))}
+                      formationId={sessionChoisie?.formationId ?? ""}
+                      matieres={programme}
+                      affectations={affectations.map((a) => ({ matiereId: a.matiereId, enseignantId: a.enseignantId }))}
                     />
                   </div>
                 </details>

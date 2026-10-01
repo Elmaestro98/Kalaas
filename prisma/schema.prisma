@@ -182,6 +182,10 @@ model Institut {
   enseignants        Enseignant[]
   affectations       Affectation[]
   invitations        Invitation[]
+  matieres           Matiere[]
+  unitesEnseignement UniteEnseignement[]
+  evaluations        Evaluation[]
+  notes              Note[]
 }
 
 model Abonnement {
@@ -267,8 +271,10 @@ model Formation {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
-  institut Institut  @relation(fields: [institutId], references: [id])
-  sessions Session[]
+  institut           Institut            @relation(fields: [institutId], references: [id])
+  sessions           Session[]
+  matieres           Matiere[]
+  unitesEnseignement UniteEnseignement[]
 
   @@index([institutId])
   @@index([institutId, cycle, filiere, niveau])
@@ -296,6 +302,7 @@ model Session {
   seances         Seance[]
   creneaux        Creneau[]
   affectations    Affectation[]
+  evaluations     Evaluation[]
 
   @@index([institutId])
   @@index([formationId])
@@ -321,13 +328,49 @@ model Enseignant {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
-  institut     Institut      @relation(fields: [institutId], references: [id])
-  membre       Membre?       @relation(fields: [membreId], references: [id])
-  creneaux     Creneau[]
-  affectations Affectation[]
-  invitations  Invitation[]
+  institut            Institut      @relation(fields: [institutId], references: [id])
+  membre              Membre?       @relation(fields: [membreId], references: [id])
+  creneaux            Creneau[]
+  affectations        Affectation[]
+  invitations         Invitation[]
+  seances             Seance[]
+  matieresHabituelles Matiere[]     @relation("ProfesseurHabituel")
 
   @@index([institutId, nom])
+}
+
+// Programme d'une formation : ses matières (prêt pour les semestres et UE du LMD)
+model Matiere {
+  id                   String   @id @default(cuid())
+  institutId           String
+  formationId          String
+  intitule             String
+  code                 String?
+  volumeHoraire        Int?
+  heuresCM             Int?
+  heuresTD             Int?
+  heuresTP             Int?
+  coefficient          Int?
+  credits              Int?
+  semestre             Int?
+  ueId                 String?
+  enseignantHabituelId String?
+  ordre                Int      @default(0)
+  active               Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  institut           Institut           @relation(fields: [institutId], references: [id])
+  formation          Formation          @relation(fields: [formationId], references: [id])
+  enseignantHabituel Enseignant?        @relation("ProfesseurHabituel", fields: [enseignantHabituelId], references: [id], onDelete: SetNull)
+  creneaux           Creneau[]
+  affectations       Affectation[]
+  seances            Seance[]
+  unite              UniteEnseignement? @relation(fields: [ueId], references: [id], onDelete: SetNull)
+  evaluations        Evaluation[]
+
+  @@unique([formationId, intitule])
+  @@index([institutId])
 }
 
 model Salle {
@@ -355,6 +398,7 @@ model Creneau {
   heureDebut   Int
   heureFin     Int
   matiere      String
+  matiereId    String?
   enseignantId String?
   salleId      String?
   createdAt    DateTime    @default(now())
@@ -362,6 +406,7 @@ model Creneau {
 
   institut   Institut    @relation(fields: [institutId], references: [id])
   session    Session     @relation(fields: [sessionId], references: [id])
+  matiereRef Matiere?    @relation(fields: [matiereId], references: [id])
   enseignant Enseignant? @relation(fields: [enseignantId], references: [id])
   salle      Salle?      @relation(fields: [salleId], references: [id])
   seances    Seance[]
@@ -425,6 +470,7 @@ model Inscription {
   suivantes  Inscription[] @relation("Parcours")
   echeances  Echeance[]
   presences  Presence[]
+  notes      Note[]
 
   @@index([institutId])
   @@index([apprenantId])
@@ -560,23 +606,27 @@ model ClotureCaisse {
 // Matière et horaires sont recopiés : l'historique reste juste même si
 // le cours est ensuite modifié ou retiré de l'emploi du temps.
 model Seance {
-  id         String   @id @default(cuid())
-  institutId String
-  sessionId  String
-  creneauId  String?
-  date       DateTime @db.Date
-  matiere    String?
-  heureDebut Int?
-  heureFin   Int?
-  appelParId String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(cuid())
+  institutId   String
+  sessionId    String
+  creneauId    String?
+  date         DateTime @db.Date
+  matiere      String?
+  matiereId    String?
+  enseignantId String?
+  heureDebut   Int?
+  heureFin     Int?
+  appelParId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  institut  Institut   @relation(fields: [institutId], references: [id])
-  session   Session    @relation(fields: [sessionId], references: [id])
-  creneau   Creneau?   @relation(fields: [creneauId], references: [id], onDelete: SetNull)
-  appelPar  Membre?    @relation(fields: [appelParId], references: [id])
-  presences Presence[]
+  institut   Institut    @relation(fields: [institutId], references: [id])
+  session    Session     @relation(fields: [sessionId], references: [id])
+  creneau    Creneau?    @relation(fields: [creneauId], references: [id], onDelete: SetNull)
+  matiereRef Matiere?    @relation(fields: [matiereId], references: [id], onDelete: SetNull)
+  enseignant Enseignant? @relation(fields: [enseignantId], references: [id], onDelete: SetNull)
+  appelPar   Membre?     @relation(fields: [appelParId], references: [id])
+  presences  Presence[]
 
   @@unique([sessionId, date, creneauId])
   @@index([institutId, date])
@@ -678,11 +728,13 @@ model Affectation {
   sessionId     String
   enseignantId  String
   matiere       String
+  matiereId     String?
   volumeHoraire Int?
   createdAt     DateTime @default(now())
 
   institut   Institut   @relation(fields: [institutId], references: [id])
   session    Session    @relation(fields: [sessionId], references: [id])
+  matiereRef Matiere?   @relation(fields: [matiereId], references: [id])
   enseignant Enseignant @relation(fields: [enseignantId], references: [id])
 
   @@unique([sessionId, matiere])
@@ -708,4 +760,88 @@ model Invitation {
   enseignant Enseignant? @relation(fields: [enseignantId], references: [id])
 
   @@index([institutId, email])
+}
+
+// ─── Notes (LMD et formations courtes) ─────────────
+
+enum TypeEvaluation {
+  DEVOIR
+  EXAMEN
+  TP
+  ORAL
+  PROJET
+  AUTRE
+}
+
+enum StatutNote {
+  NOTEE
+  ABSENT
+  DISPENSE
+}
+
+// Unité d'enseignement : regroupe des matières d'un semestre, porte des crédits ECTS
+model UniteEnseignement {
+  id          String   @id @default(cuid())
+  institutId  String
+  formationId String
+  code        String?
+  intitule    String
+  semestre    Int?
+  credits     Int?
+  ordre       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  institut  Institut  @relation(fields: [institutId], references: [id])
+  formation Formation @relation(fields: [formationId], references: [id])
+  matieres  Matiere[]
+
+  @@unique([formationId, intitule])
+  @@index([institutId])
+}
+
+// Une évaluation (devoir, examen…) d'une matière dans une classe, avec son poids en %
+model Evaluation {
+  id          String         @id @default(cuid())
+  institutId  String
+  sessionId   String
+  matiereId   String
+  intitule    String
+  type        TypeEvaluation @default(DEVOIR)
+  date        DateTime?      @db.Date
+  poids       Int
+  bareme      Int            @default(20)
+  verrouillee Boolean        @default(false)
+  creeParId   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  institut Institut @relation(fields: [institutId], references: [id])
+  session  Session  @relation(fields: [sessionId], references: [id])
+  matiere  Matiere  @relation(fields: [matiereId], references: [id])
+  notes    Note[]
+
+  @@index([sessionId, matiereId])
+  @@index([institutId])
+}
+
+// Une note : valeur en centièmes (12,5 → 1250) pour éviter les nombres à virgule
+model Note {
+  id            String     @id @default(cuid())
+  institutId    String
+  evaluationId  String
+  inscriptionId String
+  statut        StatutNote @default(NOTEE)
+  valeur        Int?
+  saisieParId   String?
+  updatedAt     DateTime   @updatedAt
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  evaluation  Evaluation  @relation(fields: [evaluationId], references: [id])
+  inscription Inscription @relation(fields: [inscriptionId], references: [id])
+
+  @@unique([evaluationId, inscriptionId])
+  @@index([inscriptionId])
+  @@index([institutId])
 }

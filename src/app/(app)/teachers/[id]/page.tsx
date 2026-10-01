@@ -36,7 +36,7 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
     notFound();
   }
 
-  const [affectations, creneaux, membres, programmation] = await Promise.all([
+  const [affectations, creneaux, membres, programmation, seances] = await Promise.all([
     db.affectation.findMany({
       where: { enseignantId: enseignant.id, session: { dateFin: { gte: dateDuJour() } } },
       orderBy: { matiere: "asc" },
@@ -66,7 +66,18 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
         })
       : Promise.resolve([]),
     chargerEmploiDuTemps(db, "enseignant", enseignant.id),
+    // Cours réellement faits (appel enregistré) par ce professeur
+    db.seance.findMany({
+      where: { enseignantId: enseignant.id },
+      select: { sessionId: true, matiereId: true, date: true, heureDebut: true, heureFin: true },
+    }),
   ]);
+
+  const duree = (s: { heureDebut: number | null; heureFin: number | null }) => (s.heureFin ?? 0) - (s.heureDebut ?? 0);
+  const aujourdhui = dateDuJour();
+  const debutMois = new Date(Date.UTC(aujourdhui.getUTCFullYear(), aujourdhui.getUTCMonth(), 1));
+  const heuresRealiseesMois =
+    Math.round((seances.filter((s) => s.date >= debutMois).reduce((t, s) => t + duree(s), 0) / 60) * 10) / 10;
 
   // Heures programmées sur toute la session, pour chaque matière affectée
   const suivi = affectations.map((a) => {
@@ -74,7 +85,21 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
       (c) => c.session.id === a.session.id && c.matiere.toLowerCase() === a.matiere.toLowerCase(),
     );
     const programmees = Math.round((minutesHebdo(cours) / 60) * nbSemaines(a.session.dateDebut, a.session.dateFin));
-    return { ...a, hebdo: dureeTotaleHebdo(cours), programmees, etat: etatVolume(programmees, a.volumeHoraire) };
+    const realisees =
+      Math.round(
+        (seances
+          .filter((s) => s.sessionId === a.session.id && a.matiereId && s.matiereId === a.matiereId)
+          .reduce((t, s) => t + duree(s), 0) /
+          60) *
+          10,
+      ) / 10;
+    return {
+      ...a,
+      hebdo: dureeTotaleHebdo(cours),
+      programmees,
+      realisees,
+      etat: etatVolume(programmees, a.volumeHoraire),
+    };
   });
 
   // Message WhatsApp prêt à envoyer : ses cours jour par jour
@@ -170,11 +195,18 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
         <div className="rounded-lg bg-navy-900 p-5 text-white">
           <p className="text-sm text-white/70">Volume hebdomadaire</p>
           <p className="mt-1 text-2xl font-bold text-gold-500 tabular-nums">{dureeTotaleHebdo(creneaux)}</p>
-          <p className="mt-1 text-xs text-white/70">{creneaux.length} cours par semaine</p>
+          <p className="mt-1 text-xs text-white/70">
+            {creneaux.length} cours par semaine · {classes.length} classe{classes.length > 1 ? "s" : ""}
+          </p>
         </div>
         <div className="rounded-lg border border-border bg-surface-200 p-5">
-          <p className="text-sm text-ink-muted">Classes</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums">{classes.length}</p>
+          <p className="text-sm text-ink-muted">Réalisé ce mois</p>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-success">{heuresRealiseesMois} h</p>
+          <p className="mt-1 text-xs text-ink-muted">
+            {enseignant.tarifHoraire
+              ? `${formatFcfa(Math.round(heuresRealiseesMois * enseignant.tarifHoraire))} à payer`
+              : "cours dont l'appel a été fait"}
+          </p>
         </div>
         <div className="rounded-lg border border-border bg-surface-200 p-5">
           <p className="text-sm text-ink-muted">Coût hebdomadaire estimé</p>
@@ -209,7 +241,9 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
                     </span>
                   </Link>
                   <span className="shrink-0 text-right">
-                    <span className="block text-xs text-ink-muted tabular-nums">{a.hebdo} / semaine</span>
+                    <span className="block text-xs text-ink-muted tabular-nums">
+                      {a.hebdo} / semaine · <span className="font-semibold text-success">réalisé {a.realisees} h</span>
+                    </span>
                     <span
                       className={`mt-0.5 inline-block rounded-full px-2 text-xs tabular-nums ${ETAT_VOLUME[a.etat].classe}`}
                     >

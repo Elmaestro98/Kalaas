@@ -15,7 +15,7 @@ const schemaCreneau = z
     jour: z.enum(["LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"], "Choisissez le jour."),
     heureDebut: z.string().refine((v) => heureVersMinutes(v) !== null, "Heure de début invalide."),
     heureFin: z.string().refine((v) => heureVersMinutes(v) !== null, "Heure de fin invalide."),
-    matiere: z.string().trim().min(2, "Indiquez la matière ou le cours.").max(80, "80 caractères maximum."),
+    matiereId: z.string().min(1, "Choisissez la matière."),
     enseignantId: z.string(),
     salleId: z.string(),
   })
@@ -33,7 +33,7 @@ const schemaCreneau = z
     }
   });
 
-export type ChampCreneau = "jour" | "heureDebut" | "heureFin" | "matiere" | "enseignantId" | "salleId";
+export type ChampCreneau = "jour" | "heureDebut" | "heureFin" | "matiereId" | "enseignantId" | "salleId";
 
 export type EtatCreneau = {
   erreurs: Partial<Record<ChampCreneau, string>>;
@@ -69,6 +69,13 @@ export async function ajouterCreneau(_etat: EtatCreneau, formData: FormData): Pr
   const session = await db.session.findFirst({ where: { id: d.sessionId } });
   if (!session) {
     return echec({ erreurGenerale: "Session introuvable." });
+  }
+  // La matière doit appartenir au programme de la formation de cette classe
+  const matiere = await db.matiere.findFirst({
+    where: { id: d.matiereId, formationId: session.formationId, active: true },
+  });
+  if (!matiere) {
+    return echec({ erreurs: { matiereId: "Cette matière ne fait pas partie du programme de la formation." } });
   }
   if (d.enseignantId && !(await db.enseignant.findFirst({ where: { id: d.enseignantId, actif: true } }))) {
     return echec({ erreurs: { enseignantId: "Enseignant introuvable." } });
@@ -120,7 +127,8 @@ export async function ajouterCreneau(_etat: EtatCreneau, formData: FormData): Pr
         jour: d.jour,
         heureDebut: debut,
         heureFin: fin,
-        matiere: d.matiere,
+        matiere: matiere.intitule,
+        matiereId: matiere.id,
         enseignantId: d.enseignantId || null,
         salleId: d.salleId || null,
       },

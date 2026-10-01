@@ -12,7 +12,7 @@ export default async function CoursesPage() {
     db.formation.findMany({
       where: { active: true },
       orderBy: [{ filiere: "asc" }, { niveau: "asc" }, { intitule: "asc" }],
-      include: { _count: { select: { sessions: true } } },
+      include: { _count: { select: { sessions: true, matieres: { where: { active: true } } } } },
     }),
     db.session.findMany({
       orderBy: { dateDebut: "desc" },
@@ -117,6 +117,7 @@ export default async function CoursesPage() {
                   prixTotal={formation.prixTotal}
                   nbMensualites={formation.nbMensualites}
                   nbSessions={formation._count.sessions}
+                  nbMatieres={formation._count.matieres}
                 />
               ))}
             </div>

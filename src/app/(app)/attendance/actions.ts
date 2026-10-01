@@ -70,6 +70,9 @@ export async function enregistrerAppel(_etat: EtatAppel, formData: FormData): Pr
           creneauId: creneau.id,
           date,
           matiere: creneau.matiere,
+          matiereId: creneau.matiereId,
+          // Professeur du cours au moment de l'appel : base des heures réalisées (paie des vacataires)
+          enseignantId: creneau.enseignantId,
           heureDebut: creneau.heureDebut,
           heureFin: creneau.heureFin,
           appelParId: membre.id,

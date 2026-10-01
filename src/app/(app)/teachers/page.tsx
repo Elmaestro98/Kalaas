@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Link2, Plus } from "lucide-react";
+import { Clock, Link2, Plus } from "lucide-react";
 import type { Enseignant } from "@prisma/client";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
@@ -66,13 +66,22 @@ export default async function TeachersPage() {
           </p>
         </div>
         {estDirecteur && (
-          <Link
-            href="/teachers/new"
-            className="flex h-11 items-center gap-2 rounded-md bg-action px-5 font-medium text-on-action hover:bg-action-hover"
-          >
-            <Plus size={18} aria-hidden="true" />
-            Nouveau professeur
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/teachers/hours"
+              className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
+            >
+              <Clock size={18} aria-hidden="true" />
+              État des heures
+            </Link>
+            <Link
+              href="/teachers/new"
+              className="flex h-11 items-center gap-2 rounded-md bg-action px-5 font-medium text-on-action hover:bg-action-hover"
+            >
+              <Plus size={18} aria-hidden="true" />
+              Nouveau professeur
+            </Link>
+          </div>
         )}
       </div>
 
