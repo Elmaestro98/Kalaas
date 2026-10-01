@@ -60,6 +60,11 @@ enum StatutInscription {
   TRANSFEREE
 }
 
+enum TypeDocument {
+  ATTESTATION_INSCRIPTION
+  CERTIFICAT_SCOLARITE
+}
+
 enum TypeRemise {
   MONTANT
   POURCENTAGE
@@ -186,6 +191,8 @@ model Institut {
   unitesEnseignement UniteEnseignement[]
   evaluations        Evaluation[]
   notes              Note[]
+  documentsDelivres  DocumentDelivre[]
+  compteursDocument  CompteurDocument[]
 }
 
 model Abonnement {
@@ -232,6 +239,7 @@ model Membre {
   relancesEnvoyees   Relance[]
   ficheEnseignant    Enseignant?
   appels             Seance[]
+  documentsDelivres  DocumentDelivre[]
 
   @@unique([institutId, utilisateurId])
   @@index([utilisateurId])
@@ -463,14 +471,15 @@ model Inscription {
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
 
-  institut   Institut      @relation(fields: [institutId], references: [id])
-  apprenant  Apprenant     @relation(fields: [apprenantId], references: [id])
-  session    Session       @relation(fields: [sessionId], references: [id])
-  precedente Inscription?  @relation("Parcours", fields: [inscriptionPrecedenteId], references: [id])
-  suivantes  Inscription[] @relation("Parcours")
+  institut   Institut          @relation(fields: [institutId], references: [id])
+  apprenant  Apprenant         @relation(fields: [apprenantId], references: [id])
+  session    Session           @relation(fields: [sessionId], references: [id])
+  precedente Inscription?      @relation("Parcours", fields: [inscriptionPrecedenteId], references: [id])
+  suivantes  Inscription[]     @relation("Parcours")
   echeances  Echeance[]
   presences  Presence[]
   notes      Note[]
+  documents  DocumentDelivre[]
 
   @@index([institutId])
   @@index([apprenantId])
@@ -844,4 +853,38 @@ model Note {
   @@unique([evaluationId, inscriptionId])
   @@index([inscriptionId])
   @@index([institutId])
+}
+
+// Attestations et certificats délivrés : chaque document a un numéro unique
+// et garde une copie figée de son contenu (le PDF retéléchargé est identique).
+model DocumentDelivre {
+  id            String       @id @default(cuid())
+  institutId    String
+  inscriptionId String
+  type          TypeDocument
+  numero        String
+  annee         Int
+  motif         String?
+  contenu       Json
+  delivreParId  String
+  createdAt     DateTime     @default(now())
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  inscription Inscription @relation(fields: [inscriptionId], references: [id])
+  delivrePar  Membre      @relation(fields: [delivreParId], references: [id])
+
+  @@unique([institutId, numero])
+  @@index([institutId, createdAt])
+  @@index([inscriptionId])
+}
+
+model CompteurDocument {
+  institutId String
+  type       TypeDocument
+  annee      Int
+  dernier    Int          @default(0)
+
+  institut Institut @relation(fields: [institutId], references: [id])
+
+  @@id([institutId, type, annee])
 }

@@ -20,6 +20,8 @@ import {
   statutFinancier,
 } from "@/lib/echeancier";
 import Badge from "@/components/ui/badge";
+import { TYPES_DOCUMENT } from "@/lib/documents";
+import DocumentForm from "./document-form";
 
 type StudentPageProps = {
   params: Promise<{ id: string }>;
@@ -70,6 +72,21 @@ export default async function StudentPage({ params }: StudentPageProps) {
   });
   const compteursPresence = compter(presences.map((p) => p.statut));
   const assiduite = tauxAssiduite(compteursPresence);
+
+  // Attestations et certificats déjà délivrés
+  const documents = await db.documentDelivre.findMany({
+    where: { inscription: { apprenantId: apprenant.id } },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+    include: { delivrePar: { select: { utilisateur: { select: { nom: true } } } } },
+  });
+  const inscriptionsDocuments = apprenant.inscriptions
+    .filter((i) => i.statut === "ACTIVE" || i.statut === "TERMINEE")
+    .map((i) => ({
+      id: i.id,
+      statut: i.statut,
+      label: `${i.session.formation.intitule} · ${i.session.anneeAcademique?.libelle ?? i.session.nom}`,
+    }));
 
   // Historique des relances : une relance groupée (plusieurs échéances) = une seule ligne
   const lignesRelance = await db.relance.findMany({
@@ -347,6 +364,39 @@ export default async function StudentPage({ params }: StudentPageProps) {
                 {compteursPresence.EXCUSE > 0 && <> · {compteursPresence.EXCUSE} excusée{compteursPresence.EXCUSE > 1 ? "s" : ""}</>}
               </p>
             </div>
+          )}
+
+          <h2 className="mt-6 font-semibold">Documents</h2>
+          {inscriptionsDocuments.length === 0 ? (
+            <p className="mt-2 text-sm text-ink-muted">Aucune inscription en cours : pas de document à délivrer.</p>
+          ) : (
+            <div className="mt-2">
+              <DocumentForm inscriptions={inscriptionsDocuments} />
+            </div>
+          )}
+          {documents.length > 0 && (
+            <ul className="mt-3 space-y-2 text-sm">
+              {documents.map((d) => (
+                <li key={d.id} className="flex items-center gap-2 rounded-md bg-surface-100 px-3 py-2">
+                  <div className="flex-1">
+                    <p className="font-medium">{TYPES_DOCUMENT[d.type].label}</p>
+                    <p className="text-xs text-ink-muted">
+                      N° {d.numero} · {formatDate(d.createdAt)}
+                      {d.delivrePar.utilisateur.nom && <> · par {d.delivrePar.utilisateur.nom}</>}
+                    </p>
+                  </div>
+                  <a
+                    href={`/documents/${d.id}`}
+                    download
+                    title="Télécharger"
+                    aria-label={`Télécharger ${d.numero}`}
+                    className="flex size-9 items-center justify-center rounded-md text-ink-muted hover:bg-surface-200 hover:text-ink"
+                  >
+                    <FileDown size={16} aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           )}
 
           <h2 className="mt-6 font-semibold">Relances</h2>

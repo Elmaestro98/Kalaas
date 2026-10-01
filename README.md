@@ -36,7 +36,7 @@ Un même établissement peut donc proposer « Licence Informatique de gestion �
 | Équipe | Invitation par e-mail (Caissier, Formateur, Directeur), acceptation automatique à la première connexion, changement de rôle, retrait d'accès, liaison compte ↔ fiche professeur | ✅ |
 | M5 ter — Professeurs | Fiches professeurs (permanents et vacataires, avec ou sans compte), affectation par matière et par classe, suivi des heures programmées / prévues, programmation envoyée par WhatsApp, « Ma semaine » pour le professeur connecté | ✅ |
 | M7 — Notes et UE | Unités d'enseignement par formation (code, semestre, crédits), coefficient par matière, évaluations pondérées (devoir, examen, TP… poids total 100 %, barème libre), grille de saisie des notes sur mobile (absent = 0, dispensé), saisie par le professeur de ses matières ou par la direction, verrouillage par la direction, résultats de la classe : moyenne par matière, UE (coefficients) et semestre (crédits), UE validée à 10 ou par compensation, crédits acquis, moyennes provisoires signalées, relevé de notes PDF (A4, par étudiant ou toute la classe, mention, rang, bilan annuel, filigrane « PROVISOIRE » tant que tout n'est pas verrouillé) | ✅ |
-| M6 — Tableau de bord et documents | Encaissé du jour / du mois, reste à recouvrer ✅ · exports Excel et PDF, attestation d'inscription, certificat de scolarité 🔜 | 🟡 |
+| M6 — Tableau de bord et documents | Encaissé du jour / du mois, reste à recouvrer ✅ · attestation d'inscription et certificat de scolarité PDF (numéro unique ATT- / CS-, contenu figé, historique sur la fiche étudiant, refus si abandon ou transfert, assiduité sur le certificat) ✅ · exports Excel et PDF du tableau de bord 🔜 | 🟡 |
 
 > **Hors MVP (phase 2)** : délibérations (jury, rattrapages, procès-verbaux) et procès-verbaux, relevés de notes, exceptions d'emploi du temps (cours annulés ou déplacés à une date précise), portail étudiant, application mobile native.
 
@@ -168,6 +168,7 @@ kalaas/
 │   │       ├── attendance/         # présences : cours du jour, écran d'appel
 │   │       ├── unpaid/             # impayés, relances WhatsApp, modèles de messages
 │   │       ├── team/               # équipe : invitations, rôles, accès
+│   │       ├── documents/          # téléchargement des attestations et certificats délivrés
 │   │       ├── grades/             # notes : évaluations, entry/ (grille de saisie), results/ (moyennes UE et semestre), transcript/ (relevés PDF)
 │   │       ├── teachers/           # professeurs (fiches, matières, volume horaire) + hours/ (état des heures, export Excel)
 │   │       ├── timetable/          # emplois du temps, affectations + route pdf/ (téléchargement)
@@ -249,7 +250,8 @@ npx prisma migrate dev --name xxx # nouvelle migration
 - [x] **Paiements** : encaissements, répartition, reçus numérotés, annulation, journal de caisse
 - [ ] Paiements (reste) : reçu PDF, clôture de caisse, relances wa.me, import Excel
 - [x] **Notes** : UE, coefficients, évaluations pondérées, saisie, résultats par semestre
-- [ ] **Pilotage** : présences, exports, attestations d'inscription et certificats de scolarité
+- [x] **Documents** : relevé de notes, attestation d'inscription, certificat de scolarité
+- [ ] **Pilotage** : exports du tableau de bord
 - [ ] **Pilote** : E-DEV Academy + 2 établissements (dont au moins un en LMD), corrections
 
 Lancement commercial dès que 3 établissements utilisent Kalaas chaque jour.
