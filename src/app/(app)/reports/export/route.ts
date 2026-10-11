@@ -29,11 +29,12 @@ export async function GET(request: NextRequest) {
 
   const synthese = classeur.addWorksheet("Synthèse");
   synthese.addRow([`${institut.nom} — Rapport financier ${cle}`]).font = { bold: true, size: 13 };
-  synthese.addRow(["Paiements annulés exclus. Paie comptée le mois où elle a été versée."]);
+  synthese.addRow(["Paiements et dépenses annulés exclus. Solde = encaissé − paie versée − dépenses."]);
   synthese.addRow([]);
   entete(synthese, ["Indicateur", "Montant (FCFA)"]);
   synthese.addRow(["Encaissé", rapport.encaisse]);
   synthese.addRow(["Paie des vacataires versée", rapport.paieVersee]);
+  synthese.addRow(["Dépenses", rapport.depenses]);
   synthese.addRow(["Solde du mois", rapport.solde]).font = { bold: true };
   synthese.addRow(["Paie validée encore à payer", rapport.paieAPayer]);
   synthese.addRow(["Paiements annulés", rapport.annule]);
@@ -60,13 +61,23 @@ export async function GET(request: NextRequest) {
   formations.columns = [{ width: 40 }, { width: 18 }];
   formations.getColumn(2).numFmt = "#,##0";
 
-  const mois = classeur.addWorksheet("6 derniers mois");
-  entete(mois, ["Mois", "Encaissé (FCFA)", "Paie versée (FCFA)", "Solde (FCFA)"]);
-  for (const l of historique) {
-    mois.addRow([l.cle, l.encaisse, l.paie, l.solde]);
+  const sorties = classeur.addWorksheet("Dépenses");
+  entete(sorties, ["Catégorie", "Montant (FCFA)"]);
+  sorties.addRow(["Paie des vacataires", rapport.paieVersee]);
+  for (const c of rapport.parCategorie) {
+    sorties.addRow([c.label, c.montant]);
   }
-  mois.columns = [{ width: 12 }, { width: 18 }, { width: 18 }, { width: 18 }];
-  for (const c of [2, 3, 4]) {
+  sorties.addRow(["Total", rapport.paieVersee + rapport.depenses]).font = { bold: true };
+  sorties.columns = [{ width: 30 }, { width: 18 }];
+  sorties.getColumn(2).numFmt = "#,##0";
+
+  const mois = classeur.addWorksheet("6 derniers mois");
+  entete(mois, ["Mois", "Encaissé (FCFA)", "Paie versée (FCFA)", "Dépenses (FCFA)", "Solde (FCFA)"]);
+  for (const l of historique) {
+    mois.addRow([l.cle, l.encaisse, l.paie, l.depenses, l.solde]);
+  }
+  mois.columns = [{ width: 12 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }];
+  for (const c of [2, 3, 4, 5]) {
     mois.getColumn(c).numFmt = "#,##0";
   }
 

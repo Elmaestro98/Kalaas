@@ -10,6 +10,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   PenLine,
+  Receipt,
   Settings,
   UserCog,
   Users,
@@ -87,6 +88,12 @@ export const NAV_SECTIONS: NavSection[] = [
         href: "/unpaid",
         label: "Impayés et relances",
         icon: BellRing,
+        roles: BUREAU,
+      },
+      {
+        href: "/expenses",
+        label: "Dépenses",
+        icon: Receipt,
         roles: BUREAU,
       },
       {

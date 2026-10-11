@@ -71,7 +71,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
       </div>
 
       {/* Les chiffres clés du mois */}
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-lg border border-border bg-surface-200 p-5">
           <p className="text-sm text-ink-muted">Encaissé</p>
           <p className="mt-1 text-2xl font-bold text-success tabular-nums">{formatFcfa(rapport.encaisse)}</p>
@@ -88,12 +88,21 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             {rapport.paieAPayer > 0 && <> · {formatFcfa(rapport.paieAPayer)} encore à payer</>}
           </p>
         </div>
+        <div className="rounded-lg border border-border bg-surface-200 p-5">
+          <p className="text-sm text-ink-muted">Dépenses</p>
+          <p className="mt-1 text-2xl font-bold tabular-nums">{formatFcfa(rapport.depenses)}</p>
+          <p className="mt-1 text-xs text-ink-muted">
+            <Link href={`/expenses?mois=${cle}`} className="font-semibold">
+              voir le détail
+            </Link>
+          </p>
+        </div>
         <div className="rounded-lg bg-navy-900 p-5 text-white">
           <p className="text-sm text-white/70">Solde du mois</p>
           <p className={`mt-1 text-2xl font-bold tabular-nums ${rapport.solde < 0 ? "text-danger" : "text-gold-500"}`}>
             {formatFcfa(rapport.solde)}
           </p>
-          <p className="mt-1 text-xs text-white/70">encaissé − paie versée</p>
+          <p className="mt-1 text-xs text-white/70">encaissé − paie − dépenses</p>
         </div>
         <div className="rounded-lg border border-border bg-surface-200 p-5">
           <div className="flex items-center justify-between gap-2">
@@ -151,6 +160,36 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         </section>
       </div>
 
+      {/* Dépenses par catégorie */}
+      <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5">
+        <h2 className="font-semibold">Sorties d&apos;argent</h2>
+        <table className="mt-3 w-full text-sm">
+          <tbody>
+            <tr className="border-b border-border">
+              <td className="py-2.5">Paie des vacataires</td>
+              <td className="py-2.5 text-right text-ink-muted tabular-nums">
+                {part(rapport.paieVersee, rapport.paieVersee + rapport.depenses)}
+              </td>
+              <td className="py-2.5 text-right font-semibold tabular-nums">{formatFcfa(rapport.paieVersee)}</td>
+            </tr>
+            {rapport.parCategorie.map((c) => (
+              <tr key={c.categorie} className="border-b border-border">
+                <td className="py-2.5">{c.label}</td>
+                <td className="py-2.5 text-right text-ink-muted tabular-nums">
+                  {part(c.montant, rapport.paieVersee + rapport.depenses)}
+                </td>
+                <td className="py-2.5 text-right font-semibold tabular-nums">{formatFcfa(c.montant)}</td>
+              </tr>
+            ))}
+            <tr className="font-bold">
+              <td className="py-2.5">Total</td>
+              <td />
+              <td className="py-2.5 text-right tabular-nums">{formatFcfa(rapport.paieVersee + rapport.depenses)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
       {/* Les 6 derniers mois */}
       <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5">
         <h2 className="font-semibold">Les 6 derniers mois</h2>
@@ -161,6 +200,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 <th className="py-2 font-medium">Mois</th>
                 <th className="py-2 text-right font-medium">Encaissé</th>
                 <th className="py-2 text-right font-medium">Paie versée</th>
+                <th className="py-2 text-right font-medium">Dépenses</th>
                 <th className="py-2 text-right font-medium">Solde</th>
               </tr>
             </thead>
@@ -174,6 +214,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   </td>
                   <td className="py-2.5 text-right tabular-nums">{formatFcfa(l.encaisse)}</td>
                   <td className="py-2.5 text-right tabular-nums">{formatFcfa(l.paie)}</td>
+                  <td className="py-2.5 text-right tabular-nums">{formatFcfa(l.depenses)}</td>
                   <td className={`py-2.5 text-right tabular-nums ${l.solde < 0 ? "text-danger" : ""}`}>
                     {formatFcfa(l.solde)}
                   </td>
@@ -185,8 +226,8 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
       </section>
 
       <p className="mt-4 text-xs text-ink-muted">
-        Les paiements annulés ne sont pas comptés. La paie est comptée le mois où elle a été versée. Les autres dépenses
-        (loyer, salaires des permanents…) ne sont pas encore suivies dans Kalaas.
+        Les paiements et dépenses annulés ne sont pas comptés. La paie est comptée le mois où elle a été versée, les
+        dépenses à leur date.
       </p>
     </div>
   );

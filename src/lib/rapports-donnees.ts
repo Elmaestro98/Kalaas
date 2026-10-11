@@ -2,6 +2,7 @@ import "server-only";
 import type { DbInstitut } from "@/lib/prisma";
 import { dateDuJour } from "@/lib/echeancier";
 import { MODES_PAIEMENT, type ModePaiementSaisie } from "@/lib/paiements";
+import { CATEGORIES_DEPENSE, type CategorieDepenseSaisie } from "@/lib/depenses";
 
 const NON_ANNULE = { annulation: { is: null } };
 
@@ -14,7 +15,9 @@ export type RapportMois = {
   paieVersee: number; // bulletins de vacation payés dans le mois
   nbBulletins: number;
   paieAPayer: number; // bulletins du mois validés, pas encore payés
-  solde: number;
+  depenses: number; // dépenses non annulées du mois
+  parCategorie: { categorie: CategorieDepenseSaisie; label: string; montant: number }[];
+  solde: number; // encaissé − paie versée − dépenses
 };
 
 export type SituationImpayes = {
@@ -23,7 +26,14 @@ export type SituationImpayes = {
   apprenantsEnRetard: number;
 };
 
-export type LigneEvolution = { cle: string; debut: Date; encaisse: number; paie: number; solde: number };
+export type LigneEvolution = {
+  cle: string;
+  debut: Date;
+  encaisse: number;
+  paie: number;
+  depenses: number;
+  solde: number;
+};
 
 function cleMois(d: Date) {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -33,7 +43,7 @@ function cleMois(d: Date) {
 export async function rapportDuMois(db: DbInstitut, debut: Date, fin: Date, cle: string): Promise<RapportMois> {
   const periode = { gte: debut, lt: fin };
 
-  const [modes, annules, repartitions, payees, aPayer] = await Promise.all([
+  const [modes, annules, repartitions, payees, aPayer, categories] = await Promise.all([
     db.paiement.groupBy({
       by: ["mode"],
       where: { ...NON_ANNULE, date: periode },
@@ -62,6 +72,11 @@ export async function rapportDuMois(db: DbInstitut, debut: Date, fin: Date, cle:
       where: { statut: "VALIDEE", mois: cle },
       _sum: { montantNet: true },
     }),
+    db.depense.groupBy({
+      by: ["categorie"],
+      where: { annuleeLe: null, date: periode },
+      _sum: { montant: true },
+    }),
   ]);
 
   const parMode = MODES_PAIEMENT.map(({ valeur }) => {
@@ -78,6 +93,13 @@ export async function rapportDuMois(db: DbInstitut, debut: Date, fin: Date, cle:
 
   const paieVersee = payees._sum.montantNet ?? 0;
 
+  const parCategorie = CATEGORIES_DEPENSE.map(({ valeur, label }) => ({
+    categorie: valeur,
+    label,
+    montant: categories.find((c) => c.categorie === valeur)?._sum.montant ?? 0,
+  })).filter((c) => c.montant > 0);
+  const depenses = parCategorie.reduce((s, c) => s + c.montant, 0);
+
   return {
     encaisse,
     nbPaiements: parMode.reduce((s, m) => s + m.nombre, 0),
@@ -89,7 +111,9 @@ export async function rapportDuMois(db: DbInstitut, debut: Date, fin: Date, cle:
     paieVersee,
     nbBulletins: payees._count,
     paieAPayer: aPayer._sum.montantNet ?? 0,
-    solde: encaisse - paieVersee,
+    depenses,
+    parCategorie,
+    solde: encaisse - paieVersee - depenses,
   };
 }
 
@@ -112,11 +136,11 @@ export async function situationImpayes(db: DbInstitut): Promise<SituationImpayes
   };
 }
 
-// Encaissé et paie versée sur les N mois qui finissent par « fin » (exclu), le plus ancien d'abord
+// Encaissé, paie versée et dépenses sur les N mois qui finissent par « fin » (exclu), le plus ancien d'abord
 export async function evolution(db: DbInstitut, fin: Date, nombreMois: number): Promise<LigneEvolution[]> {
   const debut = new Date(Date.UTC(fin.getUTCFullYear(), fin.getUTCMonth() - nombreMois, 1));
 
-  const [paiements, vacations] = await Promise.all([
+  const [paiements, vacations, depenses] = await Promise.all([
     db.paiement.findMany({
       where: { ...NON_ANNULE, date: { gte: debut, lt: fin } },
       select: { date: true, montant: true },
@@ -125,12 +149,16 @@ export async function evolution(db: DbInstitut, fin: Date, nombreMois: number): 
       where: { statut: "PAYEE", payeeLe: { gte: debut, lt: fin } },
       select: { payeeLe: true, montantNet: true },
     }),
+    db.depense.findMany({
+      where: { annuleeLe: null, date: { gte: debut, lt: fin } },
+      select: { date: true, montant: true },
+    }),
   ]);
 
   const lignes: LigneEvolution[] = [];
   for (let i = 0; i < nombreMois; i++) {
     const d = new Date(Date.UTC(debut.getUTCFullYear(), debut.getUTCMonth() + i, 1));
-    lignes.push({ cle: cleMois(d), debut: d, encaisse: 0, paie: 0, solde: 0 });
+    lignes.push({ cle: cleMois(d), debut: d, encaisse: 0, paie: 0, depenses: 0, solde: 0 });
   }
   const ligneDe = (date: Date) => lignes.find((l) => l.cle === cleMois(date));
 
@@ -142,8 +170,12 @@ export async function evolution(db: DbInstitut, fin: Date, nombreMois: number): 
     const l = v.payeeLe && ligneDe(v.payeeLe);
     if (l) l.paie += v.montantNet;
   }
+  for (const dep of depenses) {
+    const l = ligneDe(dep.date);
+    if (l) l.depenses += dep.montant;
+  }
   for (const l of lignes) {
-    l.solde = l.encaisse - l.paie;
+    l.solde = l.encaisse - l.paie - l.depenses;
   }
   return lignes;
 }
