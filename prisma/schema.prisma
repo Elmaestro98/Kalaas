@@ -89,6 +89,11 @@ enum ModePaiement {
   VIREMENT
 }
 
+enum StatutVacation {
+  VALIDEE
+  PAYEE
+}
+
 enum StatutPresence {
   PRESENT
   ABSENT
@@ -193,6 +198,8 @@ model Institut {
   notes              Note[]
   documentsDelivres  DocumentDelivre[]
   compteursDocument  CompteurDocument[]
+  vacations          Vacation[]
+  compteursVacation  CompteurVacation[]
 }
 
 model Abonnement {
@@ -240,6 +247,8 @@ model Membre {
   ficheEnseignant    Enseignant?
   appels             Seance[]
   documentsDelivres  DocumentDelivre[]
+  vacationsValidees  Vacation[]        @relation("VacationValidee")
+  vacationsPayees    Vacation[]        @relation("VacationPayee")
 
   @@unique([institutId, utilisateurId])
   @@index([utilisateurId])
@@ -343,6 +352,7 @@ model Enseignant {
   invitations         Invitation[]
   seances             Seance[]
   matieresHabituelles Matiere[]     @relation("ProfesseurHabituel")
+  vacations           Vacation[]
 
   @@index([institutId, nom])
 }
@@ -887,4 +897,46 @@ model CompteurDocument {
   institut Institut @relation(fields: [institutId], references: [id])
 
   @@id([institutId, type, annee])
+}
+
+model Vacation {
+  id                String         @id @default(cuid())
+  institutId        String
+  enseignantId      String
+  mois              String
+  numero            String
+  minutes           Int
+  tarifHoraire      Int
+  montantBrut       Int
+  ajustement        Int            @default(0)
+  motifAjustement   String?
+  montantNet        Int
+  detail            Json
+  statut            StatutVacation @default(VALIDEE)
+  modePaiement      ModePaiement?
+  referencePaiement String?
+  payeeLe           DateTime?
+  valideeParId      String
+  payeeParId        String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  institut   Institut   @relation(fields: [institutId], references: [id])
+  enseignant Enseignant @relation(fields: [enseignantId], references: [id])
+  valideePar Membre     @relation("VacationValidee", fields: [valideeParId], references: [id])
+  payeePar   Membre?    @relation("VacationPayee", fields: [payeeParId], references: [id])
+
+  @@unique([enseignantId, mois])
+  @@unique([institutId, numero])
+  @@index([institutId, mois])
+}
+
+model CompteurVacation {
+  institutId String
+  annee      Int
+  dernier    Int    @default(0)
+
+  institut Institut @relation(fields: [institutId], references: [id])
+
+  @@id([institutId, annee])
 }

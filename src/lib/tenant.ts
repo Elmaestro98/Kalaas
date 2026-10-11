@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import type { Role } from "@prisma/client";
 import { prisma, dbInstitut } from "@/lib/prisma";
 import { accepterInvitation } from "@/lib/invitations";
-
+/
 export const getContexte = cache(async () => {
   const { userId, orgId } = await auth.protect();
 
