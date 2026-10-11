@@ -1,5 +1,6 @@
 import type { Role } from "@prisma/client";
 import {
+  Banknote,
   BarChart3,
   BellRing,
   BookOpen,
@@ -86,6 +87,12 @@ export const NAV_SECTIONS: NavSection[] = [
         href: "/unpaid",
         label: "Impayés et relances",
         icon: BellRing,
+        roles: BUREAU,
+      },
+      {
+        href: "/payroll",
+        label: "Paie des vacataires",
+        icon: Banknote,
         roles: BUREAU,
       },
       {

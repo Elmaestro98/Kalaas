@@ -40,6 +40,8 @@ const MODELES_INSTITUT = new Set<string>([
   "ClotureCaisse",
   "Seance",
   "Presence",
+  "Vacation",
+  "CompteurVacation",
   "ModeleRelance",
   "Relance",
   "JournalAudit",

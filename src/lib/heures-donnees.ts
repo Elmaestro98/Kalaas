@@ -11,11 +11,12 @@ export type LigneHeures = {
   nom: string;
   statut: "PERMANENT" | "VACATAIRE";
   tarifHoraire: number | null;
+  minutes: number; // durée exacte, pour la paie
   heures: number; // heures réalisées (appels faits) dans le mois
   montant: number | null; // heures × tarif horaire
   coursFaits: number;
   coursSansAppel: number; // cours prévus à l'emploi du temps, passés, sans appel
-  detail: { classe: string; matiere: string; heures: number }[];
+  detail: { classe: string; matiere: string; minutes: number; heures: number }[];
 };
 
 // « 2026-10 » → { debut: 1er octobre, fin: 1er novembre } (UTC), ou le mois courant
@@ -101,6 +102,7 @@ export async function etatDesHeures(db: DbInstitut, debut: Date, fin: Date): Pro
       nom: nomEnseignant(e),
       statut: e.statut,
       tarifHoraire: e.tarifHoraire,
+      minutes,
       heures,
       montant: e.tarifHoraire ? Math.round(heures * e.tarifHoraire) : null,
       coursFaits: siennes.length,
@@ -108,6 +110,7 @@ export async function etatDesHeures(db: DbInstitut, debut: Date, fin: Date): Pro
       detail: [...parCours.values()].map((d) => ({
         classe: d.classe,
         matiere: d.matiere,
+        minutes: d.minutes,
         heures: Math.round((d.minutes / 60) * 10) / 10,
       })),
     });
