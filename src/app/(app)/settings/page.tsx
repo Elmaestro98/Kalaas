@@ -6,6 +6,7 @@ import { definirAnneeEnCours, desactiverSalle } from "./actions";
 import AcademicYearForm from "./academic-year-form";
 import PrefixForm from "./prefix-form";
 import ExpenseLimitForm from "./expense-limit-form";
+import EstablishmentForm from "./establishment-form";
 import RoomForm from "./room-form";
 
 export default async function SettingsPage() {
@@ -33,6 +34,27 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-4xl">
       <h1 className="text-2xl font-semibold lg:text-3xl">Paramètres</h1>
       <p className="mt-1 text-sm text-ink-muted">{institut.nom}</p>
+
+      <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
+        <h2 className="font-semibold">Établissement</h2>
+        <p className="mt-1 mb-5 text-sm text-ink-muted">
+          Ces informations apparaissent en en-tête des reçus, bulletins, attestations et relevés de notes.
+        </p>
+        {/* key : après l'enregistrement, le formulaire reprend les valeurs mises au propre par le serveur */}
+        <EstablishmentForm
+          key={institut.updatedAt.toISOString()}
+          valeursInitiales={{
+            nom: institut.nom,
+            ville: institut.ville ?? "",
+            adresse: institut.adresse ?? "",
+            telephone: institut.telephone ?? "",
+            telephone2: institut.telephone2 ?? "",
+            ninea: institut.ninea ?? "",
+            rccm: institut.rccm ?? "",
+            piedRecu: institut.piedRecu ?? "",
+          }}
+        />
+      </section>
 
       <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
         <h2 className="font-semibold">Années académiques</h2>

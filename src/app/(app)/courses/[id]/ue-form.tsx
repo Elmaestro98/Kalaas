@@ -47,7 +47,6 @@ export default function UEForm({ formationId, valeurs = VIDE }: { formationId: s
         </label>
       </div>
       {etat.erreur && <p className="text-sm text-danger">{etat.erreur}</p>}
-      {edition && etat.succes > 0 && !etat.erreur && <p className="text-sm text-success">UE enregistrée.</p>}
       <button
         type="submit"
         disabled={enCours}

@@ -47,8 +47,6 @@ export default function FundForm({ fondsActuel, declare }: FundFormProps) {
       </div>
       {etat.erreur ? (
         <p className="text-sm text-danger">{etat.erreur}</p>
-      ) : etat.succes ? (
-        <p className="text-sm text-success">Fonds de caisse enregistré.</p>
       ) : (
         <p className="text-xs text-ink-muted">
           Les espèces déjà dans la caisse en début de journée (monnaie pour rendre). Laissez 0 si la caisse était

@@ -53,7 +53,6 @@ export default function TemplateForm({ declencheur, label, description, contenu,
           {enCours ? "Enregistrement…" : "Enregistrer"}
         </button>
         {etat.erreur && <span className="text-sm text-danger">{etat.erreur}</span>}
-        {etat.succes && texte === contenu && <span className="text-sm text-success">Modèle enregistré.</span>}
       </div>
     </form>
   );

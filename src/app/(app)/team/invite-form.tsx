@@ -82,7 +82,6 @@ export default function InviteForm({ fiches }: { fiches: { id: string; nom: stri
           {etat.erreur}
         </p>
       )}
-      {etat.succes && <p className="rounded-sm bg-success-soft px-4 py-3 text-sm text-success">{etat.succes}</p>}
 
       <button
         type="submit"

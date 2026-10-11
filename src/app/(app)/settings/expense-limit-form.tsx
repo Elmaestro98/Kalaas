@@ -73,7 +73,6 @@ export default function ExpenseLimitForm({ plafondActuel }: { plafondActuel: num
           {enCours ? "Enregistrement…" : "Enregistrer"}
         </button>
         {etat.erreur && <p className="text-sm text-danger">{etat.erreur}</p>}
-        {etat.succes && <p className="text-sm text-success">Règle enregistrée.</p>}
       </div>
     </form>
   );

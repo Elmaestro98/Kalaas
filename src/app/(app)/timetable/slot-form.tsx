@@ -268,9 +268,6 @@ export default function SlotForm({
           {etat.erreurGenerale}
         </p>
       )}
-      {etat.succes > 0 && !etat.erreurGenerale && (
-        <p className="text-sm text-success">Cours ajouté. Vous pouvez saisir le suivant.</p>
-      )}
     </form>
   );
 }

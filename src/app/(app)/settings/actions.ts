@@ -5,6 +5,95 @@ import { revalidatePath } from "next/cache";
 import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
+import { clerkClient } from "@clerk/nextjs/server";
+import { normaliserTelephone } from "@/lib/telephone";
+
+// ─── Informations de l'établissement (en-tête des reçus et documents) ───
+
+const telephoneValide = (v: string) => v === "" || normaliserTelephone(v) !== null;
+
+const schemaEtablissement = z.object({
+  nom: z.string().trim().min(2, "Le nom de l'établissement est obligatoire.").max(120, "120 caractères maximum."),
+  ville: z.string().trim().min(2, "La ville est obligatoire.").max(80, "80 caractères maximum."),
+  adresse: z.string().trim().max(200, "200 caractères maximum."),
+  telephone: z
+    .string()
+    .trim()
+    .refine((v) => normaliserTelephone(v) !== null, "Numéro invalide (ex. 77 123 45 67)."),
+  telephone2: z.string().trim().refine(telephoneValide, "Numéro invalide (ex. 33 800 00 00)."),
+  ninea: z.string().trim().max(30, "30 caractères maximum."),
+  rccm: z.string().trim().max(50, "50 caractères maximum."),
+  piedRecu: z.string().trim().max(200, "200 caractères maximum."),
+});
+
+export type ChampEtablissement = keyof z.infer<typeof schemaEtablissement>;
+export type EtatEtablissement = { erreurs: Partial<Record<ChampEtablissement, string>>; erreurGenerale: string | null };
+
+export async function modifierEtablissement(_etat: EtatEtablissement, formData: FormData): Promise<EtatEtablissement> {
+  const { institut, membre } = await exigerRole("DIRECTEUR");
+
+  const resultat = schemaEtablissement.safeParse(Object.fromEntries(formData));
+  if (!resultat.success) {
+    const { fieldErrors } = z.flattenError(resultat.error);
+    const erreurs: EtatEtablissement["erreurs"] = {};
+    for (const [champ, messages] of Object.entries(fieldErrors)) {
+      if (messages?.[0]) erreurs[champ as ChampEtablissement] = messages[0];
+    }
+    return { erreurs, erreurGenerale: null };
+  }
+  const d = resultat.data;
+
+  const donnees = {
+    nom: d.nom,
+    ville: d.ville,
+    adresse: d.adresse || null,
+    telephone: normaliserTelephone(d.telephone),
+    telephone2: d.telephone2 ? normaliserTelephone(d.telephone2) : null,
+    ninea: d.ninea || null,
+    rccm: d.rccm || null,
+    piedRecu: d.piedRecu || null,
+  };
+  const avant = {
+    nom: institut.nom,
+    ville: institut.ville,
+    adresse: institut.adresse,
+    telephone: institut.telephone,
+    telephone2: institut.telephone2,
+    ninea: institut.ninea,
+    rccm: institut.rccm,
+    piedRecu: institut.piedRecu,
+  };
+
+  // Institut n'est pas un modèle « tenant » : client brut, établissement du contexte ciblé explicitement
+  await prisma.$transaction([
+    prisma.institut.update({ where: { id: institut.id }, data: donnees }),
+    prisma.journalAudit.create({
+      data: {
+        institutId: institut.id,
+        auteurId: membre.utilisateurId,
+        action: "ETABLISSEMENT_MODIFIE",
+        entite: "Institut",
+        entiteId: institut.id,
+        avant,
+        apres: donnees,
+      },
+    }),
+  ]);
+
+  // Le même nom dans le sélecteur d'établissement (organisation Clerk) : sans effet bloquant si Clerk échoue
+  if (d.nom !== institut.nom) {
+    try {
+      const clerk = await clerkClient();
+      await clerk.organizations.updateOrganization(institut.clerkOrgId, { name: d.nom });
+    } catch {
+      // Le nom reste correct sur les documents ; le sélecteur sera mis à jour au prochain essai
+    }
+  }
+
+  await flash("Informations de l'établissement enregistrées.");
+  revalidatePath("/", "layout");
+  return { erreurs: {}, erreurGenerale: null };
+}
 
 // ─── Années académiques ────────────────────────────
 

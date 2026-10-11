@@ -42,7 +42,6 @@ export default function PrefixForm({ prefixeActuel }: { prefixeActuel: string })
         Enregistrer
       </button>
       {etat.erreur && <p className="text-sm text-danger sm:basis-full">{etat.erreur}</p>}
-      {etat.succes && <p className="text-sm text-success sm:basis-full">Préfixe enregistré.</p>}
     </form>
   );
 }

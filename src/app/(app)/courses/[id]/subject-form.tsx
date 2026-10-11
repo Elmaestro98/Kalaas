@@ -131,7 +131,6 @@ export default function SubjectForm({ formationId, lmd, enseignants, ues, valeur
       </label>
 
       {etat.erreur && <p className="text-sm text-danger">{etat.erreur}</p>}
-      {edition && etat.succes > 0 && !etat.erreur && <p className="text-sm text-success">Matière enregistrée.</p>}
 
       <button
         type="submit"

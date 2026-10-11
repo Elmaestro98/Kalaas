@@ -158,7 +158,6 @@ export default function TeacherForm({ valeurs, comptes }: TeacherFormProps) {
           {etat.erreurGenerale}
         </p>
       )}
-      {etat.succes && <p className="text-sm text-success">Fiche enregistrée.</p>}
 
       <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
         {!v.id && (
