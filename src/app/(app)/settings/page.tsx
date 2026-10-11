@@ -5,6 +5,7 @@ import Badge from "@/components/ui/badge";
 import { definirAnneeEnCours, desactiverSalle } from "./actions";
 import AcademicYearForm from "./academic-year-form";
 import PrefixForm from "./prefix-form";
+import ExpenseLimitForm from "./expense-limit-form";
 import RoomForm from "./room-form";
 
 export default async function SettingsPage() {
@@ -112,6 +113,15 @@ export default async function SettingsPage() {
           scolarité. Il est composé du préfixe, de l&apos;année d&apos;entrée et d&apos;un numéro.
         </p>
         <PrefixForm prefixeActuel={institut.prefixeMatricule ?? prefixeParDefaut(institut.nom)} />
+      </section>
+
+      <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
+        <h2 className="font-semibold">Dépenses saisies par les caissiers</h2>
+        <p className="mt-1 mb-4 text-sm text-ink-muted">
+          Le directeur peut toujours saisir toutes les dépenses. Choisissez ce qu&apos;un caissier a le droit de
+          saisir.
+        </p>
+        <ExpenseLimitForm plafondActuel={institut.plafondDepenseCaissier ?? null} />
       </section>
     </div>
   );

@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
-import { bilanCaissier } from "@/lib/caisse";
+import { bilanCaissier, caisseCloturee } from "@/lib/caisse";
 
 const schemaCloture = z.object({
   montantCompte: z.coerce
@@ -63,6 +63,7 @@ export async function cloturerCaisse(_etat: EtatCloture, formData: FormData): Pr
             montantTheorique: bilan.especes,
             montantCompte,
             ecart,
+            fonds: bilan.fonds,
             especesEncaissees: bilan.especesEncaissees,
             depensesEspeces: bilan.depensesEspeces,
             paieEspeces: bilan.paieEspeces,
@@ -81,4 +82,54 @@ export async function cloturerCaisse(_etat: EtatCloture, formData: FormData): Pr
   revalidatePath("/payments/closing");
   revalidatePath("/payments");
   return { erreur: null };
+}
+
+// ─── Fonds de caisse du jour (modifiable tant que la caisse n'est pas clôturée) ───
+
+const schemaFonds = z.object({
+  montant: z.coerce
+    .number()
+    .int("Montant sans virgule.")
+    .min(0, "Montant invalide.")
+    .max(100_000_000, "Montant trop élevé, vérifiez le nombre de zéros."),
+});
+
+export type EtatFonds = { erreur: string | null; succes: boolean };
+
+export async function definirFondsCaisse(_etat: EtatFonds, formData: FormData): Promise<EtatFonds> {
+  const { institut, membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+
+  const resultat = schemaFonds.safeParse(Object.fromEntries(formData));
+  if (!resultat.success) {
+    return { erreur: resultat.error.issues[0].message, succes: false };
+  }
+  const { montant } = resultat.data;
+
+  const aujourdhui = dateDuJour();
+  if (await caisseCloturee(db, membre.id, aujourdhui)) {
+    return { erreur: "Votre caisse est déjà clôturée : le fonds ne peut plus être modifié.", succes: false };
+  }
+
+  await db.$transaction(async (tx) => {
+    const avant = await tx.fondsCaisse.findFirst({ where: { caissierId: membre.id, date: aujourdhui } });
+    const fonds = await tx.fondsCaisse.upsert({
+      where: { institutId_caissierId_date: { institutId: institut.id, caissierId: membre.id, date: aujourdhui } },
+      create: { institutId: institut.id, caissierId: membre.id, date: aujourdhui, montant },
+      update: { montant },
+    });
+    await tx.journalAudit.create({
+      data: {
+        institutId: institut.id,
+        auteurId: membre.utilisateurId,
+        action: avant ? "FONDS_CAISSE_MODIFIE" : "FONDS_CAISSE_DECLARE",
+        entite: "FondsCaisse",
+        entiteId: fonds.id,
+        avant: avant ? { montant: avant.montant } : undefined,
+        apres: { date: aujourdhui.toISOString().slice(0, 10), montant },
+      },
+    });
+  });
+
+  revalidatePath("/payments/closing");
+  return { erreur: null, succes: true };
 }

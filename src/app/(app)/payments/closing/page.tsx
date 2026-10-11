@@ -6,6 +6,7 @@ import { formatDate, formatFcfa } from "@/lib/format";
 import { MODES_PAIEMENT } from "@/lib/paiements";
 import { bilanCaissier, membresAvecCaisse } from "@/lib/caisse";
 import ClosingForm from "./closing-form";
+import FundForm from "./fund-form";
 
 const JOUR_MS = 86_400_000;
 
@@ -103,7 +104,14 @@ export default async function ClosingPage() {
           <h2 className="mt-6 font-semibold">Mouvements d&apos;espèces</h2>
           <dl className="mt-2 divide-y divide-border text-sm">
             <div className="flex items-center justify-between py-2.5">
-              <dt className="text-ink-muted">Espèces encaissées</dt>
+              <dt className="text-ink-muted">
+                Fonds de caisse du matin
+                {!bilan.fondsDeclare && <span className="ml-1 text-xs text-warning">(non déclaré)</span>}
+              </dt>
+              <dd className="tabular-nums">{formatFcfa(bilan.fonds)}</dd>
+            </div>
+            <div className="flex items-center justify-between py-2.5">
+              <dt className="text-ink-muted">+ Espèces encaissées</dt>
               <dd className="tabular-nums">{formatFcfa(bilan.especesEncaissees)}</dd>
             </div>
             <div className="flex items-center justify-between py-2.5">
@@ -129,7 +137,8 @@ export default async function ClosingPage() {
           </dl>
           {bilan.especes < 0 && (
             <p className="mt-2 text-xs text-danger">
-              Plus d&apos;espèces sorties qu&apos;encaissées aujourd&apos;hui : vérifiez les dépenses et paies saisies.
+              Plus d&apos;espèces sorties qu&apos;il n&apos;y en avait : déclarez le fonds de caisse du matin, ou
+              vérifiez les dépenses et paies saisies.
             </p>
           )}
         </section>
@@ -162,6 +171,9 @@ export default async function ClosingPage() {
             </div>
           ) : (
             <>
+              <div className="mb-5 border-b border-border pb-5">
+                <FundForm fondsActuel={bilan.fonds} declare={bilan.fondsDeclare} />
+              </div>
               <h2 className="mb-1 font-semibold">Clôturer ma caisse</h2>
               <p className="mb-4 text-sm text-ink-muted">
                 Espèces attendues : <b className="text-ink">{formatFcfa(bilan.especes)}</b>

@@ -130,6 +130,49 @@ export async function modifierPrefixeMatricule(
   return { erreur: null, succes: true };
 }
 
+// ─── Plafond des dépenses saisies par un caissier ───
+
+export type EtatPlafond = { erreur: string | null; succes: boolean };
+
+export async function modifierPlafondDepense(_etat: EtatPlafond, formData: FormData): Promise<EtatPlafond> {
+  const { institut, membre } = await exigerRole("DIRECTEUR");
+
+  // « aucune » = pas de limite ; sinon un montant (0 = le caissier ne peut pas saisir de dépense)
+  const regle = String(formData.get("regle") ?? "");
+  let plafond: number | null = null;
+  if (regle === "plafond") {
+    const montant = Number(formData.get("montant"));
+    if (!Number.isInteger(montant) || montant < 0 || montant > 100_000_000) {
+      return { erreur: "Montant invalide.", succes: false };
+    }
+    plafond = montant;
+  } else if (regle === "interdit") {
+    plafond = 0;
+  } else if (regle !== "aucune") {
+    return { erreur: "Choisissez une règle.", succes: false };
+  }
+
+  // Institut n'est pas un modèle « tenant » : client brut, établissement du contexte ciblé explicitement
+  await prisma.$transaction([
+    prisma.institut.update({ where: { id: institut.id }, data: { plafondDepenseCaissier: plafond } }),
+    prisma.journalAudit.create({
+      data: {
+        institutId: institut.id,
+        auteurId: membre.utilisateurId,
+        action: "PLAFOND_DEPENSE_MODIFIE",
+        entite: "Institut",
+        entiteId: institut.id,
+        avant: { plafondDepenseCaissier: institut.plafondDepenseCaissier },
+        apres: { plafondDepenseCaissier: plafond },
+      },
+    }),
+  ]);
+
+  revalidatePath("/settings");
+  revalidatePath("/expenses/new");
+  return { erreur: null, succes: true };
+}
+
 // ─── Salles (emplois du temps) ─────────────────────
 
 const schemaSalle = z.object({

@@ -8,12 +8,14 @@ export type BilanCaisse = {
   parMode: Record<ModePaiementSaisie, number>;
   nbPaiements: number;
   nbAnnules: number;
+  fonds: number; // espèces présentes dans la caisse au début de la journée
+  fondsDeclare: boolean;
   especesEncaissees: number; // espèces reçues des apprenants
   depensesEspeces: number; // dépenses payées en espèces par ce membre ce jour-là
   nbDepensesEspeces: number;
   paieEspeces: number; // bulletins de vacation payés en espèces par ce membre ce jour-là
   nbPaieEspeces: number;
-  especes: number; // ce qui doit se trouver physiquement dans la caisse
+  especes: number; // ce qui doit se trouver physiquement dans la caisse : fonds + encaissé − sorties
   total: number;
 };
 
@@ -22,7 +24,8 @@ export type BilanCaisse = {
 export async function bilanCaissier(db: DbInstitut, caissierId: string, date: Date): Promise<BilanCaisse> {
   const lendemain = new Date(date.getTime() + JOUR_MS);
 
-  const [paiements, depenses, vacations] = await Promise.all([
+  const [fonds, paiements, depenses, vacations] = await Promise.all([
+    db.fondsCaisse.findFirst({ where: { caissierId, date }, select: { montant: true } }),
     db.paiement.findMany({
       where: { caissierId, date: { gte: date, lt: lendemain } },
       select: { mode: true, montant: true, annulation: { select: { id: true } } },
@@ -56,12 +59,14 @@ export async function bilanCaissier(db: DbInstitut, caissierId: string, date: Da
     parMode,
     nbPaiements: paiements.length - nbAnnules,
     nbAnnules,
+    fonds: fonds?.montant ?? 0,
+    fondsDeclare: fonds !== null,
     especesEncaissees: parMode.ESPECES,
     depensesEspeces,
     nbDepensesEspeces: depenses._count,
     paieEspeces,
     nbPaieEspeces: vacations._count,
-    especes: parMode.ESPECES - depensesEspeces - paieEspeces,
+    especes: (fonds?.montant ?? 0) + parMode.ESPECES - depensesEspeces - paieEspeces,
     total: Object.values(parMode).reduce((s, m) => s + m, 0),
   };
 }

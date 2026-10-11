@@ -160,22 +160,24 @@ enum JourSemaine {
 // ─── Plateforme : instituts, comptes, rôles ────────
 
 model Institut {
-  id               String         @id @default(cuid())
-  clerkOrgId       String         @unique
-  nom              String
-  logoUrl          String?
-  adresse          String?
-  ville            String?
-  ninea            String?
-  rccm             String?
-  telephone        String?
-  telephone2       String?
-  sousDomaine      String?        @unique
-  piedRecu         String?
-  prefixeMatricule String?
-  statut           StatutInstitut @default(ACTIF)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  id                     String         @id @default(cuid())
+  clerkOrgId             String         @unique
+  nom                    String
+  logoUrl                String?
+  adresse                String?
+  ville                  String?
+  ninea                  String?
+  rccm                   String?
+  telephone              String?
+  telephone2             String?
+  sousDomaine            String?        @unique
+  piedRecu               String?
+  prefixeMatricule       String?
+  // Montant maximum d'une dépense saisie par un caissier (null = pas de limite, 0 = interdit)
+  plafondDepenseCaissier Int?
+  statut                 StatutInstitut @default(ACTIF)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
   abonnements        Abonnement[]
   membres            Membre[]
@@ -189,6 +191,7 @@ model Institut {
   annulations        Annulation[]
   compteursRecu      CompteurRecu[]
   cloturesCaisse     ClotureCaisse[]
+  fondsCaisse        FondsCaisse[]
   seances            Seance[]
   presences          Presence[]
   modelesRelance     ModeleRelance[]
@@ -254,6 +257,7 @@ model Membre {
   paiementsEncaisses Paiement[]
   annulations        Annulation[]
   cloturesCaisse     ClotureCaisse[]
+  fondsCaisse        FondsCaisse[]     @relation("FondsCaisse")
   relancesEnvoyees   Relance[]
   ficheEnseignant    Enseignant?
   appels             Seance[]
@@ -976,4 +980,20 @@ model Depense {
   annuleePar Membre?  @relation("DepenseAnnulee", fields: [annuleeParId], references: [id])
 
   @@index([institutId, date])
+}
+
+// Fonds de caisse : espèces présentes dans la caisse au début de la journée
+model FondsCaisse {
+  id         String   @id @default(cuid())
+  institutId String
+  caissierId String
+  date       DateTime @db.Date
+  montant    Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  institut Institut @relation(fields: [institutId], references: [id])
+  caissier Membre   @relation("FondsCaisse", fields: [caissierId], references: [id])
+
+  @@unique([institutId, caissierId, date])
 }

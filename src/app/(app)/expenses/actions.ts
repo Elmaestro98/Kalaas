@@ -7,6 +7,7 @@ import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { referenceObligatoire } from "@/lib/paiements";
 import { caisseCloturee } from "@/lib/caisse";
+import { formatFcfa } from "@/lib/format";
 
 const MONTANT_MAX = 100_000_000;
 
@@ -56,6 +57,17 @@ export async function enregistrerDepense(_etat: EtatDepense, formData: FormData)
     return { erreurs, erreurGenerale: null };
   }
   const d = resultat.data;
+
+  // Plafond fixé par le directeur dans Paramètres (null = pas de limite, 0 = aucune dépense)
+  const plafond = institut.plafondDepenseCaissier;
+  if (membre.role === "CAISSIER" && plafond !== null && d.montant > plafond) {
+    return plafond === 0
+      ? { erreurs: {}, erreurGenerale: "Seul le directeur peut enregistrer des dépenses." }
+      : {
+          erreurs: { montant: `Au-delà de ${formatFcfa(plafond)}, seul le directeur peut enregistrer la dépense.` },
+          erreurGenerale: null,
+        };
+  }
 
   const date = new Date(`${d.date}T00:00:00Z`);
   if (Number.isNaN(date.getTime()) || date > dateDuJour()) {
