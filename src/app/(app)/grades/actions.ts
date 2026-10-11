@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { getContexte } from "@/lib/tenant";
 import { peutNoter } from "@/lib/notes-donnees";
 import { lireNote, type StatutNoteSaisie } from "@/lib/notes";
@@ -66,6 +67,7 @@ export async function creerEvaluation(etat: EtatEvaluation, formData: FormData):
   });
 
   revalidatePath("/grades");
+  await flash("Évaluation créée.");
   return { erreur: null, succes: etat.succes + 1 };
 }
 
@@ -82,6 +84,7 @@ export async function supprimerEvaluation(formData: FormData): Promise<void> {
   if (!(await peutNoter(db, membre, evaluation.sessionId, evaluation.matiereId))) return;
 
   await db.evaluation.delete({ where: { id: evaluation.id } });
+  await flash("Évaluation supprimée.");
   revalidatePath("/grades");
 }
 
@@ -106,6 +109,7 @@ export async function basculerVerrou(formData: FormData): Promise<void> {
     },
   });
 
+  await flash(evaluation.verrouillee ? "Évaluation déverrouillée." : "Évaluation verrouillée.");
   revalidatePath("/grades");
   revalidatePath("/grades/entry");
 }
@@ -182,5 +186,6 @@ export async function enregistrerNotes(_etat: EtatSaisie, formData: FormData): P
   revalidatePath("/grades");
   revalidatePath("/grades/entry");
   revalidatePath("/grades/results");
+  await flash("Notes enregistrées.");
   return { erreur: null, enregistre: true, erreursLignes: [] };
 }

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { CYCLES, codeNiveau, estLmd, intituleLmd } from "@/lib/lmd";
@@ -134,6 +135,7 @@ export async function creerFormation(
     };
   }
 
+  await flash("Formation créée.");
   revalidatePath("/courses");
   redirect("/courses");
 }

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { bilanCaissier, caisseCloturee } from "@/lib/caisse";
@@ -79,6 +80,7 @@ export async function cloturerCaisse(_etat: EtatCloture, formData: FormData): Pr
     return { erreur: "La clôture a échoué. Réessayez." };
   }
 
+  await flash("Caisse clôturée.");
   revalidatePath("/payments/closing");
   revalidatePath("/payments");
   return { erreur: null };
@@ -130,6 +132,7 @@ export async function definirFondsCaisse(_etat: EtatFonds, formData: FormData): 
     });
   });
 
+  await flash("Fonds de caisse enregistré.");
   revalidatePath("/payments/closing");
   return { erreur: null, succes: true };
 }

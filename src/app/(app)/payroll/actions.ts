@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { etatDesHeures, lireMois } from "@/lib/heures-donnees";
@@ -174,6 +175,7 @@ export async function payerVacation(_etat: EtatPaiementVacation, formData: FormD
     return { erreur: "Ce bulletin est déjà payé." };
   }
 
+  await flash("Bulletin marqué comme payé.");
   revalidatePath(`/payroll/${vacation.id}`);
   revalidatePath("/payroll");
   return { erreur: null };
@@ -204,6 +206,7 @@ export async function annulerValidation(formData: FormData): Promise<void> {
     });
   });
 
+  await flash("Validation annulée : le bulletin repasse à valider.");
   revalidatePath("/payroll");
   redirect(`/payroll?mois=${vacation.mois}`);
 }

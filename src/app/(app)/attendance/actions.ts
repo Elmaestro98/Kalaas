@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { getContexte } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
@@ -60,6 +61,12 @@ export async function enregistrerAppel(_etat: EtatAppel, formData: FormData): Pr
     return { inscriptionId: i.id, statut: (STATUTS.includes(valeur as StatutPresence) ? valeur : "PRESENT") as StatutPresence };
   });
 
+  // Même vocabulaire que le bouton : « Valider l'appel » ou « Mettre à jour l'appel »
+  const dejaFait = await db.seance.findFirst({
+    where: { sessionId: creneau.sessionId, date, creneauId: creneau.id },
+    select: { id: true },
+  });
+
   try {
     await db.$transaction(async (tx) => {
       const seance = await tx.seance.upsert({
@@ -92,7 +99,8 @@ export async function enregistrerAppel(_etat: EtatAppel, formData: FormData): Pr
     return { erreur: "L'enregistrement de l'appel a échoué. Réessayez." };
   }
 
+  await flash(dejaFait ? "Appel mis à jour." : "Appel enregistré.");
   revalidatePath("/attendance");
   revalidatePath("/dashboard");
-  redirect(`/attendance?date=${dateIso(date)}&ok=1`);
+  redirect(`/attendance?date=${dateIso(date)}`);
 }

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 
@@ -120,6 +121,7 @@ export async function creerSession(
     };
   }
 
+  await flash("Session ouverte.");
   revalidatePath("/courses");
   redirect("/courses");
 }

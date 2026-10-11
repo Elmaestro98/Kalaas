@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 
 const entierFacultatif = (max: number, message: string) =>
@@ -100,6 +101,7 @@ export async function enregistrerMatiere(etat: EtatMatiere, formData: FormData):
   revalidatePath(`/courses/${formation.id}`);
   revalidatePath("/courses");
   revalidatePath("/timetable");
+  await flash("Matière enregistrée.");
   return { erreur: null, succes: etat.succes + 1 };
 }
 
@@ -113,6 +115,7 @@ export async function basculerMatiere(formData: FormData): Promise<void> {
     return;
   }
   await db.matiere.update({ where: { id: matiere.id }, data: { active: !matiere.active } });
+  await flash(matiere.active ? "Matière désactivée." : "Matière réactivée.");
   revalidatePath(`/courses/${matiere.formationId}`);
   revalidatePath("/timetable");
 }
@@ -205,6 +208,7 @@ export async function enregistrerUE(etat: EtatUE, formData: FormData): Promise<E
 
   revalidatePath(`/courses/${formation.id}`);
   revalidatePath("/grades");
+  await flash("Unité d'enseignement enregistrée.");
   return { erreur: null, succes: etat.succes + 1 };
 }
 
@@ -218,6 +222,7 @@ export async function basculerUE(formData: FormData): Promise<void> {
     return;
   }
   await db.uniteEnseignement.update({ where: { id: ue.id }, data: { active: !ue.active } });
+  await flash(ue.active ? "Unité d'enseignement désactivée." : "Unité d'enseignement réactivée.");
   revalidatePath(`/courses/${ue.formationId}`);
   revalidatePath("/grades");
 }

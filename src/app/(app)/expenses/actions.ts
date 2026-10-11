@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
@@ -111,9 +112,10 @@ export async function enregistrerDepense(_etat: EtatDepense, formData: FormData)
     return { erreurs: {}, erreurGenerale: "L'enregistrement a échoué. Réessayez dans un instant." };
   }
 
+  await flash("Dépense enregistrée.");
   revalidatePath("/expenses");
   revalidatePath("/reports");
-  redirect(`/expenses?mois=${d.date.slice(0, 7)}&nouveau=1`);
+  redirect(`/expenses?mois=${d.date.slice(0, 7)}`);
 }
 
 // ─── Annuler une dépense (jamais de suppression) ───
@@ -170,6 +172,7 @@ export async function annulerDepense(
     return { erreur: "Cette dépense est déjà annulée." };
   }
 
+  await flash("Dépense annulée.");
   revalidatePath("/expenses");
   revalidatePath("/reports");
   return { erreur: null };

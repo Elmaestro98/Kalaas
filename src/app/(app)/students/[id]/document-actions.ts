@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { z } from "zod";
 import { getContexte } from "@/lib/tenant";
 import { CYCLES, codeNiveau, estLmd } from "@/lib/lmd";
@@ -113,6 +114,7 @@ export async function delivrerDocument(_etat: EtatDocument, formData: FormData):
     return cree;
   });
 
+  await flash(`Document ${document.numero} délivré.`);
   revalidatePath(`/students/${apprenant.id}`);
   return { erreur: null, document: { id: document.id, numero: document.numero } };
 }

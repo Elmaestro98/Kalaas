@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 import { JOURS, formatHeure, heureVersMinutes } from "@/lib/emploi-du-temps";
 import { nomEnseignant } from "@/lib/enseignants";
@@ -137,6 +138,7 @@ export async function ajouterCreneau(_etat: EtatCreneau, formData: FormData): Pr
     return echec({ erreurGenerale: "L'enregistrement a échoué. Réessayez." });
   }
 
+  await flash("Cours ajouté à l'emploi du temps.");
   revalidatePath("/timetable");
   return { erreurs: {}, erreurGenerale: null, succes: _etat.succes + 1 };
 }
@@ -150,5 +152,6 @@ export async function supprimerCreneau(formData: FormData): Promise<void> {
     return;
   }
   await db.creneau.delete({ where: { id: creneau.id } });
+  await flash("Cours retiré de l'emploi du temps.");
   revalidatePath("/timetable");
 }

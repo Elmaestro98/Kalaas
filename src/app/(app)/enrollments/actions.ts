@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { normaliserTelephone } from "@/lib/telephone";
@@ -292,5 +293,6 @@ export async function creerInscription(
   revalidatePath("/students");
   revalidatePath("/enrollments");
   revalidatePath("/courses");
+  await flash("Inscription enregistrée.");
   redirect(`/students/${apprenantId}`);
 }

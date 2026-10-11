@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 import type { DbInstitut } from "@/lib/prisma";
 
@@ -52,6 +53,7 @@ export async function enregistrerAffectation(
 
   revalidatePath("/timetable");
   revalidatePath(`/teachers/${enseignant.id}`);
+  await flash("Professeur affecté à la matière.");
   return { erreur: null, succes: etat.succes + 1 };
 }
 
@@ -107,6 +109,7 @@ export async function appliquerProgramme(formData: FormData): Promise<void> {
     if (affectees.has(m.id) || !m.enseignantHabituelId || !m.enseignantHabituel?.actif) continue;
     await affecter(db, institut.id, session.id, m, m.enseignantHabituelId, m.volumeHoraire);
   }
+  await flash("Programme appliqué à la classe.");
 
   revalidatePath("/timetable");
 }
@@ -120,6 +123,7 @@ export async function supprimerAffectation(formData: FormData): Promise<void> {
     return;
   }
   await db.affectation.delete({ where: { id: affectation.id } });
+  await flash("Affectation retirée.");
 
   revalidatePath("/timetable");
   revalidatePath(`/teachers/${affectation.enseignantId}`);

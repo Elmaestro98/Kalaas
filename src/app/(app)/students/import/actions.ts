@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 import { calculerRemise, dateDuJour, genererEcheances } from "@/lib/echeancier";
 import { repartirPaiement } from "@/lib/paiements";
@@ -263,6 +264,7 @@ export async function importerApprenants(donnees: {
 
   revalidatePath("/students");
   revalidatePath("/enrollments");
+  if (importes > 0) await flash(`${importes} apprenant${importes > 1 ? "s" : ""} importé${importes > 1 ? "s" : ""}.`);
   revalidatePath("/courses");
   return { erreur: null, importes, echecs };
 }

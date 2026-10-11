@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatDate, formatFcfa } from "@/lib/format";
 import { lireMois } from "@/lib/heures-donnees";
@@ -7,10 +7,9 @@ import { CATEGORIES_DEPENSE, LABEL_CATEGORIE } from "@/lib/depenses";
 import { LABEL_MODE, TON_MODE } from "@/lib/paiements";
 import Badge from "@/components/ui/badge";
 import CancelExpense from "./cancel-expense";
-import ClearParam from "@/components/clear-param";
 
 type ExpensesPageProps = {
-  searchParams: Promise<{ mois?: string; nouveau?: string }>;
+  searchParams: Promise<{ mois?: string }>;
 };
 
 const formateurMois = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -22,7 +21,7 @@ function cleMois(d: Date) {
 export default async function ExpensesPage({ searchParams }: ExpensesPageProps) {
   const { membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
   const estDirecteur = membre.role === "DIRECTEUR";
-  const { mois, nouveau } = await searchParams;
+  const { mois } = await searchParams;
   const { debut, fin } = lireMois(mois);
 
   const [depenses, clotures] = await Promise.all([
@@ -57,14 +56,6 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   return (
     <div className="mx-auto max-w-5xl">
-      {nouveau && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg bg-success-soft p-4 text-success">
-          <CheckCircle2 size={24} aria-hidden="true" />
-          <p className="font-semibold">Dépense enregistrée</p>
-          <ClearParam nom="nouveau" />
-        </div>
-      )}
-
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex-1">
           <h1 className="text-2xl font-semibold lg:text-3xl">Dépenses</h1>

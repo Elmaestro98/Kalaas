@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
 
@@ -74,6 +75,7 @@ export async function creerAnneeAcademique(
     return { erreurs: {}, erreurGenerale: "L'enregistrement a échoué. Réessayez.", succes: false };
   }
 
+  await flash("Année académique créée.");
   revalidatePath("/settings");
   return { erreurs: {}, erreurGenerale: null, succes: true };
 }
@@ -92,6 +94,7 @@ export async function definirAnneeEnCours(formData: FormData): Promise<void> {
     db.anneeAcademique.update({ where: { id: annee.id }, data: { enCours: true } }),
   ]);
 
+  await flash(`${annee.libelle} est maintenant l'année en cours.`);
   revalidatePath("/settings");
   revalidatePath("/courses");
 }
@@ -126,6 +129,7 @@ export async function modifierPrefixeMatricule(
     data: { prefixeMatricule: resultat.data.prefixeMatricule },
   });
 
+  await flash("Préfixe des matricules enregistré.");
   revalidatePath("/settings");
   return { erreur: null, succes: true };
 }
@@ -169,6 +173,7 @@ export async function modifierPlafondDepense(_etat: EtatPlafond, formData: FormD
   ]);
 
   revalidatePath("/settings");
+  await flash("Règle des dépenses enregistrée.");
   revalidatePath("/expenses/new");
   return { erreur: null, succes: true };
 }
@@ -205,6 +210,7 @@ export async function ajouterSalle(etat: EtatSalle, formData: FormData): Promise
   }
 
   await db.salle.create({ data: { institutId: institut.id, nom, capacite: capacite ?? null } });
+  await flash(`Salle « ${nom} » ajoutée.`);
   revalidatePath("/settings");
   revalidatePath("/timetable");
   return { erreur: null, succes: etat.succes + 1 };
@@ -221,6 +227,7 @@ export async function desactiverSalle(formData: FormData): Promise<void> {
     return;
   }
   await db.salle.update({ where: { id: salle.id }, data: { active: false } });
+  await flash(`Salle « ${salle.nom} » désactivée.`);
   revalidatePath("/settings");
   revalidatePath("/timetable");
 }

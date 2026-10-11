@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { prochainNumeroRecu } from "@/lib/recus";
@@ -284,6 +285,7 @@ export async function annulerPaiement(
     return { erreur: "L'annulation a échoué. Réessayez dans un instant." };
   }
 
+  await flash("Paiement annulé.");
   revalidatePath(`/payments/${paiement.id}`);
   revalidatePath("/payments");
   revalidatePath("/students");

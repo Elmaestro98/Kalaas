@@ -54,3 +54,23 @@
     outline-offset: 2px;
   }
 }
+
+/* ─── Notifications (application et page d'accueil) ─── */
+
+@keyframes toast-entree {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-sortie {
+  to {
+    opacity: 0;
+    transform: translateX(16px) scale(0.97);
+  }
+}

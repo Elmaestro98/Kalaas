@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, ChevronLeft, ChevronRight, ClipboardCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, ClipboardCheck } from "lucide-react";
 import { getContexte } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { formatHeure, JOURS } from "@/lib/emploi-du-temps";
@@ -7,7 +7,7 @@ import { chargerCoursDuJour } from "@/lib/presences-donnees";
 import { dateIso, jourDeDate, lireDate } from "@/lib/presences";
 
 type AttendancePageProps = {
-  searchParams: Promise<{ date?: string; ok?: string }>;
+  searchParams: Promise<{ date?: string }>;
 };
 
 const JOUR_MS = 86_400_000;
@@ -44,13 +44,6 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
       <p className="mt-1 text-sm text-ink-muted">
         {estFormateur ? "Faites l'appel de vos cours." : "Appel par cours, d'après les emplois du temps."}
       </p>
-
-      {params.ok && (
-        <p className="mt-4 flex items-center gap-2 rounded-md bg-success-soft px-4 py-3 text-sm text-success">
-          <CheckCircle2 size={18} aria-hidden="true" />
-          Appel enregistré.
-        </p>
-      )}
 
       {/* Navigation par jour */}
       <div className="mt-6 flex items-center gap-2">

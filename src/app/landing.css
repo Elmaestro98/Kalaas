@@ -1,0 +1,23 @@
+/* ─── Page d'accueil publique ─── */
+
+/* Changement d'écran dans l'aperçu du produit */
+@keyframes apparition {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

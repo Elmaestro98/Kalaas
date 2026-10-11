@@ -6,9 +6,11 @@ import { getContexte } from "@/lib/tenant";
 import Sidebar from "@/components/sidebar";
 import MobileNav from "@/components/mobile-nav";
 import { ROLE_LABELS } from "@/components/navigations";
+import Toaster from "@/components/toaster";
+import { lireFlash } from "@/lib/flash";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const { membre } = await getContexte();
+  const [{ membre }, flash] = await Promise.all([getContexte(), lireFlash()]);
 
   return (
     <div className="flex min-h-screen">
@@ -34,6 +36,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </div>
 
       <MobileNav />
+      <Toaster flash={flash} />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { clerkClient } from "@clerk/nextjs/server";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { exigerRole } from "@/lib/tenant";
@@ -78,6 +79,7 @@ export async function inviterMembre(etat: EtatInvitation, formData: FormData): P
     },
   });
 
+  await flash(`Invitation envoyée à ${email}.`);
   revalidatePath("/team");
   return { erreur: null, succes: `Invitation envoyée à ${email}.`, compteur: etat.compteur + 1 };
 }
@@ -107,6 +109,7 @@ export async function revoquerInvitation(formData: FormData): Promise<void> {
   }
 
   await db.invitation.update({ where: { id: invitation.id }, data: { statut: "REVOQUEE" } });
+  await flash("Invitation annulée.");
   revalidatePath("/team");
 }
 
@@ -134,6 +137,7 @@ export async function changerRole(formData: FormData): Promise<void> {
   }
 
   await db.membre.update({ where: { id: cible.id }, data: { role: role.data } });
+  await flash("Rôle modifié.");
   revalidatePath("/team");
 }
 
@@ -153,5 +157,6 @@ export async function basculerAcces(formData: FormData): Promise<void> {
   }
 
   await db.membre.update({ where: { id: cible.id }, data: { actif: !cible.actif } });
+  await flash(cible.actif ? "Accès retiré." : "Accès rétabli.");
   revalidatePath("/team");
 }

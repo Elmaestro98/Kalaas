@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { exigerRole } from "@/lib/tenant";
 
 const DECLENCHEURS = ["MANUELLE", "J_MOINS_3", "J_PLUS_1", "J_PLUS_7"] as const;
@@ -75,6 +76,7 @@ export async function enregistrerModele(_etat: EtatModele, formData: FormData): 
     update: { contenu, actif: true },
   });
 
+  await flash("Modèle de message enregistré.");
   revalidatePath("/unpaid");
   return { erreur: null, succes: true };
 }

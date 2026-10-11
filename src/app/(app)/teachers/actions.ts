@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { normaliserTelephone } from "@/lib/telephone";
@@ -109,8 +110,10 @@ export async function enregistrerEnseignant(
   revalidatePath("/teachers");
   revalidatePath("/timetable");
   if (!d.id) {
+    await flash("Professeur ajouté.");
     redirect(`/teachers/${id}`);
   }
+  await flash("Fiche enregistrée.");
   revalidatePath(`/teachers/${id}`);
   return { erreurs: {}, erreurGenerale: null, succes: true };
 }
@@ -126,6 +129,7 @@ export async function basculerActifEnseignant(formData: FormData): Promise<void>
     return;
   }
   await db.enseignant.update({ where: { id: enseignant.id }, data: { actif: !enseignant.actif } });
+  await flash(enseignant.actif ? "Professeur désactivé." : "Professeur réactivé.");
 
   revalidatePath("/teachers");
   revalidatePath(`/teachers/${enseignant.id}`);
