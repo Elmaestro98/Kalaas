@@ -129,6 +129,10 @@ export async function annulerDepense(
   if (!depense) {
     return { erreur: "Dépense introuvable." };
   }
+  // Espèces sorties d'une caisse déjà clôturée : le comptage est figé, on n'y touche plus
+  if (depense.mode === "ESPECES" && (await caisseCloturee(db, depense.saisieParId, depense.date))) {
+    return { erreur: "La caisse de ce jour est clôturée : cette dépense en espèces ne peut plus être annulée." };
+  }
 
   const { count } = await db.$transaction(async (tx) => {
     const maj = await tx.depense.updateMany({

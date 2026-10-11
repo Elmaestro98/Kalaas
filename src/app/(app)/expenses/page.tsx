@@ -7,6 +7,7 @@ import { CATEGORIES_DEPENSE, LABEL_CATEGORIE } from "@/lib/depenses";
 import { LABEL_MODE, TON_MODE } from "@/lib/paiements";
 import Badge from "@/components/ui/badge";
 import CancelExpense from "./cancel-expense";
+import ClearParam from "@/components/clear-param";
 
 type ExpensesPageProps = {
   searchParams: Promise<{ mois?: string; nouveau?: string }>;
@@ -24,14 +25,25 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   const { mois, nouveau } = await searchParams;
   const { debut, fin } = lireMois(mois);
 
-  const depenses = await db.depense.findMany({
-    where: { date: { gte: debut, lt: fin } },
-    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
-    include: {
-      saisiePar: { include: { utilisateur: { select: { nom: true } } } },
-      annuleePar: { include: { utilisateur: { select: { nom: true } } } },
-    },
-  });
+  const [depenses, clotures] = await Promise.all([
+    db.depense.findMany({
+      where: { date: { gte: debut, lt: fin } },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+      include: {
+        saisiePar: { include: { utilisateur: { select: { nom: true } } } },
+        annuleePar: { include: { utilisateur: { select: { nom: true } } } },
+      },
+    }),
+    db.clotureCaisse.findMany({
+      where: { date: { gte: debut, lt: fin } },
+      select: { caissierId: true, date: true },
+    }),
+  ]);
+
+  // Une dépense en espèces d'une caisse clôturée ne peut plus être annulée
+  const caissesFermees = new Set(clotures.map((c) => `${c.caissierId}|${c.date.toISOString()}`));
+  const figee = (d: (typeof depenses)[number]) =>
+    d.mode === "ESPECES" && caissesFermees.has(`${d.saisieParId}|${d.date.toISOString()}`);
 
   const valides = depenses.filter((d) => !d.annuleeLe);
   const total = valides.reduce((s, d) => s + d.montant, 0);
@@ -49,6 +61,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         <div className="mb-6 flex items-center gap-3 rounded-lg bg-success-soft p-4 text-success">
           <CheckCircle2 size={24} aria-hidden="true" />
           <p className="font-semibold">Dépense enregistrée</p>
+          <ClearParam nom="nouveau" />
         </div>
       )}
 
@@ -124,7 +137,12 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                 </span>
                 <Badge ton={TON_MODE[d.mode]}>{LABEL_MODE[d.mode]}</Badge>
                 <span className="w-32 text-right font-bold tabular-nums">{formatFcfa(d.montant)}</span>
-                {estDirecteur && !d.annuleeLe && <CancelExpense depenseId={d.id} />}
+                {estDirecteur && !d.annuleeLe && !figee(d) && <CancelExpense depenseId={d.id} />}
+                {estDirecteur && !d.annuleeLe && figee(d) && (
+                  <span className="text-xs text-ink-muted" title="La caisse de ce jour est clôturée">
+                    Caisse clôturée
+                  </span>
+                )}
               </div>
               {d.annuleeLe && (
                 <p className="mt-1 text-xs text-danger">

@@ -5,6 +5,7 @@ import { dateDuJour } from "@/lib/echeancier";
 import { LABEL_MODE, TON_MODE } from "@/lib/paiements";
 import Badge from "@/components/ui/badge";
 import TrainerDashboard from "./trainer-dashboard";
+import DirectorSummary from "./director-summary";
 
 const formateurHeure = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
@@ -108,6 +109,8 @@ export default async function DashboardPage() {
           <p className="mt-1 text-3xl font-bold tabular-nums">{nbApprenants}</p>
         </div>
       </div>
+
+      {membre.role === "DIRECTEUR" && <DirectorSummary db={db} aujourdhui={aujourdhui} debutMois={debutMois} />}
 
       <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
         <div className="flex items-baseline justify-between">
