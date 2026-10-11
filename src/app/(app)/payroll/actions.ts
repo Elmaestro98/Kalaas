@@ -9,6 +9,8 @@ import { etatDesHeures, lireMois } from "@/lib/heures-donnees";
 import { prochainNumeroVacation } from "@/lib/paie-donnees";
 import { calculerBrut, estMois, lireAjustement, type LigneDetailVacation } from "@/lib/paie";
 import { referenceObligatoire } from "@/lib/paiements";
+import { caisseCloturee } from "@/lib/caisse";
+import { dateDuJour } from "@/lib/echeancier";
 
 // ─── Valider le bulletin d'un vacataire pour un mois ───
 
@@ -137,6 +139,9 @@ export async function payerVacation(_etat: EtatPaiementVacation, formData: FormD
   const vacation = await db.vacation.findFirst({ where: { id: vacationId } });
   if (!vacation) {
     return { erreur: "Bulletin introuvable." };
+  }
+  if (mode === "ESPECES" && (await caisseCloturee(db, membre.id, dateDuJour()))) {
+    return { erreur: "Votre caisse est clôturée pour aujourd'hui : payez en Wave, Orange Money ou virement." };
   }
 
   // updateMany + statut VALIDEE : si deux personnes cliquent en même temps, un seul paiement passe

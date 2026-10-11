@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { referenceObligatoire } from "@/lib/paiements";
+import { caisseCloturee } from "@/lib/caisse";
 
 const MONTANT_MAX = 100_000_000;
 
@@ -59,6 +60,14 @@ export async function enregistrerDepense(_etat: EtatDepense, formData: FormData)
   const date = new Date(`${d.date}T00:00:00Z`);
   if (Number.isNaN(date.getTime()) || date > dateDuJour()) {
     return { erreurs: { date: "La date ne peut pas être dans le futur." }, erreurGenerale: null };
+  }
+
+  // Caisse clôturée ce jour-là : le comptage est figé, plus aucune sortie d'espèces
+  if (d.mode === "ESPECES" && (await caisseCloturee(db, membre.id, date))) {
+    return {
+      erreurs: { mode: "Votre caisse est clôturée pour ce jour : payez en Wave, Orange Money ou virement." },
+      erreurGenerale: null,
+    };
   }
 
   try {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Download } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatDate, formatFcfa } from "@/lib/format";
 import { nomEnseignant } from "@/lib/enseignants";
@@ -59,6 +59,13 @@ export default async function VacationPage({ params, searchParams }: VacationPag
 
       <div className="mt-4 mb-4 flex flex-wrap gap-3 print:hidden">
         <PrintButton />
+        <a
+          href={`/payroll/${vacation.id}/pdf`}
+          className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
+        >
+          <Download size={18} aria-hidden="true" />
+          PDF
+        </a>
       </div>
 
       {/* Le bulletin (imprimable) */}
