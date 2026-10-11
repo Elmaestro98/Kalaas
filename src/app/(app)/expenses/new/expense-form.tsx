@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { enregistrerDepense, type EtatDepense } from "../actions";
 import Field, { classeChamp } from "@/components/ui/field";
 import MoneyInput from "@/components/ui/money-input";
@@ -14,10 +14,23 @@ export default function ExpenseForm({ aujourdhui }: { aujourdhui: string }) {
   const [etat, envoyer, enCours] = useActionState(enregistrerDepense, etatInitial);
   const [montant, setMontant] = useState(0);
   const [mode, setMode] = useState<ModePaiementSaisie>("ESPECES");
+  // Envoi manuel (onSubmit) : avec <form action>, React 19 vide le formulaire après chaque envoi,
+  // même en cas d'erreur, et la liste des catégories reviendrait à « Choisir… »
+  const [categorie, setCategorie] = useState("");
+  const [date, setDate] = useState(aujourdhui);
+  const [description, setDescription] = useState("");
+  const [reference, setReference] = useState("");
   const { erreurs } = etat;
 
   return (
-    <form action={envoyer} className="space-y-6">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const donnees = new FormData(e.currentTarget);
+        startTransition(() => envoyer(donnees));
+      }}
+      className="space-y-6"
+    >
       <Field id="montant" label="Montant payé" required error={erreurs.montant}>
         <MoneyInput
           id="montant"
@@ -32,7 +45,14 @@ export default function ExpenseForm({ aujourdhui }: { aujourdhui: string }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="categorie" label="Catégorie" required error={erreurs.categorie}>
-          <select id="categorie" name="categorie" required defaultValue="" className={classeChamp(erreurs.categorie)}>
+          <select
+            id="categorie"
+            name="categorie"
+            required
+            value={categorie}
+            onChange={(e) => setCategorie(e.target.value)}
+            className={classeChamp(erreurs.categorie)}
+          >
             <option value="" disabled>
               Choisir…
             </option>
@@ -50,7 +70,8 @@ export default function ExpenseForm({ aujourdhui }: { aujourdhui: string }) {
             type="date"
             required
             max={aujourdhui}
-            defaultValue={aujourdhui}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
             className={classeChamp(erreurs.date)}
           />
         </Field>
@@ -64,6 +85,8 @@ export default function ExpenseForm({ aujourdhui }: { aujourdhui: string }) {
           minLength={3}
           maxLength={200}
           placeholder="Ex. Loyer d'octobre, facture Senelec…"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           className={classeChamp(erreurs.description)}
         />
       </Field>
@@ -105,6 +128,8 @@ export default function ExpenseForm({ aujourdhui }: { aujourdhui: string }) {
             required
             maxLength={60}
             autoComplete="off"
+            value={reference}
+            onChange={(e) => setReference(e.target.value.toUpperCase())}
             className={`${classeChamp(erreurs.reference)} font-mono uppercase`}
           />
         </Field>
