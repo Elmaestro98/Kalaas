@@ -50,7 +50,7 @@ export async function exigerRole(...roles: Role[]) {
 
   if (!roles.includes(ctx.membre.role)) {
     throw new Error("Votre rôle ne permet pas cette action.");
-  }
+  } 
 
   return ctx;
 }
