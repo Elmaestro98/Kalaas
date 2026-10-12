@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Logo from "@/components/logo";
 import {
   BarChart3,
   BellRing,
@@ -57,9 +58,9 @@ export function AppWindow({ actif, titre, children }: { actif: string; titre: st
       </div>
       <div className="flex h-[24rem] text-left sm:h-[24.5rem]">
         <aside className="hidden w-40 shrink-0 bg-navy-900 py-4 text-white md:block">
-          <p className="px-4 pb-4 text-base font-bold">
-            Kalaas<span className="text-gold-500">.</span>
-          </p>
+          <div className="px-4 pb-4">
+            <Logo variante="clair" taille={22} />
+          </div>
           <ul className="space-y-0.5 px-2">
             {NAV.map((n) => (
               <li

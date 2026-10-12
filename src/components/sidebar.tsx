@@ -5,14 +5,15 @@ import { usePathname } from "next/navigation";
  import type { SidebarProps } from
 "@/type/sidebar";
 import { NAV_SECTIONS } from "./navigations";
+import Logo from "./logo";
 
 export default function Sidebar({ role, footer }: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside className="hidden w-62 shrink-0 flex-col bg-navy-900 text-white lg:flex print:hidden">
-      <div className="px-6 py-6 text-2xl font-bold">
-        Kalaas<span className="text-gold-500">.</span>
+      <div className="px-6 py-6">
+        <Logo variante="clair" taille={34} />
       </div>
 
       <nav aria-label="Navigation principale" className="flex-1 space-y-6 px-3">

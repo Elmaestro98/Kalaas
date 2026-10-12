@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { OrganizationSwitcher, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { Check, ChevronDown, History, Lock, ShieldCheck, Undo2 } from "lucide-react";
 import ProductTour from "@/components/landing/product-tour";
+import Logo from "@/components/logo";
 import { MaquetteEcheancier, MaquetteNotes, MaquetteRelances } from "@/components/landing/mockups";
 import "./landing.css";
 
@@ -142,8 +143,8 @@ export default async function HomePage() {
       {/* ─── En-tête ─── */}
       <header className="sticky top-0 z-30 border-b border-border bg-surface-100/90 backdrop-blur">
         <nav className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-4 sm:px-6" aria-label="Navigation principale">
-          <Link href="/" className="text-xl font-bold text-ink">
-            Kalaas<span className="text-gold-500">.</span>
+          <Link href="/" aria-label="Kalaas, accueil">
+            <Logo taille={32} />
           </Link>
           <div className="hidden gap-6 text-sm md:flex">
             <a href="#fonctionnalites" className="text-ink-muted hover:text-ink">
@@ -346,9 +347,7 @@ export default async function HomePage() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div>
-            <p className="text-lg font-bold text-ink">
-              Kalaas<span className="text-gold-500">.</span>
-            </p>
+            <Logo taille={28} />
             <p className="mt-1">Logiciel de gestion d&apos;établissement académique</p>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
