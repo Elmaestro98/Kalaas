@@ -4,7 +4,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import type { Enseignant, Matiere } from "@prisma/client";
 import { exigerRole } from "@/lib/tenant";
 import { formatFcfa } from "@/lib/format";
-import { CYCLES, aDesNiveaux, codeNiveau, estLmd } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau, estLmd, estScolaire } from "@/lib/lmd";
 import { nomEnseignant } from "@/lib/enseignants";
 import Badge from "@/components/ui/badge";
 import { basculerMatiere, basculerUE } from "../subject-actions";
@@ -119,6 +119,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
   ).map((e) => ({ id: e.id, nom: nomEnseignant(e) }));
 
   const lmd = estLmd(formation.cycle);
+  // École : on ouvre des « classes » (CM1 A, CM1 B…) plutôt que des sessions
+  const groupe = estScolaire(formation.cycle) ? "classe" : "session";
   const actives = formation.matieres.filter((m) => m.active);
   const inactives = formation.matieres.filter((m) => !m.active);
   const uesActives = formation.unitesEnseignement.filter((u) => u.active);
@@ -156,7 +158,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           </div>
           <p className="mt-1 text-sm text-ink-muted">
             {CYCLES[formation.cycle].label} · {formation.dureeMois} mois ·{" "}
-            {formatFcfa(formation.fraisInscription + formation.prixTotal)} · {formation._count.sessions} session
+            {formatFcfa(formation.fraisInscription + formation.prixTotal)} · {formation._count.sessions} {groupe}
             {formation._count.sessions > 1 ? "s" : ""}
           </p>
         </div>
@@ -165,7 +167,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
         >
           <Plus size={18} aria-hidden="true" />
-          Ouvrir une session
+          Ouvrir une {groupe}
         </Link>
       </div>
 

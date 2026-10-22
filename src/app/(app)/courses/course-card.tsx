@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatNombre } from "@/lib/format";
 import { repartirMontant } from "@/lib/echeancier";
-import { CYCLES, aDesNiveaux, codeNiveau, type Cycle } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau, estScolaire, type Cycle } from "@/lib/lmd";
 import Badge from "@/components/ui/badge";
 
 type CourseCardProps = {
@@ -80,7 +80,8 @@ export default function CourseCard({
             Programme · {nbMatieres} matière{nbMatieres > 1 ? "s" : ""}
           </Link>
           <Link href={`/courses/sessions/new?formation=${id}`} className="text-ink-muted hover:text-ink">
-            {nbSessions} session{nbSessions > 1 ? "s" : ""} · ouvrir →
+            {nbSessions} {estScolaire(cycle) ? "classe" : "session"}
+            {nbSessions > 1 ? "s" : ""} · ouvrir →
           </Link>
         </div>
       </div>

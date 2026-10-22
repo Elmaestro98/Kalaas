@@ -75,6 +75,13 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
           {resultats.sansPeriode > 1 ? "nt" : ""} pas dans les moyennes.
         </p>
       )}
+      {annee && nbEvaluations > 0 && (
+        <p className="mt-3 rounded-sm bg-info-soft px-4 py-2 text-sm text-info">
+          La moyenne annuelle est la moyenne des {libellePeriode(decoupage, 1).split(" ")[1]}s notés. Les colonnes
+          des matières montrent la moyenne de chaque matière sur l&apos;année, à titre indicatif : la moyenne annuelle
+          n&apos;est pas recalculée à partir d&apos;elles.
+        </p>
+      )}
       {!annee && nbEvaluations > 0 && !resultats.verrouille[vue] && (
         <p className="mt-3 rounded-sm bg-warning-soft px-4 py-2 text-sm text-warning">
           Certaines évaluations de la période ne sont pas verrouillées : les bulletins porteront la mention « PROVISOIRE ».

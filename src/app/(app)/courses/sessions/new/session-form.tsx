@@ -319,7 +319,7 @@ export default function SessionForm({ formations, formateurs, annees, formationI
           disabled={enCours || sansAnnee}
           className="h-12 cursor-pointer rounded-md bg-action px-6 font-medium text-on-action hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {enCours ? "Enregistrement…" : "Ouvrir la session"}
+          {enCours ? "Enregistrement…" : scolaire ? "Ouvrir la classe" : annuel ? "Ouvrir la promotion" : "Ouvrir la session"}
         </button>
       </div>
     </form>

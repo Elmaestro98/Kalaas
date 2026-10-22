@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import SessionForm from "./session-form";
 
 type NewSessionPageProps = {
@@ -8,7 +9,9 @@ type NewSessionPageProps = {
 };
 
 export default async function NewSessionPage({ searchParams }: NewSessionPageProps) {
-  const { db } = await exigerRole("DIRECTEUR");
+  const { institut, db } = await exigerRole("DIRECTEUR");
+  const mots = vocabulaire(institut.typeEtablissement);
+  const ecole = institut.typeEtablissement === "ECOLE";
   const { formation } = await searchParams;
 
   const [formations, membres, anneesBrutes] = await Promise.all([
@@ -46,9 +49,9 @@ export default async function NewSessionPage({ searchParams }: NewSessionPagePro
         Formations
       </Link>
 
-      <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">Nouvelle session</h1>
+      <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">{ecole ? "Nouvelle classe" : "Nouvelle session"}</h1>
       <p className="mt-1 mb-6 text-sm text-ink-muted">
-        Ouvrez une promo pour pouvoir y inscrire des apprenants.
+        Ouvrez {ecole ? "une classe" : "une promo"} pour pouvoir y inscrire des {mots.apprenants}.
       </p>
 
       {formations.length === 0 ? (

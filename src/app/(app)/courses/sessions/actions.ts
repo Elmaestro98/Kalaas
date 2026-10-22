@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
+import { estScolaire } from "@/lib/lmd";
 
 const schemaSession = z
   .object({
@@ -121,7 +122,7 @@ export async function creerSession(
     };
   }
 
-  await flash("Session ouverte.");
+  await flash(estScolaire(formation.cycle) ? "Classe ouverte." : "Session ouverte.");
   revalidatePath("/courses");
   redirect("/courses");
 }

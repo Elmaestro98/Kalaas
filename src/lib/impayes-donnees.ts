@@ -3,9 +3,10 @@ import type { DbInstitut } from "@/lib/prisma";
 import { dateDuJour } from "@/lib/echeancier";
 import { formatDate, formatFcfa } from "@/lib/format";
 import {
-  MODELES_PAR_DEFAUT,
+  PARENT_INCONNU,
   declencheurDuJour,
   joursDeRetard,
+  modelesParDefaut,
   rendreMessage,
   type Declencheur,
 } from "@/lib/relances";
@@ -151,10 +152,10 @@ export async function chargerRelancesDuJour(db: DbInstitut): Promise<RelanceDuJo
   return resultat;
 }
 
-// Modèles de l'établissement, complétés par les modèles par défaut
-export async function chargerModeles(db: DbInstitut): Promise<Record<Declencheur, string>> {
+// Modèles de l'établissement, complétés par les modèles par défaut (adressés aux parents pour une école)
+export async function chargerModeles(db: DbInstitut, ecole: boolean): Promise<Record<Declencheur, string>> {
   const enregistres = await db.modeleRelance.findMany({ where: { canal: "WHATSAPP", actif: true } });
-  const modeles = { ...MODELES_PAR_DEFAUT };
+  const modeles = { ...modelesParDefaut(ecole) };
   for (const m of enregistres) {
     modeles[m.declencheur] = m.contenu;
   }
@@ -166,6 +167,7 @@ export function messagePourDossier(modele: string, d: DossierImpaye, etablisseme
   return rendreMessage(modele, {
     prenom: d.apprenant.prenom,
     nom: d.apprenant.nom,
+    parent: d.apprenant.tuteurNom ?? PARENT_INCONNU,
     montant: formatFcfa(d.montant),
     echeance: plusAncienne?.libelle ?? "",
     echeances: d.echeances.map((e) => e.libelle).join(", "),
@@ -180,6 +182,7 @@ export function messagePourRelance(modele: string, r: RelanceDuJour, etablisseme
   return rendreMessage(modele, {
     prenom: r.apprenant.prenom,
     nom: r.apprenant.nom,
+    parent: r.apprenant.tuteurNom ?? PARENT_INCONNU,
     montant: formatFcfa(r.echeance.reste),
     echeance: r.echeance.libelle,
     echeances: r.echeance.libelle,

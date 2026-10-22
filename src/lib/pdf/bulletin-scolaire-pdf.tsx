@@ -231,8 +231,9 @@ export default function BulletinScolairePdf({
                 </Text>
               </View>
               <View style={styles.case}>
-                <Text style={styles.label}>ABSENCES (DEPUIS LA RENTRÉE)</Text>
+                <Text style={styles.label}>ABSENCES</Text>
                 <Text style={styles.chiffre}>{b.absences}</Text>
+                <Text style={styles.petit}>depuis la rentrée</Text>
               </View>
             </View>
 

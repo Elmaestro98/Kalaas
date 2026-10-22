@@ -21,9 +21,29 @@ export const MODELES_PAR_DEFAUT: Record<Declencheur, string> = {
     "Bonjour {prenom}, votre paiement de {montant} a maintenant {jours} jours de retard. Merci de passer régulariser ou de nous contacter rapidement. {etablissement}",
 };
 
+// École : le message s'adresse au parent et parle de la scolarité de l'enfant
+export const MODELES_PARENTS: Record<Declencheur, string> = {
+  MANUELLE:
+    "Bonjour {parent}, sauf erreur de notre part, {montant} restent à régler pour la scolarité de {prenom} en {formation} ({echeances}). Merci de passer à l'accueil ou de payer par Wave / Orange Money. {etablissement}",
+  J_MOINS_3:
+    "Bonjour {parent}, petit rappel : {montant} ({echeance}) sont à régler pour la scolarité de {prenom} avant le {date}. Merci d'avance ! {etablissement}",
+  J_PLUS_1:
+    "Bonjour {parent}, le paiement de {montant} ({echeance}) pour la scolarité de {prenom} était attendu le {date}. Merci de régulariser dès que possible. {etablissement}",
+  J_PLUS_7:
+    "Bonjour {parent}, le paiement de {montant} pour la scolarité de {prenom} a maintenant {jours} jours de retard. Merci de passer à l'école ou de nous contacter rapidement. {etablissement}",
+};
+
+export function modelesParDefaut(ecole: boolean): Record<Declencheur, string> {
+  return ecole ? MODELES_PARENTS : MODELES_PAR_DEFAUT;
+}
+
+// Parent non renseigné : formule de politesse neutre
+export const PARENT_INCONNU = "Madame, Monsieur";
+
 export const VARIABLES: { cle: string; description: string }[] = [
-  { cle: "prenom", description: "Prénom de l'apprenant" },
-  { cle: "nom", description: "Nom de l'apprenant" },
+  { cle: "prenom", description: "Prénom de l'apprenant (ou de l'élève)" },
+  { cle: "nom", description: "Nom de l'apprenant (ou de l'élève)" },
+  { cle: "parent", description: `Nom du parent ou tuteur (« ${PARENT_INCONNU} » s'il n'est pas renseigné)` },
   { cle: "montant", description: "Montant à régler (ex. 30 000 FCFA)" },
   { cle: "echeance", description: "Libellé de l'échéance (ex. Mensualité 2/6)" },
   { cle: "echeances", description: "Liste des échéances concernées" },

@@ -53,7 +53,7 @@ export default async function UnpaidPage({ searchParams }: UnpaidPageProps) {
   const [dossiers, duJour, modeles] = await Promise.all([
     chargerImpayes(db),
     chargerRelancesDuJour(db),
-    chargerModeles(db),
+    chargerModeles(db, mots.parentContact),
   ]);
 
   const totalRetard = dossiers.reduce((s, d) => s + d.montant, 0);
@@ -86,12 +86,13 @@ export default async function UnpaidPage({ searchParams }: UnpaidPageProps) {
   const exemple = {
     prenom: "Awa",
     nom: "Diop",
+    parent: "Amadou Diop",
     montant: "30 000 FCFA",
     echeance: "Mensualité 2/6",
     echeances: "Mensualité 1/6, Mensualité 2/6",
     date: "5 nov. 2026",
     jours: "12",
-    formation: "Licence Informatique — L1",
+    formation: mots.parentContact ? "CM1" : "Licence Informatique — L1",
     etablissement: institut.nom,
   };
 

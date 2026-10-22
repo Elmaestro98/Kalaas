@@ -61,10 +61,14 @@ export default async function SettingsPage() {
       </section>
 
       <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
-        <h2 className="font-semibold">Années académiques</h2>
+        <h2 className="font-semibold">
+          {institut.typeEtablissement === "ECOLE" ? "Années scolaires" : "Années académiques"}
+        </h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Pour les formations LMD (Licence, Master, Doctorat). L&apos;année « en cours » est proposée par
-          défaut lors des inscriptions et des réinscriptions.
+          {institut.typeEtablissement === "ECOLE"
+            ? "Chaque classe (CM1 A, 6e B…) est ouverte pour une année scolaire."
+            : "Pour les formations LMD (Licence, Master, Doctorat)."}{" "}
+          L&apos;année « en cours » est proposée par défaut lors des inscriptions et des réinscriptions.
         </p>
 
         {annees.length > 0 && (
