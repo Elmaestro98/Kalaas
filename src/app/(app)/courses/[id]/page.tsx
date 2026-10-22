@@ -4,7 +4,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import type { Enseignant, Matiere } from "@prisma/client";
 import { exigerRole } from "@/lib/tenant";
 import { formatFcfa } from "@/lib/format";
-import { CYCLES, codeNiveau, estLmd } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau, estLmd } from "@/lib/lmd";
 import { nomEnseignant } from "@/lib/enseignants";
 import Badge from "@/components/ui/badge";
 import { basculerMatiere, basculerUE } from "../subject-actions";
@@ -152,7 +152,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold lg:text-3xl">{formation.intitule}</h1>
-            {lmd && <Badge ton={CYCLES[formation.cycle].ton}>{codeNiveau(formation.cycle, formation.niveau)}</Badge>}
+            {aDesNiveaux(formation.cycle) && <Badge ton={CYCLES[formation.cycle].ton}>{codeNiveau(formation.cycle, formation.niveau)}</Badge>}
           </div>
           <p className="mt-1 text-sm text-ink-muted">
             {CYCLES[formation.cycle].label} · {formation.dureeMois} mois ·{" "}

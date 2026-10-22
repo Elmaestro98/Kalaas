@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatNombre } from "@/lib/format";
 import { repartirMontant } from "@/lib/echeancier";
-import { CYCLES, codeNiveau, estLmd, type Cycle } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau, type Cycle } from "@/lib/lmd";
 import Badge from "@/components/ui/badge";
 
 type CourseCardProps = {
@@ -43,7 +43,7 @@ export default function CourseCard({
               {intitule}
             </Link>
           </h2>
-          {estLmd(cycle) ? (
+          {aDesNiveaux(cycle) ? (
             <Badge ton={CYCLES[cycle].ton}>{codeNiveau(cycle, niveau)}</Badge>
           ) : (
             <span className="shrink-0 rounded-full bg-surface-100 px-2.5 py-0.5 text-xs font-medium text-ink-muted">
@@ -53,7 +53,7 @@ export default function CourseCard({
         </div>
 
         <div>
-          <p className="text-xs text-ink-muted">{estLmd(cycle) ? "Coût annuel" : "Coût total"}</p>
+          <p className="text-xs text-ink-muted">{aDesNiveaux(cycle) ? "Coût annuel" : "Coût total"}</p>
           <p className="whitespace-nowrap">
             <span className="text-2xl font-bold tabular-nums">{formatNombre(total)}</span>{" "}
             <span className="text-sm text-ink-muted">FCFA</span>

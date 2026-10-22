@@ -232,13 +232,14 @@ export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentP
         typeSuggere = "REINSCRIPTION";
         sessionSuggeree = sessions.find(
           (s) =>
-            s.formation.cycle === f.cycle &&
-            s.formation.filiere?.toLowerCase() === f.filiere?.toLowerCase() &&
-            s.formation.niveau === suivant &&
+            s.formation.cycle === suivant.cycle &&
+            s.formation.niveau === suivant.niveau &&
+            // Même filière (ou série) dans le même cycle ; en changeant de cycle (3e → 2nde), elle se choisit
+            (suivant.cycle !== f.cycle || s.formation.filiere?.toLowerCase() === f.filiere?.toLowerCase()) &&
             s.anneeAcademique?.enCours,
         )?.id;
       } else {
-        // Fin de cycle (ex. L3) : l'étudiant change de cycle (Master) → nouvelle inscription
+        // Fin de parcours (ex. L3, Tle) : l'étudiant change de cycle (Master) → nouvelle inscription
         typeSuggere = "NOUVELLE";
       }
     } else if (derniere) {

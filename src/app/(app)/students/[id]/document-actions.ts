@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { flash } from "@/lib/flash";
 import { z } from "zod";
 import { getContexte } from "@/lib/tenant";
-import { CYCLES, codeNiveau, estLmd } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau } from "@/lib/lmd";
 import { compter, tauxAssiduite } from "@/lib/presences";
 import { formaterNumeroDocument, refusDocument, type ContenuDocument } from "@/lib/documents";
 
@@ -70,7 +70,7 @@ export async function delivrerDocument(_etat: EtatDocument, formData: FormData):
       lieuNaissance: apprenant.lieuNaissance,
     },
     formation: session.formation.intitule,
-    cycle: estLmd(session.formation.cycle) ? CYCLES[session.formation.cycle].label : null,
+    cycle: aDesNiveaux(session.formation.cycle) ? CYCLES[session.formation.cycle].label : null,
     niveau: codeNiveau(session.formation.cycle, session.formation.niveau) || null,
     classe: session.nom,
     anneeAcademique: session.anneeAcademique?.libelle ?? null,

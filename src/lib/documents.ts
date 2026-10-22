@@ -44,8 +44,8 @@ export type ContenuDocument = {
     lieuNaissance: string | null;
   };
   formation: string;
-  cycle: string | null; // « Licence », null pour une formation courte
-  niveau: string | null; // « L1 »
+  cycle: string | null; // « Licence », « Élémentaire », null pour une formation courte
+  niveau: string | null; // « L1 », « CM1 »
   classe: string;
   anneeAcademique: string | null;
   dateDebut: string; // AAAA-MM-JJ

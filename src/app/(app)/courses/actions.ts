@@ -5,13 +5,16 @@ import { revalidatePath } from "next/cache";
 import { flash } from "@/lib/flash";
 import { redirect } from "next/navigation";
 import { exigerRole } from "@/lib/tenant";
-import { CYCLES, codeNiveau, estLmd, intituleLmd } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau, estLmd, intituleNiveau } from "@/lib/lmd";
 
 const MONTANT_MAX = 100_000_000;
 
 const schemaFormation = z
   .object({
-    cycle: z.enum(["FORMATION_COURTE", "LICENCE", "MASTER", "DOCTORAT"], "Choisissez le type de formation."),
+    cycle: z.enum(
+      ["FORMATION_COURTE", "LICENCE", "MASTER", "DOCTORAT", "PRESCOLAIRE", "ELEMENTAIRE", "MOYEN", "SECONDAIRE"],
+      "Choisissez le type de formation.",
+    ),
     intitule: z.string().trim().max(120, "120 caractères maximum."),
     filiere: z.string().trim().max(80, "80 caractères maximum."),
     niveau: z.preprocess(
@@ -40,16 +43,17 @@ const schemaFormation = z
       .max(36, "36 mensualités maximum."),
   })
   .superRefine((d, ctx) => {
-    if (!estLmd(d.cycle)) {
+    if (!aDesNiveaux(d.cycle)) {
       if (d.intitule.length < 2) {
         ctx.addIssue({ code: "custom", path: ["intitule"], message: "Indiquez l'intitulé de la formation." });
       }
       return;
     }
-    if (d.filiere.length < 2) {
+    // La filière est obligatoire en LMD ; à l'école, la série (lycée) est facultative
+    if (estLmd(d.cycle) && d.filiere.length < 2) {
       ctx.addIssue({ code: "custom", path: ["filiere"], message: "Indiquez la filière (ex. Informatique de gestion)." });
     }
-    const max = CYCLES[d.cycle].nbNiveaux;
+    const max = CYCLES[d.cycle].niveaux.length;
     if (!d.niveau || d.niveau < 1 || d.niveau > max) {
       ctx.addIssue({ code: "custom", path: ["niveau"], message: "Choisissez le niveau." });
     }
@@ -88,27 +92,30 @@ export async function creerFormation(
     return { erreurs, erreurGenerale: null };
   }
   const d = resultat.data;
-  const lmd = estLmd(d.cycle);
+  const avecNiveaux = aDesNiveaux(d.cycle);
+  const filiere = avecNiveaux && d.filiere ? d.filiere : null;
 
-  // En LMD, l'intitulé est construit automatiquement : « Licence Informatique — L2 »
-  const intitule = lmd ? intituleLmd(d.cycle, d.filiere, d.niveau!) : d.intitule;
+  // Avec niveaux, l'intitulé est construit automatiquement : « Licence Informatique — L2 », « CM1 », « Tle S »
+  const intitule = avecNiveaux ? intituleNiveau(d.cycle, d.filiere, d.niveau!) : d.intitule;
 
-  const doublon = lmd
+  const doublon = avecNiveaux
     ? await db.formation.findFirst({
         where: {
           active: true,
           cycle: d.cycle,
           niveau: d.niveau,
-          filiere: { equals: d.filiere, mode: "insensitive" },
+          filiere: filiere ? { equals: filiere, mode: "insensitive" } : null,
         },
       })
     : await db.formation.findFirst({
         where: { active: true, intitule: { equals: intitule, mode: "insensitive" } },
       });
   if (doublon) {
-    return lmd
+    return avecNiveaux
       ? {
-          erreurs: { niveau: `Le niveau ${codeNiveau(d.cycle, d.niveau!)} de cette filière existe déjà.` },
+          erreurs: {
+            niveau: `Le niveau ${codeNiveau(d.cycle, d.niveau!)} existe déjà${filiere ? " pour cette filière" : ""}.`,
+          },
           erreurGenerale: null,
         }
       : { erreurs: { intitule: "Une formation porte déjà ce nom." }, erreurGenerale: null };
@@ -120,8 +127,8 @@ export async function creerFormation(
         institutId: institut.id,
         intitule,
         cycle: d.cycle,
-        filiere: lmd ? d.filiere : null,
-        niveau: lmd ? d.niveau : null,
+        filiere,
+        niveau: avecNiveaux ? d.niveau : null,
         dureeMois: d.dureeMois,
         fraisInscription: d.fraisInscription,
         prixTotal: d.prixTotal,

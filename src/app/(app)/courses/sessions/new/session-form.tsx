@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { creerSession, type EtatSession } from "../actions";
 import Field, { classeChamp, idDescription } from "@/components/ui/field";
-import { estLmd, type Cycle } from "@/lib/lmd";
+import { aDesNiveaux, estScolaire, type Cycle } from "@/lib/lmd";
 
 type OptionFormation = { id: string; intitule: string; dureeMois: number; cycle: Cycle };
 type OptionFormateur = { id: string; nom: string };
@@ -40,18 +40,19 @@ function calculerFin(debut: string, mois: number): string {
 
 type Calendrier = { anneeId: string; dateDebut: string; dateFin: string; nom: string };
 
-// Dates et nom proposés selon la formation (courte ou LMD) et l'année académique
+// Dates et nom proposés selon la formation (courte, LMD ou école) et l'année académique
 function proposer(
   formation: OptionFormation | undefined,
   annee: OptionAnnee | undefined,
   debutActuel: string,
 ): Calendrier {
-  if (formation && estLmd(formation.cycle) && annee) {
+  if (formation && aDesNiveaux(formation.cycle) && annee) {
     return {
       anneeId: annee.id,
       dateDebut: annee.dateDebut.slice(0, 10),
       dateFin: annee.dateFin.slice(0, 10),
-      nom: `Promotion ${annee.libelle}`,
+      // À l'école, une session est une classe : « CM1 A » (la lettre se change pour la classe suivante)
+      nom: estScolaire(formation.cycle) ? `${formation.intitule} A` : `Promotion ${annee.libelle}`,
     };
   }
   return {
@@ -83,13 +84,15 @@ export default function SessionForm({ formations, formateurs, annees, formationI
 
   const erreurs = etat.erreurs;
   const formation = formations.find((f) => f.id === formationId);
-  const lmd = formation ? estLmd(formation.cycle) : false;
-  const sansAnnee = lmd && annees.length === 0;
+  // LMD et école : la session dure une année académique (ou scolaire)
+  const annuel = formation ? aDesNiveaux(formation.cycle) : false;
+  const scolaire = formation ? estScolaire(formation.cycle) : false;
+  const sansAnnee = annuel && annees.length === 0;
 
   function appliquer(idFormation: string, idAnnee: string, debut: string) {
     const f = formations.find((x) => x.id === idFormation);
     const choixAnnee =
-      f && estLmd(f.cycle) ? (annees.find((a) => a.id === idAnnee) ?? anneeParDefaut) : undefined;
+      f && aDesNiveaux(f.cycle) ? (annees.find((a) => a.id === idAnnee) ?? anneeParDefaut) : undefined;
     const p = proposer(f, choixAnnee, debut);
 
     setAnneeId(p.anneeId);
@@ -127,23 +130,28 @@ export default function SessionForm({ formations, formateurs, annees, formationI
             {formations.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.intitule}
-                {!estLmd(f.cycle) && ` (${f.dureeMois} mois)`}
+                {!aDesNiveaux(f.cycle) && ` (${f.dureeMois} mois)`}
               </option>
             ))}
           </select>
         </Field>
 
-        {lmd &&
+        {annuel &&
           (sansAnnee ? (
             <p className="rounded-md bg-warning-soft px-4 py-3 text-sm text-warning">
-              Créez d&apos;abord une année académique (ex. 2026-2027) dans{" "}
+              Créez d&apos;abord une année {scolaire ? "scolaire" : "académique"} (ex. 2026-2027) dans{" "}
               <Link href="/settings" className="font-semibold">
                 Paramètres
               </Link>
               .
             </p>
           ) : (
-            <Field id="anneeAcademiqueId" label="Année académique" required error={erreurs.anneeAcademiqueId}>
+            <Field
+              id="anneeAcademiqueId"
+              label={scolaire ? "Année scolaire" : "Année académique"}
+              required
+              error={erreurs.anneeAcademiqueId}
+            >
               <select
                 id="anneeAcademiqueId"
                 name="anneeAcademiqueId"
@@ -162,15 +170,22 @@ export default function SessionForm({ formations, formateurs, annees, formationI
               </select>
             </Field>
           ))}
-        {!lmd && <input type="hidden" name="anneeAcademiqueId" value="" />}
+        {!annuel && <input type="hidden" name="anneeAcademiqueId" value="" />}
 
-        <Field id="nom" label={lmd ? "Nom de la promotion" : "Nom de la session"} required error={erreurs.nom}>
+        <Field
+          id="nom"
+          label={scolaire ? "Nom de la classe" : annuel ? "Nom de la promotion" : "Nom de la session"}
+          required
+          error={erreurs.nom}
+        >
           <input
             id="nom"
             name="nom"
             required
             maxLength={80}
-            placeholder={lmd ? "Ex. Promotion 2026-2027" : "Ex. Promo octobre 2026 · soir"}
+            placeholder={
+              scolaire ? "Ex. CM1 A" : annuel ? "Ex. Promotion 2026-2027" : "Ex. Promo octobre 2026 · soir"
+            }
             value={nom}
             onChange={(e) => {
               setNomModifie(true);
@@ -196,7 +211,7 @@ export default function SessionForm({ formations, formateurs, annees, formationI
               value={dateDebut}
               onChange={(e) => {
                 setDateDebut(e.target.value);
-                if (!lmd && !finModifiee && formation) {
+                if (!annuel && !finModifiee && formation) {
                   setDateFin(calculerFin(e.target.value, formation.dureeMois));
                 }
               }}
@@ -210,7 +225,7 @@ export default function SessionForm({ formations, formateurs, annees, formationI
             id="dateFin"
             label="Date de fin"
             required
-            hint={lmd ? AIDE_FIN_LMD : AIDE_FIN}
+            hint={annuel ? AIDE_FIN_LMD : AIDE_FIN}
             error={erreurs.dateFin}
           >
             <input
@@ -225,7 +240,7 @@ export default function SessionForm({ formations, formateurs, annees, formationI
                 setDateFin(e.target.value);
               }}
               aria-invalid={!!erreurs.dateFin || undefined}
-              aria-describedby={idDescription("dateFin", erreurs.dateFin, lmd ? AIDE_FIN_LMD : AIDE_FIN)}
+              aria-describedby={idDescription("dateFin", erreurs.dateFin, annuel ? AIDE_FIN_LMD : AIDE_FIN)}
               className={classeChamp(erreurs.dateFin)}
             />
           </Field>
@@ -249,7 +264,7 @@ export default function SessionForm({ formations, formateurs, annees, formationI
         <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Organisation</h2>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field id="formateurId" label={lmd ? "Responsable ou enseignant" : "Formateur"} error={erreurs.formateurId}>
+          <Field id="formateurId" label={scolaire ? "Maître ou professeur principal" : annuel ? "Responsable ou enseignant" : "Formateur"} error={erreurs.formateurId}>
             <select
               id="formateurId"
               name="formateurId"

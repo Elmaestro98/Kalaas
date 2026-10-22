@@ -33,6 +33,10 @@ enum CycleFormation {
   LICENCE
   MASTER
   DOCTORAT
+  PRESCOLAIRE
+  ELEMENTAIRE
+  MOYEN
+  SECONDAIRE
 }
 
 enum TypeInscription {

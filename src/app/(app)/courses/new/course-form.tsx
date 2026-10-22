@@ -7,7 +7,7 @@ import Field, { classeChamp, idDescription } from "@/components/ui/field";
 import MoneyInput from "@/components/ui/money-input";
 import { formatFcfa } from "@/lib/format";
 import { grouperMontants, repartirMontant } from "@/lib/echeancier";
-import { CYCLES, codeNiveau, estLmd, intituleLmd, type Cycle } from "@/lib/lmd";
+import { CYCLES, aDesNiveaux, codeNiveau, estLmd, estScolaire, intituleNiveau, type Cycle } from "@/lib/lmd";
 
 const etatInitial: EtatFormation = { erreurs: {}, erreurGenerale: null };
 
@@ -16,16 +16,21 @@ const AIDE_MENSUALITES = "Par défaut, une par mois de formation";
 const AIDE_FRAIS = "Payés une seule fois, à l'inscription";
 const AIDE_PRIX = "Hors frais d'inscription, réparti en mensualités";
 const AIDE_FILIERE = "Ex. Informatique de gestion, Finance-Comptabilité";
+const AIDE_SERIE = "Lycée : L, S1, S2… Laissez vide s'il n'y a pas de série";
 
 const CHOIX_CYCLES: { valeur: Cycle; label: string; detail: string }[] = [
   { valeur: "FORMATION_COURTE", label: "Formation courte", detail: "Quelques mois" },
   { valeur: "LICENCE", label: "Licence", detail: "L1 · L2 · L3" },
   { valeur: "MASTER", label: "Master", detail: "M1 · M2" },
   { valeur: "DOCTORAT", label: "Doctorat", detail: "D1 · D2 · D3" },
+  { valeur: "PRESCOLAIRE", label: "Préscolaire", detail: "PS · MS · GS" },
+  { valeur: "ELEMENTAIRE", label: "Élémentaire", detail: "CI → CM2" },
+  { valeur: "MOYEN", label: "Moyen", detail: "6e → 3e" },
+  { valeur: "SECONDAIRE", label: "Secondaire", detail: "2nde → Tle" },
 ];
 
-// Durée par défaut d'un niveau LMD : une année académique (octobre → juillet)
-const DUREE_LMD = 10;
+// Durée par défaut d'un niveau LMD ou scolaire : une année (octobre → juillet)
+const DUREE_ANNEE = 10;
 const DUREE_COURTE = 6;
 
 export default function CourseForm({ filieres }: { filieres: string[] }) {
@@ -40,16 +45,29 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
   const [mensualitesModifiees, setMensualitesModifiees] = useState(false);
   const [frais, setFrais] = useState(0);
   const [prix, setPrix] = useState(0);
+  // Réponse du serveur dont les erreurs ont été masquées (le type de formation a changé depuis)
+  const [etatMasque, setEtatMasque] = useState<EtatFormation | null>(null);
 
-  const erreurs = etat.erreurs;
+  const erreurs = etatMasque === etat ? {} : etat.erreurs;
   const lmd = estLmd(cycle);
+  const scolaire = estScolaire(cycle);
+  const avecNiveaux = aDesNiveaux(cycle);
+  // Filière en LMD (obligatoire), série au lycée (facultative)
+  const avecFiliere = lmd || cycle === "SECONDAIRE";
+  const aideFiliere = lmd ? AIDE_FILIERE : AIDE_SERIE;
+  const filiereSaisie = avecFiliere ? filiere : "";
   const groupes = grouperMontants(repartirMontant(prix, nbMensualites));
   const total = frais + prix;
 
   function changerCycle(nouveau: Cycle) {
+    // Une filière LMD n'est pas une série de lycée (et inversement) : on repart d'un champ vide
+    if (CYCLES[nouveau].famille !== CYCLES[cycle].famille) {
+      setFiliere("");
+    }
+    setEtatMasque(etat);
     setCycle(nouveau);
     setNiveau(1);
-    const dureeDefaut = estLmd(nouveau) ? DUREE_LMD : DUREE_COURTE;
+    const dureeDefaut = aDesNiveaux(nouveau) ? DUREE_ANNEE : DUREE_COURTE;
     setDuree(dureeDefaut);
     if (!mensualitesModifiees) {
       setNbMensualites(dureeDefaut);
@@ -106,30 +124,40 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
       <section className="space-y-5">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Informations</h2>
 
-        {lmd ? (
+        {avecNiveaux ? (
           <>
             <input type="hidden" name="intitule" value="" />
             <div className="grid gap-5 sm:grid-cols-[1fr_10rem]">
-              <Field id="filiere" label="Filière" required hint={AIDE_FILIERE} error={erreurs.filiere}>
-                <input
+              {avecFiliere ? (
+                <Field
                   id="filiere"
-                  name="filiere"
-                  required
-                  maxLength={80}
-                  list="filieres-existantes"
-                  autoComplete="off"
-                  value={filiere}
-                  onChange={(e) => setFiliere(e.target.value)}
-                  aria-invalid={!!erreurs.filiere || undefined}
-                  aria-describedby={idDescription("filiere", erreurs.filiere, AIDE_FILIERE)}
-                  className={classeChamp(erreurs.filiere)}
-                />
-                <datalist id="filieres-existantes">
-                  {filieres.map((f) => (
-                    <option key={f} value={f} />
-                  ))}
-                </datalist>
-              </Field>
+                  label={lmd ? "Filière" : "Série"}
+                  required={lmd}
+                  hint={aideFiliere}
+                  error={erreurs.filiere}
+                >
+                  <input
+                    id="filiere"
+                    name="filiere"
+                    required={lmd}
+                    maxLength={80}
+                    list="filieres-existantes"
+                    autoComplete="off"
+                    value={filiere}
+                    onChange={(e) => setFiliere(e.target.value)}
+                    aria-invalid={!!erreurs.filiere || undefined}
+                    aria-describedby={idDescription("filiere", erreurs.filiere, aideFiliere)}
+                    className={classeChamp(erreurs.filiere)}
+                  />
+                  <datalist id="filieres-existantes">
+                    {filieres.map((f) => (
+                      <option key={f} value={f} />
+                    ))}
+                  </datalist>
+                </Field>
+              ) : (
+                <input type="hidden" name="filiere" value="" />
+              )}
               <Field id="niveau" label="Niveau" required error={erreurs.niveau}>
                 <select
                   id="niveau"
@@ -140,7 +168,7 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
                   aria-describedby={idDescription("niveau", erreurs.niveau)}
                   className={classeChamp(erreurs.niveau)}
                 >
-                  {Array.from({ length: CYCLES[cycle].nbNiveaux }, (_, i) => i + 1).map((n) => (
+                  {CYCLES[cycle].niveaux.map((_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>
                       {codeNiveau(cycle, n)}
                     </option>
@@ -150,9 +178,11 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
             </div>
             <p className="rounded-md bg-surface-100 px-4 py-3 text-sm">
               <span className="text-ink-muted">Intitulé : </span>
-              <b>{filiere.trim() ? intituleLmd(cycle, filiere, niveau) : "—"}</b>
+              <b>{lmd && !filiereSaisie.trim() ? "—" : intituleNiveau(cycle, filiereSaisie, niveau)}</b>
               <span className="mt-1 block text-xs text-ink-muted">
-                Créez une formation par niveau : chaque niveau a son propre tarif.
+                {scolaire
+                  ? "Créez une formation par niveau : chaque niveau a son propre tarif. Les classes (6e A, 6e B…) s'ouvrent ensuite comme sessions."
+                  : "Créez une formation par niveau : chaque niveau a son propre tarif."}
               </span>
             </p>
           </>
@@ -221,13 +251,13 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
 
       <section className="space-y-5">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
-          Tarification{lmd && " annuelle"}
+          Tarification{avecNiveaux && " annuelle"}
         </h2>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Field
             id="fraisInscription"
-            label={lmd ? "Frais d'inscription annuels" : "Frais d'inscription"}
+            label={avecNiveaux ? "Frais d'inscription annuels" : "Frais d'inscription"}
             hint={AIDE_FRAIS}
             error={erreurs.fraisInscription}
           >
@@ -244,7 +274,7 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
 
           <Field
             id="prixTotal"
-            label={lmd ? "Scolarité annuelle" : "Prix de la formation"}
+            label={avecNiveaux ? "Scolarité annuelle" : "Prix de la formation"}
             required
             hint={AIDE_PRIX}
             error={erreurs.prixTotal}
@@ -264,7 +294,7 @@ export default function CourseForm({ filieres }: { filieres: string[] }) {
 
         <div aria-live="polite" className="rounded-lg border border-gold-500/40 bg-gold-100 p-5">
           <p className="text-xs font-semibold uppercase tracking-wider text-gold-700">
-            Échéancier par {lmd ? "étudiant et par an" : "apprenant"}
+            Échéancier par {scolaire ? "élève et par an" : lmd ? "étudiant et par an" : "apprenant"}
           </p>
           <dl className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between gap-4">

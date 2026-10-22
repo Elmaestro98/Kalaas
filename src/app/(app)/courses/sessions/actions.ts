@@ -76,7 +76,7 @@ export async function creerSession(
     return { erreurs: { formationId: "Formation introuvable." }, erreurGenerale: null };
   }
 
-  // En LMD, la session (la promotion) appartient obligatoirement à une année académique
+  // En LMD et à l'école, la session (promotion ou classe) appartient obligatoirement à une année académique
   let anneeAcademiqueId: string | null = null;
   if (formation.cycle !== "FORMATION_COURTE") {
     const annee = donnees.anneeAcademiqueId
