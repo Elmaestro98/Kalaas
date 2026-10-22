@@ -113,15 +113,34 @@ export async function creerInscription(
 ): Promise<EtatInscription> {
   const { institut, membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
 
-  const resultat = schemaInscription.safeParse(Object.fromEntries(formData));
+  // École : le téléphone du parent devient le contact principal (reçus, relances, recherche)
+  const brut = Object.fromEntries(formData);
+  const parentContact = institut.typeEtablissement === "ECOLE" && !brut.apprenantId;
+  if (parentContact) {
+    brut.telephone = brut.tuteurTelephone ?? "";
+  }
+
+  const resultat = schemaInscription.safeParse(brut);
+  const erreurs: EtatInscription["erreurs"] = {};
   if (!resultat.success) {
     const { fieldErrors } = z.flattenError(resultat.error);
-    const erreurs: EtatInscription["erreurs"] = {};
     for (const [champ, messages] of Object.entries(fieldErrors)) {
       if (messages?.[0]) {
         erreurs[champ as ChampInscription] = messages[0];
       }
     }
+  }
+  if (parentContact) {
+    if (!String(brut.tuteurNom ?? "").trim()) {
+      erreurs.tuteurNom = "Indiquez le nom du parent.";
+    }
+    // Le champ « téléphone » n'est pas affiché : l'erreur va sous celui du parent
+    if (erreurs.telephone) {
+      erreurs.tuteurTelephone = erreurs.telephone;
+      delete erreurs.telephone;
+    }
+  }
+  if (!resultat.success || Object.keys(erreurs).length > 0) {
     return { erreurs, erreurGenerale: null };
   }
   const d = resultat.data;

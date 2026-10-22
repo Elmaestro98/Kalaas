@@ -1,4 +1,5 @@
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatDate } from "@/lib/format";
 import { prefixeParDefaut } from "@/lib/lmd";
 import Badge from "@/components/ui/badge";
@@ -6,11 +7,13 @@ import { definirAnneeEnCours, desactiverSalle } from "./actions";
 import AcademicYearForm from "./academic-year-form";
 import PrefixForm from "./prefix-form";
 import ExpenseLimitForm from "./expense-limit-form";
+import SchoolTermForm from "./school-term-form";
 import EstablishmentForm from "./establishment-form";
 import RoomForm from "./room-form";
 
 export default async function SettingsPage() {
   const { institut, db } = await exigerRole("DIRECTEUR");
+  const mots = vocabulaire(institut.typeEtablissement);
 
   const [annees, salles] = await Promise.all([
     db.anneeAcademique.findMany({
@@ -45,6 +48,7 @@ export default async function SettingsPage() {
           key={institut.updatedAt.toISOString()}
           valeursInitiales={{
             nom: institut.nom,
+            typeEtablissement: institut.typeEtablissement,
             ville: institut.ville ?? "",
             adresse: institut.adresse ?? "",
             telephone: institut.telephone ?? "",
@@ -97,6 +101,16 @@ export default async function SettingsPage() {
         </div>
       </section>
 
+      {institut.typeEtablissement === "ECOLE" && (
+        <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
+          <h2 className="font-semibold">Notes et bulletins</h2>
+          <p className="mt-1 mb-4 text-sm text-ink-muted">
+            Chaque évaluation est rattachée à une période, et un bulletin est édité à la fin de chaque période.
+          </p>
+          <SchoolTermForm decoupageActuel={institut.decoupageScolaire} />
+        </section>
+      )}
+
       <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
         <h2 className="font-semibold">Salles</h2>
         <p className="mt-1 text-sm text-ink-muted">
@@ -131,7 +145,7 @@ export default async function SettingsPage() {
       <section className="mt-6 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
         <h2 className="font-semibold">Matricules</h2>
         <p className="mt-1 mb-4 text-sm text-ink-muted">
-          Chaque apprenant reçoit un matricule unique à sa première inscription, conservé pendant toute sa
+          Chaque {mots.apprenant} reçoit un matricule unique à sa première inscription, conservé pendant toute sa
           scolarité. Il est composé du préfixe, de l&apos;année d&apos;entrée et d&apos;un numéro.
         </p>
         <PrefixForm prefixeActuel={institut.prefixeMatricule ?? prefixeParDefaut(institut.nom)} />

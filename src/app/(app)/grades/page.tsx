@@ -1,21 +1,26 @@
 import Link from "next/link";
-import { BarChart3, Lock, PenLine, Trash2, Unlock } from "lucide-react";
+import { BarChart3, FileText, Lock, PenLine, Trash2, Unlock } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatDate } from "@/lib/format";
 import { TYPES_EVALUATION } from "@/lib/notes";
+import { estScolaire } from "@/lib/lmd";
+import { vocabulaire } from "@/lib/etablissement";
+import { libellePeriode, periodes as listePeriodes } from "@/lib/bulletins";
 import { classesPourNotes, matieresNotables } from "@/lib/notes-donnees";
 import { basculerVerrou, supprimerEvaluation } from "./actions";
 import ClassSelect from "./class-select";
 import EvaluationForm from "./evaluation-form";
+import PeriodTabs from "./period-tabs";
 
 type GradesPageProps = {
-  searchParams: Promise<{ session?: string }>;
+  searchParams: Promise<{ session?: string; periode?: string }>;
 };
 
 const LABEL_TYPE = Object.fromEntries(TYPES_EVALUATION.map((t) => [t.valeur, t.label]));
 
 export default async function GradesPage({ searchParams }: GradesPageProps) {
-  const { membre, db } = await exigerRole("DIRECTEUR", "FORMATEUR");
+  const { institut, membre, db } = await exigerRole("DIRECTEUR", "FORMATEUR");
+  const mots = vocabulaire(institut.typeEtablissement);
   const estDirecteur = membre.role === "DIRECTEUR";
   const params = await searchParams;
 
@@ -57,6 +62,19 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
 
   const visibles = notables === "TOUTES" ? matieres : matieres.filter((m) => notables.has(m.id));
 
+  // École : les évaluations sont rangées par période (par défaut, la dernière période commencée)
+  const scolaire = estScolaire(session.formation.cycle);
+  const periodes = listePeriodes(institut.decoupageScolaire);
+  const demandee = Number(params.periode);
+  const periode = scolaire
+    ? periodes.includes(demandee)
+      ? demandee
+      : Math.max(1, ...evaluations.map((e) => e.periode ?? 0).filter((p) => periodes.includes(p)))
+    : null;
+  const dePeriode = scolaire ? evaluations.filter((e) => e.periode === periode) : evaluations;
+  const sansPeriode = scolaire ? evaluations.filter((e) => e.periode === null).length : 0;
+  const suffixe = periode ? `&periode=${periode}` : "";
+
   return (
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-end gap-4">
@@ -66,9 +84,18 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
             Créez les évaluations de chaque matière avec leur poids, puis saisissez les notes sur la grille.
           </p>
         </div>
+        {scolaire && (
+          <Link
+            href={`/grades/report-cards?session=${session.id}${suffixe}`}
+            className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
+          >
+            <FileText size={18} aria-hidden="true" />
+            Appréciations et bulletins
+          </Link>
+        )}
         {estDirecteur && (
           <Link
-            href={`/grades/results?session=${session.id}`}
+            href={`/grades/results?session=${session.id}${suffixe}`}
             className="flex h-11 items-center gap-2 rounded-md bg-gold-500 px-4 font-medium text-navy-900 hover:opacity-90"
           >
             <BarChart3 size={18} aria-hidden="true" />
@@ -80,12 +107,27 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
       <div className="mt-4">
         <ClassSelect valeur={session.id} chemin="/grades" classes={classes} />
         <p className="mt-1 text-xs text-ink-muted">
-          {nbInscrits} apprenant{nbInscrits > 1 ? "s" : ""} ·{" "}
+          {nbInscrits} {nbInscrits > 1 ? mots.apprenants : mots.apprenant} ·{" "}
           <Link href={`/courses/${session.formation.id}`} className="font-medium">
             programme et coefficients
           </Link>
         </p>
       </div>
+
+      {periode !== null && (
+        <PeriodTabs
+          className="mt-4"
+          lien={(p) => `/grades?session=${session.id}&periode=${p}`}
+          periodes={periodes.map((p) => ({ valeur: p, label: libellePeriode(institut.decoupageScolaire, p) }))}
+          active={periode}
+        />
+      )}
+      {sansPeriode > 0 && (
+        <p className="mt-3 rounded-sm bg-warning-soft px-4 py-2 text-sm text-warning">
+          {sansPeriode} évaluation{sansPeriode > 1 ? "s ont été créées" : " a été créée"} sans période : elle
+          {sansPeriode > 1 ? "s ne comptent" : " ne compte"} dans aucun bulletin.
+        </p>
+      )}
 
       {visibles.length === 0 ? (
         <p className="mt-6 rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center text-sm text-ink-muted">
@@ -96,7 +138,7 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
       ) : (
         <div className="mt-6 space-y-4">
           {visibles.map((m) => {
-            const siennes = evaluations.filter((e) => e.matiereId === m.id);
+            const siennes = dePeriode.filter((e) => e.matiereId === m.id);
             const poidsTotal = siennes.reduce((s, e) => s + e.poids, 0);
             return (
               <section key={m.id} className="rounded-lg border border-border bg-surface-200 p-5">
@@ -106,7 +148,7 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
                     <span className="ml-2 text-xs font-normal text-ink-muted">
                       coef {m.coefficient ?? 1}
                       {m.unite && ` · ${m.unite.code ?? m.unite.intitule}`}
-                      {m.semestre && ` · S${m.semestre}`}
+                      {!scolaire && m.semestre && ` · S${m.semestre}`}
                     </span>
                   </h2>
                   <span
@@ -186,6 +228,7 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
                     <EvaluationForm
                       sessionId={session.id}
                       matiereId={m.id}
+                      periode={periode}
                       poidsRestant={100 - poidsTotal}
                       suggestion={
                         poidsTotal >= 40 && !siennes.some((e) => e.type === "EXAMEN")

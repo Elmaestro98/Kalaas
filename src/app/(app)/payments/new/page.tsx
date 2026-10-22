@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Search } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatFcfa } from "@/lib/format";
 import { resumeFinancier } from "@/lib/echeancier";
 import PaymentForm, { type EcheancePayable } from "./payment-form";
@@ -13,7 +14,8 @@ type NewPaymentPageProps = {
 const INSCRIPTIONS_EN_COURS = { statut: { in: ["ACTIVE" as const, "TERMINEE" as const] } };
 
 export default async function NewPaymentPage({ searchParams }: NewPaymentPageProps) {
-  const { membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const { institut, membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const mots = vocabulaire(institut.typeEtablissement);
   const { q = "", apprenant: apprenantId } = await searchParams;
 
   // ─── Étape 2 : l'apprenant est choisi ───
@@ -57,7 +59,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
           className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
         >
           <ArrowLeft size={16} aria-hidden="true" />
-          Changer d&apos;apprenant
+          Changer d&apos;{mots.apprenant}
         </Link>
         <h1 className="mt-3 mb-6 text-2xl font-semibold lg:text-3xl">Nouvel encaissement</h1>
 
@@ -81,7 +83,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
         {echeances.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center">
             <p className="font-semibold">Rien à encaisser</p>
-            <p className="mt-1 text-sm text-ink-muted">Cet apprenant est à jour de tous ses paiements.</p>
+            <p className="mt-1 text-sm text-ink-muted">Cet {mots.apprenant} est à jour de tous ses paiements.</p>
           </div>
         ) : (
           <div className="rounded-lg border border-border bg-surface-200 p-5 shadow-[var(--shadow-card)] lg:p-6">
@@ -135,7 +137,7 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="text-2xl font-semibold lg:text-3xl">Nouvel encaissement</h1>
-      <p className="mt-1 mb-6 text-sm text-ink-muted">Étape 1 sur 2 · trouvez l&apos;apprenant</p>
+      <p className="mt-1 mb-6 text-sm text-ink-muted">Étape 1 sur 2 · trouvez l&apos;{mots.apprenant}</p>
 
       <form action="/payments/new">
         <label className="flex h-12 items-center gap-2 rounded-md border border-border bg-surface-200 px-3 text-ink-muted focus-within:border-gold-500 focus-within:ring-4 focus-within:ring-gold-100">
@@ -145,8 +147,8 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
             name="q"
             defaultValue={recherche}
             autoFocus
-            placeholder="Nom ou téléphone de l'apprenant"
-            aria-label="Rechercher un apprenant"
+            placeholder={mots.parentContact ? "Nom de l'élève ou téléphone du parent" : `Nom ou téléphone de l'${mots.apprenant}`}
+            aria-label={`Rechercher un ${mots.apprenant}`}
             className="h-full flex-1 bg-transparent text-ink outline-none"
           />
         </label>
@@ -155,12 +157,12 @@ export default async function NewPaymentPage({ searchParams }: NewPaymentPagePro
       <p className="mt-4 mb-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
         {recherche
           ? `${resultats.length} résultat${resultats.length > 1 ? "s" : ""}`
-          : "Apprenants avec un reste à payer"}
+          : `${mots.Apprenants} avec un reste à payer`}
       </p>
 
       {resultats.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border bg-surface-200 p-6 text-center text-sm text-ink-muted">
-          {recherche ? "Aucun apprenant trouvé." : "Aucun apprenant n'a de reste à payer."}
+          {recherche ? `Aucun ${mots.apprenant} trouvé.` : `Aucun ${mots.apprenant} n'a de reste à payer.`}
         </p>
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface-200">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Search, Wallet } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatDate, formatFcfa, formatNombre } from "@/lib/format";
 import { lienWhatsApp } from "@/lib/telephone";
 import {
@@ -38,6 +39,7 @@ function couleurRetard(jours: number) {
 
 export default async function UnpaidPage({ searchParams }: UnpaidPageProps) {
   const { institut, membre, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const mots = vocabulaire(institut.typeEtablissement);
   const estDirecteur = membre.role === "DIRECTEUR";
   const params = await searchParams;
 
@@ -110,7 +112,7 @@ export default async function UnpaidPage({ searchParams }: UnpaidPageProps) {
           </p>
         </div>
         <div className="rounded-lg border border-border bg-surface-200 p-5">
-          <p className="text-sm text-ink-muted">Apprenants en retard</p>
+          <p className="text-sm text-ink-muted">{mots.Apprenants} en retard</p>
           <p className="mt-1 text-3xl font-bold tabular-nums">{dossiers.length}</p>
           <p className="mt-1 text-xs text-ink-muted">dont {plusDe30} depuis plus de 30 jours</p>
         </div>
@@ -180,11 +182,11 @@ export default async function UnpaidPage({ searchParams }: UnpaidPageProps) {
           {affiches.length === 0 ? (
             <div className="mt-5 rounded-lg border border-dashed border-border bg-surface-200 p-10 text-center">
               <p className="font-semibold">
-                {dossiers.length === 0 ? "Aucun impayé, bravo !" : "Aucun apprenant dans ce filtre"}
+                {dossiers.length === 0 ? "Aucun impayé, bravo !" : `Aucun ${mots.apprenant} dans ce filtre`}
               </p>
               <p className="mt-1 text-sm text-ink-muted">
                 {dossiers.length === 0
-                  ? "Tous les apprenants sont à jour de leurs paiements."
+                  ? `Tous les ${mots.apprenants} sont à jour de leurs paiements.`
                   : "Essayez une autre tranche ou une autre recherche."}
               </p>
             </div>
@@ -234,10 +236,10 @@ export default async function UnpaidPage({ searchParams }: UnpaidPageProps) {
                         echeanceIds={ids}
                         message={message}
                       />
-                      {d.apprenant.tuteurTelephone && (
+                      {d.apprenant.tuteurTelephone && d.apprenant.tuteurTelephone !== d.apprenant.telephone && (
                         <RelanceButton
                           href={lienWa(d.apprenant.tuteurTelephone, message)}
-                          label="Tuteur"
+                          label={mots.parentContact ? "Parent" : "Tuteur"}
                           apprenantId={d.apprenant.id}
                           declencheur="MANUELLE"
                           echeanceIds={ids}

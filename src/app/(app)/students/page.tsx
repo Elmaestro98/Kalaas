@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileSpreadsheet, Plus, Search } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatFcfa, formatNombre } from "@/lib/format";
 import {
   STATUT_FINANCIER,
@@ -26,7 +27,8 @@ function initiales(prenom: string, nom: string) {
 }
 
 export default async function StudentsPage({ searchParams }: StudentsPageProps) {
-  const { db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const { institut, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const mots = vocabulaire(institut.typeEtablissement);
   const { q = "", statut = "TOUS" } = await searchParams;
   const recherche = q.trim();
 
@@ -105,9 +107,9 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold lg:text-3xl">Apprenants</h1>
+          <h1 className="text-2xl font-semibold lg:text-3xl">{mots.Apprenants}</h1>
           <p className="mt-1 text-sm text-ink-muted">
-            {compteurs.TOUS} apprenant{compteurs.TOUS > 1 ? "s" : ""}
+            {compteurs.TOUS} {compteurs.TOUS > 1 ? mots.apprenants : mots.apprenant}
             {totalDu > 0 && (
               <>
                 {" "}· Recouvrement <b className="text-ink">{tauxRecouvrement} %</b> · Reste dû{" "}
@@ -135,7 +137,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
             className="flex h-11 items-center gap-2 rounded-md bg-action px-5 font-medium text-on-action hover:bg-action-hover"
           >
             <Plus size={18} aria-hidden="true" />
-            Inscrire un apprenant
+            Inscrire un {mots.apprenant}
           </Link>
         </div>
       </div>
@@ -171,7 +173,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
               name="q"
               defaultValue={recherche}
               placeholder="Nom, matricule ou téléphone"
-              aria-label="Rechercher un apprenant"
+              aria-label={`Rechercher un ${mots.apprenant}`}
               className="h-full flex-1 bg-transparent text-ink outline-none"
             />
           </label>
@@ -181,11 +183,11 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
       {affichees.length === 0 ? (
         <div className="mt-6 rounded-lg border border-dashed border-border bg-surface-200 p-10 text-center">
           <p className="font-semibold">
-            {compteurs.TOUS === 0 && !recherche ? "Aucun apprenant pour l'instant" : "Aucun apprenant trouvé"}
+            {compteurs.TOUS === 0 && !recherche ? `Aucun ${mots.apprenant} pour l'instant` : `Aucun ${mots.apprenant} trouvé`}
           </p>
           <p className="mt-1 text-sm text-ink-muted">
             {compteurs.TOUS === 0 && !recherche
-              ? "Inscrivez votre premier apprenant : son échéancier sera créé automatiquement."
+              ? `Inscrivez votre premier ${mots.apprenant} : son échéancier sera créé automatiquement.`
               : "Essayez un autre nom, un autre numéro ou un autre filtre."}
           </p>
         </div>
@@ -196,7 +198,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-100 text-xs font-semibold uppercase tracking-wider text-ink-muted">
                 <tr>
-                  <th scope="col" className="px-4 py-3">Apprenant</th>
+                  <th scope="col" className="px-4 py-3">{mots.Apprenant}</th>
                   <th scope="col" className="px-4 py-3">Formation</th>
                   <th scope="col" className="px-4 py-3 text-right">Payé</th>
                   <th scope="col" className="px-4 py-3">Statut</th>

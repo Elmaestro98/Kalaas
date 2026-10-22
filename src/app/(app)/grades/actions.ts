@@ -6,6 +6,8 @@ import { flash } from "@/lib/flash";
 import { getContexte } from "@/lib/tenant";
 import { peutNoter } from "@/lib/notes-donnees";
 import { lireNote, type StatutNoteSaisie } from "@/lib/notes";
+import { estScolaire } from "@/lib/lmd";
+import { libellePeriode, nbPeriodes } from "@/lib/bulletins";
 
 // ─── Créer une évaluation ──────────────────────────
 
@@ -17,6 +19,7 @@ const schemaEvaluation = z.object({
   date: z.string().optional(),
   poids: z.coerce.number().int("Poids entier (en %).").min(1, "Poids d'au moins 1 %.").max(100, "100 % maximum."),
   bareme: z.coerce.number().int("Barème entier.").min(1, "Barème invalide.").max(100, "Barème de 100 maximum."),
+  periode: z.coerce.number().int().optional(),
 });
 
 export type EtatEvaluation = { erreur: string | null; succes: number };
@@ -31,7 +34,7 @@ export async function creerEvaluation(etat: EtatEvaluation, formData: FormData):
   }
   const d = resultat.data;
 
-  const session = await db.session.findFirst({ where: { id: d.sessionId } });
+  const session = await db.session.findFirst({ where: { id: d.sessionId }, include: { formation: { select: { cycle: true } } } });
   const matiere = session
     ? await db.matiere.findFirst({ where: { id: d.matiereId, formationId: session.formationId, active: true } })
     : null;
@@ -42,14 +45,24 @@ export async function creerEvaluation(etat: EtatEvaluation, formData: FormData):
     return echec("Vous ne pouvez créer des évaluations que pour vos propres matières.");
   }
 
-  // Le total des poids d'une matière ne dépasse pas 100 %
+  // École : chaque évaluation appartient à une période (1er trimestre…)
+  let periode: number | null = null;
+  if (estScolaire(session.formation.cycle)) {
+    if (!d.periode || d.periode < 1 || d.periode > nbPeriodes(institut.decoupageScolaire)) {
+      return echec("Choisissez la période de l'évaluation.");
+    }
+    periode = d.periode;
+  }
+
+  // Le total des poids d'une matière ne dépasse pas 100 % (par période pour une école)
   const existantes = await db.evaluation.aggregate({
-    where: { sessionId: session.id, matiereId: matiere.id },
+    where: { sessionId: session.id, matiereId: matiere.id, ...(periode ? { periode } : {}) },
     _sum: { poids: true },
   });
   const total = (existantes._sum.poids ?? 0) + d.poids;
   if (total > 100) {
-    return echec(`Le total des poids de ${matiere.intitule} atteindrait ${total} % (100 % maximum).`);
+    const au = periode ? ` au ${libellePeriode(institut.decoupageScolaire, periode)}` : "";
+    return echec(`Le total des poids de ${matiere.intitule}${au} atteindrait ${total} % (100 % maximum).`);
   }
 
   await db.evaluation.create({
@@ -62,6 +75,7 @@ export async function creerEvaluation(etat: EtatEvaluation, formData: FormData):
       date: d.date && /^\d{4}-\d{2}-\d{2}$/.test(d.date) ? new Date(d.date) : null,
       poids: d.poids,
       bareme: d.bareme,
+      periode,
       creeParId: membre.id,
     },
   });

@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { ArrowLeft, FileDown } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { LIBELLE_DECISION, SEUIL_VALIDATION, formatNote } from "@/lib/notes";
 import { chargerResultatsClasse, classesPourNotes, cleSemestre } from "@/lib/notes-donnees";
 import ClassSelect from "../class-select";
+import { estScolaire } from "@/lib/lmd";
+import { periodes as listePeriodes } from "@/lib/bulletins";
+import { chargerResultatsScolaires } from "@/lib/bulletins-donnees";
+import SchoolResults from "./school-results";
 
 type ResultsPageProps = {
-  searchParams: Promise<{ session?: string }>;
+  searchParams: Promise<{ session?: string; periode?: string }>;
 };
 
 function Note({ valeur, provisoire }: { valeur: number | null; provisoire?: boolean }) {
@@ -23,7 +28,8 @@ function Note({ valeur, provisoire }: { valeur: number | null; provisoire?: bool
 }
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
-  const { membre, db } = await exigerRole("DIRECTEUR");
+  const { institut, membre, db } = await exigerRole("DIRECTEUR");
+  const mots = vocabulaire(institut.typeEtablissement);
   const params = await searchParams;
 
   const sessions = await classesPourNotes(db, membre);
@@ -33,6 +39,48 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     groupe: s.anneeAcademique ? `Année ${s.anneeAcademique.libelle}` : "Formations courtes",
   }));
   const session = sessions.find((s) => s.id === params.session) ?? sessions[0];
+
+  // École : résultats par période (trimestres ou semestres) et bilan de l'année
+  if (session && estScolaire(session.formation.cycle)) {
+    const scolaires = await chargerResultatsScolaires(db, session.id, institut.decoupageScolaire);
+    const periodes = listePeriodes(institut.decoupageScolaire);
+    const demandee = Number(params.periode);
+    const vue: number | "ANNEE" =
+      params.periode === "annee"
+        ? "ANNEE"
+        : periodes.includes(demandee)
+          ? demandee
+          : Math.max(1, ...periodes.filter((p) => (scolaires?.evaluations[p] ?? 0) > 0));
+    return (
+      <div className="mx-auto max-w-7xl">
+        <Link
+          href={`/grades?session=${session.id}${vue === "ANNEE" ? "" : `&periode=${vue}`}`}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          Notes
+        </Link>
+        <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">Résultats de la classe</h1>
+        <p className="mt-1 text-sm text-ink-muted">
+          Matière : évaluations de la période pondérées · moyenne générale : coefficients · année : moyenne des
+          périodes. <span className="italic">12,50*</span> = moyenne provisoire (notes manquantes).
+        </p>
+        <div className="mt-4 min-w-64">
+          <ClassSelect valeur={session.id} chemin="/grades/results" classes={classes} />
+        </div>
+        {scolaires && (
+          <SchoolResults
+            sessionId={session.id}
+            resultats={scolaires}
+            vue={vue}
+            decoupage={institut.decoupageScolaire}
+            mots={mots}
+          />
+        )}
+      </div>
+    );
+  }
+
   const resultats = session ? await chargerResultatsClasse(db, session.id) : null;
 
   return (
@@ -76,7 +124,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
 
       {!resultats || resultats.lignes.length === 0 ? (
         <p className="mt-6 rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center text-sm text-ink-muted">
-          Aucun apprenant ou aucune classe.
+          Aucun {mots.apprenant} ou aucune classe.
         </p>
       ) : resultats.nbEvaluations === 0 ? (
         <p className="mt-6 rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center text-sm text-ink-muted">
@@ -100,7 +148,7 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
                   <thead className="text-xs text-ink-muted">
                     <tr className="bg-surface-100">
                       <th scope="col" rowSpan={2} className="sticky left-0 z-10 bg-surface-100 px-3 py-2 text-left font-semibold">
-                        Apprenant
+                        {mots.Apprenant}
                       </th>
                       {bloc.ues.map((u) => (
                         <th

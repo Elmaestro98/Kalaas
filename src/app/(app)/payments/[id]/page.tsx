@@ -66,13 +66,19 @@ export default async function PaymentPage({ params, searchParams }: PaymentPageP
   const formation = lignes[0]?.echeance.inscription.session;
   const apprenant = paiement.apprenant;
 
+  // École : le reçu part au parent, le message parle de l'élève
+  const auParent = institut.typeEtablissement === "ECOLE";
   const messageWhatsApp = [
-    `Bonjour ${apprenant.prenom},`,
-    `${institut.nom} confirme la réception de ${formatFcfa(paiement.montant)} (${LABEL_MODE[paiement.mode]}).`,
+    auParent ? `Bonjour${apprenant.tuteurNom ? ` ${apprenant.tuteurNom}` : ""},` : `Bonjour ${apprenant.prenom},`,
+    `${institut.nom} confirme la réception de ${formatFcfa(paiement.montant)} (${LABEL_MODE[paiement.mode]})${
+      auParent ? ` pour ${apprenant.prenom} ${apprenant.nom}` : ""
+    }.`,
     `Reçu n° ${paiement.numeroRecu} du ${formatDate(paiement.date)}.`,
     situation.reste > 0
       ? `Reste à payer : ${formatFcfa(situation.reste)}.`
-      : "Votre formation est entièrement réglée. Merci !",
+      : auParent
+        ? `La scolarité de ${apprenant.prenom} est entièrement réglée. Merci !`
+        : "Votre formation est entièrement réglée. Merci !",
   ].join("\n");
   const lienPartage = `${lienWhatsApp(apprenant.telephone)}?text=${encodeURIComponent(messageWhatsApp)}`;
 

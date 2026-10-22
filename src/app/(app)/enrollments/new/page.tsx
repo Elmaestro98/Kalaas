@@ -4,21 +4,22 @@ import { ArrowLeft, Search } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { dateDuJour } from "@/lib/echeancier";
 import { codeNiveau, niveauSuivant } from "@/lib/lmd";
+import { vocabulaire, type Vocabulaire } from "@/lib/etablissement";
 import EnrollmentForm, { type ApprenantExistant, type OptionSession } from "./enrollment-form";
 
 type NewEnrollmentPageProps = {
   searchParams: Promise<{ session?: string; apprenant?: string; mode?: string; q?: string }>;
 };
 
-function Onglets({ reinscription }: { reinscription: boolean }) {
+function Onglets({ reinscription, mots }: { reinscription: boolean; mots: Vocabulaire }) {
   const classe = (actif: boolean) =>
     `flex h-9 items-center rounded-sm px-4 text-sm ${
       actif ? "bg-navy-900 font-semibold text-white" : "text-ink-muted hover:text-ink"
     }`;
   return (
-    <nav aria-label="Type d'apprenant" className="mb-6 inline-flex gap-1 rounded-md border border-border bg-surface-200 p-1">
+    <nav aria-label={`Type d'${mots.apprenant}`} className="mb-6 inline-flex gap-1 rounded-md border border-border bg-surface-200 p-1">
       <Link href="/enrollments/new" aria-current={!reinscription ? "page" : undefined} className={classe(!reinscription)}>
-        Nouvel apprenant
+        Nouvel {mots.apprenant}
       </Link>
       <Link
         href="/enrollments/new?mode=reinscription"
@@ -32,7 +33,8 @@ function Onglets({ reinscription }: { reinscription: boolean }) {
 }
 
 export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentPageProps) {
-  const { db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const { institut, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const mots = vocabulaire(institut.typeEtablissement);
   const { session: sessionDemandee, apprenant: apprenantId, mode, q = "" } = await searchParams;
   const reinscription = mode === "reinscription" || Boolean(apprenantId);
 
@@ -43,17 +45,17 @@ export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentP
         className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
       >
         <ArrowLeft size={16} aria-hidden="true" />
-        Apprenants
+        {mots.Apprenants}
       </Link>
       <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">
         {reinscription ? "Réinscription" : "Nouvelle inscription"}
       </h1>
       <p className="mt-1 mb-4 text-sm text-ink-muted">
         {reinscription
-          ? "Inscrivez un apprenant existant pour une nouvelle année ou une autre formation. Son matricule est conservé."
+          ? `Inscrivez un ${mots.apprenant} existant pour une nouvelle année ou une autre formation. Son matricule est conservé.`
           : "Un matricule est attribué et l'échéancier est généré automatiquement."}
       </p>
-      <Onglets reinscription={reinscription} />
+      <Onglets reinscription={reinscription} mots={mots} />
     </>
   );
 
@@ -99,7 +101,7 @@ export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentP
               defaultValue={recherche}
               autoFocus
               placeholder="Nom, matricule ou téléphone"
-              aria-label="Rechercher un apprenant"
+              aria-label={`Rechercher un ${mots.apprenant}`}
               className="h-full flex-1 bg-transparent text-ink outline-none"
             />
           </label>
@@ -108,7 +110,7 @@ export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentP
         {recherche &&
           (apprenants.length === 0 ? (
             <p className="mt-4 rounded-lg border border-dashed border-border bg-surface-200 p-6 text-center text-sm text-ink-muted">
-              Aucun apprenant trouvé.
+              Aucun {mots.apprenant} trouvé.
             </p>
           ) : (
             <ul className="mt-4 divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface-200">
@@ -270,6 +272,7 @@ export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentP
           sessionInitiale={sessionInitiale}
           apprenant={apprenant}
           typeInitial={typeSuggere}
+          mots={mots}
         />
       )}
     </div>

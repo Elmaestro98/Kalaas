@@ -10,11 +10,12 @@ const etatInitial: EtatEvaluation = { erreur: null, succes: 0 };
 type EvaluationFormProps = {
   sessionId: string;
   matiereId: string;
+  periode: number | null; // école : période de l'évaluation
   poidsRestant: number;
   suggestion: string;
 };
 
-export default function EvaluationForm({ sessionId, matiereId, poidsRestant, suggestion }: EvaluationFormProps) {
+export default function EvaluationForm({ sessionId, matiereId, periode, poidsRestant, suggestion }: EvaluationFormProps) {
   const [etat, envoyer, enCours] = useActionState(creerEvaluation, etatInitial);
 
   return (
@@ -25,6 +26,7 @@ export default function EvaluationForm({ sessionId, matiereId, poidsRestant, sug
     >
       <input type="hidden" name="sessionId" value={sessionId} />
       <input type="hidden" name="matiereId" value={matiereId} />
+      {periode !== null && <input type="hidden" name="periode" value={periode} />}
       <label className="space-y-1">
         <span className="text-xs font-medium">Intitulé</span>
         <input name="intitule" required maxLength={60} defaultValue={suggestion} className={`${classeChamp()} h-10`} />
@@ -68,7 +70,9 @@ export default function EvaluationForm({ sessionId, matiereId, poidsRestant, sug
       </button>
       {etat.erreur && <p className="text-sm text-danger sm:col-span-2 lg:col-span-6">{etat.erreur}</p>}
       {poidsRestant <= 0 && (
-        <p className="text-xs text-ink-muted sm:col-span-2 lg:col-span-6">Les poids atteignent déjà 100 %.</p>
+        <p className="text-xs text-ink-muted sm:col-span-2 lg:col-span-6">
+          Les poids atteignent déjà 100 %{periode !== null && " pour cette période"}.
+        </p>
       )}
     </form>
   );

@@ -10,6 +10,7 @@ const LABEL_DECLENCHEUR = Object.fromEntries(DECLENCHEURS.map((d) => [d.valeur, 
   string
 >;
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatDate, formatFcfa, formatNombre } from "@/lib/format";
 import { lienWhatsApp } from "@/lib/telephone";
 import {
@@ -35,7 +36,8 @@ const STATUT_INSCRIPTION = {
 } as const;
 
 export default async function StudentPage({ params }: StudentPageProps) {
-  const { db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const { institut, db } = await exigerRole("DIRECTEUR", "CAISSIER");
+  const mots = vocabulaire(institut.typeEtablissement);
   const { id } = await params;
 
   const apprenant = await db.apprenant.findFirst({
@@ -125,7 +127,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
         className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
       >
         <ArrowLeft size={16} aria-hidden="true" />
-        Apprenants
+        {mots.Apprenants}
       </Link>
 
       {/* Identité et actions */}
@@ -336,7 +338,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
 
           {apprenant.tuteurNom && (
             <div className="mt-4 rounded-md bg-surface-100 p-3 text-sm">
-              <p className="text-xs text-ink-muted">Tuteur ou garant</p>
+              <p className="text-xs text-ink-muted">{mots.parentContact ? "Parent" : "Tuteur ou garant"}</p>
               <p className="font-medium">{apprenant.tuteurNom}</p>
               {apprenant.tuteurTelephone && (
                 <a

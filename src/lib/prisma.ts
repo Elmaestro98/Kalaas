@@ -25,6 +25,8 @@ const MODELES_INSTITUT = new Set<string>([
   "UniteEnseignement",
   "Evaluation",
   "Note",
+  "AppreciationMatiere",
+  "ConseilClasse",
   "DocumentDelivre",
   "CompteurDocument",
   "Membre",

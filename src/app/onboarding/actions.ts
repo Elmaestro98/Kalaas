@@ -7,7 +7,8 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 const schemaInstitut = z.object({
-  nom: z.string().trim().min(2, "Le nom de l'institut est obligatoire."),
+  typeEtablissement: z.enum(["INSTITUT", "UNIVERSITE", "ECOLE"], "Choisissez le type d'établissement."),
+  nom: z.string().trim().min(2, "Le nom de l'établissement est obligatoire."),
   ville: z.string().trim().min(2, "La ville est obligatoire."),
   telephone: z
     .string()
@@ -30,7 +31,7 @@ export async function creerInstitut(
     return { erreur: "Créez ou choisissez d'abord une organisation." };
   }
   if (orgRole !== "org:admin") {
-    return { erreur: "Seul l'administrateur de l'organisation peut configurer l'institut." };
+    return { erreur: "Seul l'administrateur de l'organisation peut configurer l'établissement." };
   }
 
   const resultat = schemaInstitut.safeParse(Object.fromEntries(formData));
@@ -62,6 +63,7 @@ export async function creerInstitut(
       data: {
         clerkOrgId: orgId,
         nom: donnees.nom,
+        typeEtablissement: donnees.typeEtablissement,
         ville: donnees.ville,
         telephone: `+221 ${donnees.telephone}`,
         adresse: donnees.adresse || null,

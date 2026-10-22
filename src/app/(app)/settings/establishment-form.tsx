@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useState } from "react";
 import { modifierEtablissement, type ChampEtablissement, type EtatEtablissement } from "./actions";
 import Field, { classeChamp } from "@/components/ui/field";
+import { ORDRE_TYPES, TYPES_ETABLISSEMENT } from "@/lib/etablissement";
 
 const etatInitial: EtatEtablissement = { erreurs: {}, erreurGenerale: null };
 
@@ -64,6 +65,30 @@ export default function EstablishmentForm({ valeursInitiales }: { valeursInitial
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">{champ("nom", "Nom de l'établissement", { requis: true })}</div>
+        <div className="sm:col-span-2">
+          <Field
+            id="typeEtablissement"
+            label="Type d'établissement"
+            required
+            hint={`Vocabulaire de l'interface : « ${TYPES_ETABLISSEMENT[v.typeEtablissement as keyof typeof TYPES_ETABLISSEMENT]?.apprenants ?? "Apprenants"} »`}
+            error={erreurs.typeEtablissement}
+          >
+            <select
+              id="typeEtablissement"
+              name="typeEtablissement"
+              value={v.typeEtablissement}
+              onChange={changer("typeEtablissement")}
+              required
+              className={classeChamp(erreurs.typeEtablissement)}
+            >
+              {ORDRE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {TYPES_ETABLISSEMENT[type].label} ({TYPES_ETABLISSEMENT[type].aide})
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
         {champ("ville", "Ville", { requis: true })}
         {champ("adresse", "Adresse", { exemple: "Ex. Sacré-Cœur 3, villa 120" })}
         {champ("telephone", "Téléphone principal", { requis: true, exemple: "77 123 45 67", aide: "Affiché sur les reçus" })}

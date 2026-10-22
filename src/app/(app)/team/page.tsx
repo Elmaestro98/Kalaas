@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, Link2 } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatDate } from "@/lib/format";
 import { nomEnseignant } from "@/lib/enseignants";
 import { ROLE_LABELS } from "@/components/navigations";
@@ -19,7 +20,8 @@ function initiales(nom: string) {
 }
 
 export default async function TeamPage() {
-  const { membre: moi, db } = await exigerRole("DIRECTEUR");
+  const { institut, membre: moi, db } = await exigerRole("DIRECTEUR");
+  const mots = vocabulaire(institut.typeEtablissement);
 
   const [membres, invitations, fichesLibres] = await Promise.all([
     db.membre.findMany({
@@ -48,7 +50,7 @@ export default async function TeamPage() {
       <h1 className="text-2xl font-semibold lg:text-3xl">Équipe</h1>
       <p className="mt-1 text-sm text-ink-muted">
         {actifs.length} membre{actifs.length > 1 ? "s" : ""} actif{actifs.length > 1 ? "s" : ""} · les
-        apprenants n&apos;ont pas besoin de compte
+        {mots.apprenants} n&apos;ont pas besoin de compte
       </p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_24rem] lg:items-start">

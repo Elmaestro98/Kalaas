@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { NAV_SECTIONS } from "./navigations";
 import Logo from "./logo";
 
-export default function Sidebar({ role, footer }: SidebarProps) {
+export default function Sidebar({ role, footer, libelleApprenants }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -49,7 +49,7 @@ export default function Sidebar({ role, footer }: SidebarProps) {
                         }`}
                       >
                         <Icone size={18} aria-hidden="true" />
-                        {item.label}
+                        {item.href === "/students" ? libelleApprenants : item.label}
                       </Link>
                     </li>
                   );

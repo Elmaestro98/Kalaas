@@ -22,7 +22,7 @@ export default async function OnboardingPage() {
       <p className="text-xs font-semibold uppercase tracking-wider text-gold-700">
         Étape 1 sur 3
       </p>
-      <h1 className="mt-2 text-3xl font-semibold">Parlons de votre institut</h1>
+      <h1 className="mt-2 text-3xl font-semibold">Parlons de votre établissement</h1>
       <p className="mt-2 mb-8 text-ink-muted">
         Ces informations apparaîtront sur vos reçus. Vous pourrez les modifier plus tard.
       </p>

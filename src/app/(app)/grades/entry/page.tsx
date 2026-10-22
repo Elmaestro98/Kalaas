@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatDate } from "@/lib/format";
 import { TYPES_EVALUATION, noteVersSaisie, type StatutNoteSaisie } from "@/lib/notes";
 import { peutNoter } from "@/lib/notes-donnees";
@@ -12,7 +13,8 @@ type EntryPageProps = {
 };
 
 export default async function EntryPage({ searchParams }: EntryPageProps) {
-  const { membre, db } = await exigerRole("DIRECTEUR", "FORMATEUR");
+  const { institut, membre, db } = await exigerRole("DIRECTEUR", "FORMATEUR");
+  const mots = vocabulaire(institut.typeEtablissement);
   const { evaluation: evaluationId } = await searchParams;
 
   const evaluation = evaluationId
@@ -82,7 +84,7 @@ export default async function EntryPage({ searchParams }: EntryPageProps) {
       <div className="mt-5">
         {lignes.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center text-sm text-ink-muted">
-            Aucun apprenant inscrit dans cette classe.
+            Aucun {mots.apprenant} inscrit dans cette classe.
           </p>
         ) : (
           <GradeGrid

@@ -13,6 +13,7 @@ import { normaliserTelephone } from "@/lib/telephone";
 const telephoneValide = (v: string) => v === "" || normaliserTelephone(v) !== null;
 
 const schemaEtablissement = z.object({
+  typeEtablissement: z.enum(["INSTITUT", "UNIVERSITE", "ECOLE"], "Choisissez le type d'établissement."),
   nom: z.string().trim().min(2, "Le nom de l'établissement est obligatoire.").max(120, "120 caractères maximum."),
   ville: z.string().trim().min(2, "La ville est obligatoire.").max(80, "80 caractères maximum."),
   adresse: z.string().trim().max(200, "200 caractères maximum."),
@@ -45,6 +46,7 @@ export async function modifierEtablissement(_etat: EtatEtablissement, formData: 
 
   const donnees = {
     nom: d.nom,
+    typeEtablissement: d.typeEtablissement,
     ville: d.ville,
     adresse: d.adresse || null,
     telephone: normaliserTelephone(d.telephone),
@@ -55,6 +57,7 @@ export async function modifierEtablissement(_etat: EtatEtablissement, formData: 
   };
   const avant = {
     nom: institut.nom,
+    typeEtablissement: institut.typeEtablissement,
     ville: institut.ville,
     adresse: institut.adresse,
     telephone: institut.telephone,
@@ -319,4 +322,47 @@ export async function desactiverSalle(formData: FormData): Promise<void> {
   await flash(`Salle « ${salle.nom} » désactivée.`);
   revalidatePath("/settings");
   revalidatePath("/timetable");
+}
+
+// ─── Découpage de l'année scolaire (écoles) ────────
+
+export type EtatDecoupage = { erreur: string | null };
+
+export async function modifierDecoupage(_etat: EtatDecoupage, formData: FormData): Promise<EtatDecoupage> {
+  const { institut, membre, db } = await exigerRole("DIRECTEUR");
+  const lu = z.enum(["TRIMESTRES", "SEMESTRES"]).safeParse(formData.get("decoupage"));
+  if (!lu.success) {
+    return { erreur: "Choisissez trimestres ou semestres." };
+  }
+  const decoupage = lu.data;
+
+  // Passer en semestres laisserait sans période les évaluations du 3e trimestre
+  if (decoupage === "SEMESTRES") {
+    const auTroisieme = await db.evaluation.count({ where: { periode: { gt: 2 } } });
+    if (auTroisieme > 0) {
+      return {
+        erreur: `${auTroisieme} évaluation${auTroisieme > 1 ? "s sont rattachées" : " est rattachée"} au 3e trimestre : impossible de passer en semestres.`,
+      };
+    }
+  }
+
+  // Institut n'est pas un modèle « tenant » : client brut, établissement du contexte ciblé explicitement
+  await prisma.$transaction([
+    prisma.institut.update({ where: { id: institut.id }, data: { decoupageScolaire: decoupage } }),
+    prisma.journalAudit.create({
+      data: {
+        institutId: institut.id,
+        auteurId: membre.utilisateurId,
+        action: "DECOUPAGE_SCOLAIRE_MODIFIE",
+        entite: "Institut",
+        entiteId: institut.id,
+        avant: { decoupageScolaire: institut.decoupageScolaire },
+        apres: { decoupageScolaire: decoupage },
+      },
+    }),
+  ]);
+
+  await flash(decoupage === "TRIMESTRES" ? "L'année est découpée en trimestres." : "L'année est découpée en semestres.");
+  revalidatePath("/", "layout");
+  return { erreur: null };
 }

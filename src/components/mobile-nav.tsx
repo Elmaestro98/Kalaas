@@ -13,7 +13,7 @@ const LIENS: (LienMobile | null)[] = [
   { href: "/more", label: "Plus", icon: Menu },
 ];
 
-export default function MobileNav() {
+export default function MobileNav({ libelleApprenants }: { libelleApprenants: string }) {
   const pathname = usePathname();
 
   return (
@@ -40,7 +40,7 @@ export default function MobileNav() {
               }`}
             >
               <Icone size={22} aria-hidden="true" />
-              {lien.label}
+              {lien.href === "/students" ? libelleApprenants : lien.label}
             </Link>
           );
         })}

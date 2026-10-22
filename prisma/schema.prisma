@@ -16,6 +16,27 @@ enum Role {
   FORMATEUR
 }
 
+enum TypeEtablissement {
+  INSTITUT
+  UNIVERSITE
+  ECOLE
+}
+
+// École : l'année est découpée en trimestres ou en semestres (notes et bulletins)
+enum DecoupageScolaire {
+  TRIMESTRES
+  SEMESTRES
+}
+
+// Distinctions du conseil de classe (bulletin scolaire)
+enum Distinction {
+  FELICITATIONS
+  ENCOURAGEMENTS
+  TABLEAU_HONNEUR
+  AVERTISSEMENT
+  BLAME
+}
+
 enum StatutInstitut {
   ACTIF
   SUSPENDU
@@ -164,9 +185,11 @@ enum JourSemaine {
 // ─── Plateforme : instituts, comptes, rôles ────────
 
 model Institut {
-  id                     String         @id @default(cuid())
-  clerkOrgId             String         @unique
+  id                     String            @id @default(cuid())
+  clerkOrgId             String            @unique
   nom                    String
+  typeEtablissement      TypeEtablissement @default(INSTITUT)
+  decoupageScolaire      DecoupageScolaire @default(TRIMESTRES)
   logoUrl                String?
   adresse                String?
   ville                  String?
@@ -174,14 +197,14 @@ model Institut {
   rccm                   String?
   telephone              String?
   telephone2             String?
-  sousDomaine            String?        @unique
+  sousDomaine            String?           @unique
   piedRecu               String?
   prefixeMatricule       String?
   // Montant maximum d'une dépense saisie par un caissier (null = pas de limite, 0 = interdit)
   plafondDepenseCaissier Int?
-  statut                 StatutInstitut @default(ACTIF)
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
+  statut                 StatutInstitut    @default(ACTIF)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
   abonnements        Abonnement[]
   membres            Membre[]
@@ -204,6 +227,8 @@ model Institut {
   jobs               Job[]
   anneesAcademiques  AnneeAcademique[]
   compteursMatricule CompteurMatricule[]
+  appreciations      AppreciationMatiere[]
+  conseilsClasse     ConseilClasse[]
   salles             Salle[]
   creneaux           Creneau[]
   enseignants        Enseignant[]
@@ -399,14 +424,15 @@ model Matiere {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  institut           Institut           @relation(fields: [institutId], references: [id])
-  formation          Formation          @relation(fields: [formationId], references: [id])
-  enseignantHabituel Enseignant?        @relation("ProfesseurHabituel", fields: [enseignantHabituelId], references: [id], onDelete: SetNull)
+  institut           Institut              @relation(fields: [institutId], references: [id])
+  formation          Formation             @relation(fields: [formationId], references: [id])
+  enseignantHabituel Enseignant?           @relation("ProfesseurHabituel", fields: [enseignantHabituelId], references: [id], onDelete: SetNull)
   creneaux           Creneau[]
   affectations       Affectation[]
   seances            Seance[]
-  unite              UniteEnseignement? @relation(fields: [ueId], references: [id], onDelete: SetNull)
+  unite              UniteEnseignement?    @relation(fields: [ueId], references: [id], onDelete: SetNull)
   evaluations        Evaluation[]
+  appreciations      AppreciationMatiere[]
 
   @@unique([formationId, intitule])
   @@index([institutId])
@@ -502,15 +528,17 @@ model Inscription {
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
 
-  institut   Institut          @relation(fields: [institutId], references: [id])
-  apprenant  Apprenant         @relation(fields: [apprenantId], references: [id])
-  session    Session           @relation(fields: [sessionId], references: [id])
-  precedente Inscription?      @relation("Parcours", fields: [inscriptionPrecedenteId], references: [id])
-  suivantes  Inscription[]     @relation("Parcours")
-  echeances  Echeance[]
-  presences  Presence[]
-  notes      Note[]
-  documents  DocumentDelivre[]
+  institut      Institut              @relation(fields: [institutId], references: [id])
+  apprenant     Apprenant             @relation(fields: [apprenantId], references: [id])
+  session       Session               @relation(fields: [sessionId], references: [id])
+  precedente    Inscription?          @relation("Parcours", fields: [inscriptionPrecedenteId], references: [id])
+  suivantes     Inscription[]         @relation("Parcours")
+  echeances     Echeance[]
+  presences     Presence[]
+  notes         Note[]
+  documents     DocumentDelivre[]
+  appreciations AppreciationMatiere[]
+  conseils      ConseilClasse[]
 
   @@index([institutId])
   @@index([apprenantId])
@@ -852,6 +880,8 @@ model Evaluation {
   date        DateTime?      @db.Date
   poids       Int
   bareme      Int            @default(20)
+  // École : numéro de la période (1er, 2e, 3e trimestre…) ; null hors école
+  periode     Int?
   verrouillee Boolean        @default(false)
   creeParId   String?
   createdAt   DateTime       @default(now())
@@ -883,6 +913,43 @@ model Note {
 
   @@unique([evaluationId, inscriptionId])
   @@index([inscriptionId])
+  @@index([institutId])
+}
+
+// Bulletin scolaire : appréciation d'un professeur pour une matière et une période
+model AppreciationMatiere {
+  id            String   @id @default(cuid())
+  institutId    String
+  inscriptionId String
+  matiereId     String
+  periode       Int
+  texte         String
+  auteurId      String?
+  updatedAt     DateTime @updatedAt
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  inscription Inscription @relation(fields: [inscriptionId], references: [id])
+  matiere     Matiere     @relation(fields: [matiereId], references: [id])
+
+  @@unique([inscriptionId, periode, matiereId])
+  @@index([institutId])
+}
+
+// Bulletin scolaire : décision du conseil de classe pour un élève et une période
+model ConseilClasse {
+  id            String       @id @default(cuid())
+  institutId    String
+  inscriptionId String
+  periode       Int
+  appreciation  String?
+  distinction   Distinction?
+  auteurId      String?
+  updatedAt     DateTime     @updatedAt
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  inscription Inscription @relation(fields: [inscriptionId], references: [id])
+
+  @@unique([inscriptionId, periode])
   @@index([institutId])
 }
 

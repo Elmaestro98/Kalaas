@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getContexte } from "@/lib/tenant";
+import { vocabulaire } from "@/lib/etablissement";
 import { formatDate } from "@/lib/format";
 import { formatHeure } from "@/lib/emploi-du-temps";
 import { nomEnseignant } from "@/lib/enseignants";
@@ -13,7 +14,8 @@ type CallPageProps = {
 };
 
 export default async function CallPage({ searchParams }: CallPageProps) {
-  const { membre, db } = await getContexte();
+  const { institut, membre, db } = await getContexte();
+  const mots = vocabulaire(institut.typeEtablissement);
   const params = await searchParams;
   const date = lireDate(params.date);
 
@@ -101,7 +103,7 @@ export default async function CallPage({ searchParams }: CallPageProps) {
       <div className="mt-5">
         {lignes.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center text-sm text-ink-muted">
-            Aucun apprenant inscrit dans cette classe.
+            Aucun {mots.apprenant} inscrit dans cette classe.
           </p>
         ) : (
           <CallForm creneauId={creneau.id} date={dateIso(date)} lignes={lignes} dejaFait={Boolean(seance)} />

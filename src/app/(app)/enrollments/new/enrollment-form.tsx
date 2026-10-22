@@ -12,6 +12,7 @@ import {
   genererEcheances,
   type TypeRemiseSaisie,
 } from "@/lib/echeancier";
+import type { Vocabulaire } from "@/lib/etablissement";
 
 export type OptionSession = {
   id: string;
@@ -42,6 +43,7 @@ type EnrollmentFormProps = {
   sessionInitiale?: string;
   apprenant?: ApprenantExistant;
   typeInitial?: TypeInscription;
+  mots: Vocabulaire;
 };
 
 const etatInitial: EtatInscription = { erreurs: {}, erreurGenerale: null };
@@ -49,6 +51,7 @@ const etatInitial: EtatInscription = { erreurs: {}, erreurGenerale: null };
 const AIDE_TELEPHONE = "Reçus et rappels envoyés sur ce numéro WhatsApp";
 const AIDE_PIECE = "Facultatif · CNI ou passeport";
 const AIDE_TUTEUR = "Facultatif · parent ou garant";
+const AIDE_PARENT = "Père, mère ou tuteur légal";
 
 const TYPES: { valeur: TypeInscription; label: string; detail: string }[] = [
   { valeur: "REINSCRIPTION", label: "Réinscription", detail: "Passage au niveau suivant" },
@@ -82,7 +85,10 @@ export default function EnrollmentForm({
   sessionInitiale,
   apprenant,
   typeInitial,
+  mots,
 }: EnrollmentFormProps) {
+  // École : le parent est obligatoire et son numéro reçoit les reçus et relances
+  const ecole = mots.parentContact;
   const [etat, envoyer, enCours] = useActionState(creerInscription, etatInitial);
 
   const [type, setType] = useState<TypeInscription>(typeInitial ?? "REINSCRIPTION");
@@ -149,9 +155,9 @@ export default function EnrollmentForm({
   return (
     <form action={envoyer} className="grid gap-6 lg:grid-cols-[1fr_22rem] lg:items-start">
       <div className="space-y-6">
-        {/* 1. Apprenant */}
+        {/* 1. Apprenant (ou élève) */}
         <section className="space-y-5 rounded-lg border border-border bg-surface-200 p-5 lg:p-6">
-          <Titre numero={1}>{apprenant ? "Apprenant et type d'inscription" : "Apprenant"}</Titre>
+          <Titre numero={1}>{apprenant ? `${mots.Apprenant} et type d'inscription` : mots.Apprenant}</Titre>
 
           {apprenant ? (
             <>
@@ -207,6 +213,7 @@ export default function EnrollmentForm({
                 {champTexte("nom", "Nom", nom, setNom, { requis: true, max: 60 })}
               </div>
 
+              {!ecole && (
               <div className="grid gap-5 sm:grid-cols-2">
                 <Field id="telephone" label="WhatsApp" required hint={AIDE_TELEPHONE} error={erreurs.telephone}>
                   <div className="flex gap-2">
@@ -233,12 +240,13 @@ export default function EnrollmentForm({
                   max: 40,
                 })}
               </div>
+              )}
 
               <details className="group rounded-md border border-border">
                 <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium">
                   Informations complémentaires
                   <span className="text-xs font-normal text-ink-muted">
-                    Recommandé pour le LMD · <span className="group-open:hidden">afficher</span>
+                    {ecole ? "Recommandé pour les bulletins" : "Recommandé pour le LMD"} · <span className="group-open:hidden">afficher</span>
                     <span className="hidden group-open:inline">masquer</span>
                   </span>
                 </summary>
@@ -268,30 +276,44 @@ export default function EnrollmentForm({
                       <option value="M">Masculin</option>
                     </select>
                   </Field>
-                  <div className="sm:col-span-2">
-                    {champTexte("diplomeAcces", "Diplôme d'accès", diplomeAcces, setDiplomeAcces, {
-                      placeholder: "Ex. Bac S2 · 2025",
-                    })}
-                  </div>
+                  {!ecole && (
+                    <div className="sm:col-span-2">
+                      {champTexte("diplomeAcces", "Diplôme d'accès", diplomeAcces, setDiplomeAcces, {
+                        placeholder: "Ex. Bac S2 · 2025",
+                      })}
+                    </div>
+                  )}
                 </div>
               </details>
 
               <div className="grid gap-5 rounded-md bg-surface-100 p-4 sm:grid-cols-2">
-                {champTexte("tuteurNom", "Tuteur ou garant", tuteurNom, setTuteurNom, {
-                  aide: AIDE_TUTEUR,
+                {champTexte("tuteurNom", ecole ? "Nom du parent" : "Tuteur ou garant", tuteurNom, setTuteurNom, {
+                  requis: ecole,
+                  aide: ecole ? AIDE_PARENT : AIDE_TUTEUR,
                   placeholder: "Ex. Amadou Sow (père)",
                 })}
-                <Field id="tuteurTelephone" label="Téléphone du tuteur" error={erreurs.tuteurTelephone}>
+                <Field
+                  id="tuteurTelephone"
+                  label={ecole ? "WhatsApp du parent" : "Téléphone du tuteur"}
+                  required={ecole}
+                  hint={ecole ? AIDE_TELEPHONE : undefined}
+                  error={erreurs.tuteurTelephone}
+                >
                   <input
                     id="tuteurTelephone"
                     name="tuteurTelephone"
                     type="tel"
                     inputMode="tel"
+                    required={ecole}
                     placeholder="78 320 15 44"
                     value={tuteurTelephone}
                     onChange={(e) => setTuteurTelephone(e.target.value)}
                     aria-invalid={!!erreurs.tuteurTelephone || undefined}
-                    aria-describedby={idDescription("tuteurTelephone", erreurs.tuteurTelephone)}
+                    aria-describedby={idDescription(
+                      "tuteurTelephone",
+                      erreurs.tuteurTelephone,
+                      ecole ? AIDE_TELEPHONE : undefined,
+                    )}
                     className={classeChamp(erreurs.tuteurTelephone)}
                   />
                 </Field>
@@ -501,7 +523,7 @@ export default function EnrollmentForm({
               ? type === "NOUVELLE"
                 ? "Inscrire à cette formation"
                 : "Enregistrer la réinscription"
-              : "Inscrire l'apprenant"}
+              : `Inscrire l'${mots.apprenant}`}
         </button>
         <Link
           href="/students"

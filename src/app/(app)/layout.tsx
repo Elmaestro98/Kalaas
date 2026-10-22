@@ -8,15 +8,19 @@ import MobileNav from "@/components/mobile-nav";
 import { ROLE_LABELS } from "@/components/navigations";
 import Toaster from "@/components/toaster";
 import { lireFlash } from "@/lib/flash";
+import { TYPES_ETABLISSEMENT } from "@/lib/etablissement";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const [{ membre }, flash] = await Promise.all([getContexte(), lireFlash()]);
+  const [{ institut, membre }, flash] = await Promise.all([getContexte(), lireFlash()]);
+
+  const { apprenants } = TYPES_ETABLISSEMENT[institut.typeEtablissement];
 
   return (
     <div className="flex min-h-screen">
       <Sidebar
         role={membre.role}
         footer={`${membre.utilisateur.nom} · ${ROLE_LABELS[membre.role]}`}
+        libelleApprenants={apprenants}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -35,7 +39,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 pt-6 pb-28 lg:px-8 lg:py-8 print:p-0">{children}</main>
       </div>
 
-      <MobileNav />
+      <MobileNav libelleApprenants={apprenants} />
       <Toaster flash={flash} />
     </div>
   );

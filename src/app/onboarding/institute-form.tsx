@@ -3,6 +3,7 @@
 
 import { useActionState } from "react";
 import { creerInstitut, type EtatFormulaire } from "./actions"
+import { ORDRE_TYPES, TYPES_ETABLISSEMENT } from "@/lib/etablissement";
 
 const etatInitial: EtatFormulaire = { erreur: null };
 
@@ -14,9 +15,27 @@ export default function InstituteForm() {
 
   return (
     <form action={envoyer} className="space-y-5">
+      <fieldset className="space-y-2">
+        <legend className="mb-1.5 text-sm font-medium">
+          Type d&apos;établissement <span className="text-danger">*</span>
+        </legend>
+        {ORDRE_TYPES.map((type) => (
+          <label
+            key={type}
+            className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-surface-200 p-3 has-checked:border-gold-500 has-checked:ring-4 has-checked:ring-gold-100"
+          >
+            <input type="radio" name="typeEtablissement" value={type} required className="mt-1 accent-gold-500" />
+            <span>
+              <span className="block font-medium">{TYPES_ETABLISSEMENT[type].label}</span>
+              <span className="block text-sm text-ink-muted">{TYPES_ETABLISSEMENT[type].aide}</span>
+            </span>
+          </label>
+        ))}
+      </fieldset>
+
       <div className="space-y-1.5">
         <label htmlFor="nom" className="text-sm font-medium">
-          Nom de l&apos;institut <span className="text-danger">*</span>
+          Nom de l&apos;établissement <span className="text-danger">*</span>
         </label>
         <input id="nom" name="nom" required placeholder="Ex. Institut Excellence" className={classeChamp} />
       </div>
@@ -30,7 +49,7 @@ export default function InstituteForm() {
 
       <div className="space-y-1.5">
         <label htmlFor="telephone" className="text-sm font-medium">
-          Numéro WhatsApp de l&apos;institut <span className="text-danger">*</span>
+          Numéro WhatsApp de l&apos;établissement <span className="text-danger">*</span>
         </label>
         <div className="flex gap-2">
           <span className="flex items-center rounded-sm border border-border bg-surface-100 px-3 font-medium">
@@ -67,7 +86,7 @@ export default function InstituteForm() {
         disabled={enCours}
         className="h-12 w-full cursor-pointer rounded-md bg-action font-medium text-on-action hover:bg-action-hover disabled:cursor-wait disabled:opacity-60"
       >
-        {enCours ? "Création en cours…" : "Créer mon institut"}
+        {enCours ? "Création en cours…" : "Créer mon établissement"}
       </button>
     </form>
   );
