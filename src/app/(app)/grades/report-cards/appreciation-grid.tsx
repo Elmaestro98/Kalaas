@@ -5,10 +5,12 @@ import { Sparkles } from "lucide-react";
 import { classeChamp } from "@/components/ui/field";
 import { SEUIL_VALIDATION, formatNote } from "@/lib/notes";
 import {
+  DECISIONS_FIN_ANNEE,
   DISTINCTIONS,
   LONGUEUR_APPRECIATION,
   appreciationSuggeree,
   formatRang,
+  type DecisionSaisie,
   type DistinctionSaisie,
 } from "@/lib/bulletins";
 import { enregistrerAppreciations, type EtatAppreciations } from "./actions";
@@ -20,6 +22,8 @@ export type LigneAppreciation = {
   rang: string | null; // « 3e » (conseil de classe uniquement)
   texte: string;
   distinction: DistinctionSaisie | null; // enregistrée, sinon proposée
+  moyenneAnnuelle: number | null; // dernière période uniquement
+  decision: DecisionSaisie | null; // enregistrée, sinon proposée (dernière période)
 };
 
 type AppreciationGridProps = {
@@ -27,11 +31,12 @@ type AppreciationGridProps = {
   periode: number;
   cible: string; // « conseil » ou identifiant de matière
   lignes: LigneAppreciation[];
+  finAnnee: boolean; // conseil de la dernière période : décision de passage ou de redoublement
 };
 
 const etatInitial: EtatAppreciations = { erreur: null, enregistre: 0 };
 
-export default function AppreciationGrid({ sessionId, periode, cible, lignes }: AppreciationGridProps) {
+export default function AppreciationGrid({ sessionId, periode, cible, lignes, finAnnee }: AppreciationGridProps) {
   const [etat, envoyer, enCours] = useActionState(enregistrerAppreciations, etatInitial);
   const conseil = cible === "conseil";
   const [textes, setTextes] = useState<Record<string, string>>(
@@ -86,6 +91,8 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes }: 
               <th scope="col" className="px-3 py-2 text-center font-semibold">{conseil ? "Moy. générale" : "Moyenne"}</th>
               {conseil && <th scope="col" className="px-3 py-2 text-center font-semibold">Rang</th>}
               {conseil && <th scope="col" className="px-3 py-2 font-semibold">Distinction</th>}
+              {finAnnee && <th scope="col" className="px-3 py-2 text-center font-semibold">Moy. annuelle</th>}
+              {finAnnee && <th scope="col" className="px-3 py-2 font-semibold">Décision</th>}
               <th scope="col" className="w-1/2 px-3 py-2 font-semibold">{conseil ? "Appréciation générale" : "Appréciation"}</th>
             </tr>
           </thead>
@@ -111,6 +118,32 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes }: 
                     >
                       <option value="">Aucune</option>
                       {DISTINCTIONS.map((d) => (
+                        <option key={d.valeur} value={d.valeur}>
+                          {d.label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                )}
+                {finAnnee && (
+                  <td
+                    className={`px-3 py-2 text-center font-semibold tabular-nums ${
+                      l.moyenneAnnuelle !== null && l.moyenneAnnuelle < SEUIL_VALIDATION ? "text-danger" : ""
+                    }`}
+                  >
+                    {formatNote(l.moyenneAnnuelle)}
+                  </td>
+                )}
+                {finAnnee && (
+                  <td className="px-3 py-2">
+                    <select
+                      name={`f_${l.inscriptionId}`}
+                      defaultValue={l.decision ?? ""}
+                      aria-label={`Décision de fin d'année de ${l.nom}`}
+                      className={`${classeChamp()} h-10`}
+                    >
+                      <option value="">À décider</option>
+                      {DECISIONS_FIN_ANNEE.map((d) => (
                         <option key={d.valeur} value={d.valeur}>
                           {d.label}
                         </option>

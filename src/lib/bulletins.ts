@@ -4,8 +4,11 @@
 //  • moyenne générale de la période        = moyennes des matières pondérées par les coefficients
 //  • moyenne annuelle                      = moyenne des périodes déjà notées (même poids)
 //  • distinctions proposées d'après la moyenne, modifiables par le conseil de classe
+//  • décision de fin d'année proposée d'après la moyenne annuelle (passage à 10/20)
 
-import { moyennePonderee } from "@/lib/notes";
+import { SEUIL_VALIDATION, moyennePonderee } from "@/lib/notes";
+import { codeNiveau, niveauSuivant, type Cycle } from "@/lib/lmd";
+import { accord } from "@/lib/documents";
 
 export type DecoupageSaisie = "TRIMESTRES" | "SEMESTRES";
 export type DistinctionSaisie = "FELICITATIONS" | "ENCOURAGEMENTS" | "TABLEAU_HONNEUR" | "AVERTISSEMENT" | "BLAME";
@@ -75,3 +78,34 @@ export function formatRang(rang: number | null, exAequo = false): string {
 }
 
 export const LONGUEUR_APPRECIATION = 120;
+
+// ─── Décision de fin d'année ───────────────────────
+
+export type DecisionSaisie = "PASSAGE" | "REDOUBLEMENT";
+
+export const DECISIONS_FIN_ANNEE: { valeur: DecisionSaisie; label: string }[] = [
+  { valeur: "PASSAGE", label: "Passage" },
+  { valeur: "REDOUBLEMENT", label: "Redoublement" },
+];
+
+// Proposition automatique (le conseil de classe garde le dernier mot)
+export function proposerDecision(moyenneAnnuelle: number | null): DecisionSaisie | null {
+  if (moyenneAnnuelle === null) return null;
+  return moyenneAnnuelle >= SEUIL_VALIDATION ? "PASSAGE" : "REDOUBLEMENT";
+}
+
+// Texte imprimé : « Passe en CM2 », « Passe en 6e », « Redouble le CM1 » ; « Admis(e) » après la Terminale
+export function texteDecision(
+  decision: DecisionSaisie,
+  cycle: Cycle,
+  niveau: number | null,
+  sexe: "F" | "M" | null,
+): string {
+  if (decision === "REDOUBLEMENT") {
+    const actuel = codeNiveau(cycle, niveau);
+    // « la 6e », « la Tle », « la PS » ; « le CM1 », « le CI »
+    return actuel ? `Redouble ${/^(\d|PS|MS|GS|Tle)/.test(actuel) ? "la" : "le"} ${actuel}` : "Redouble";
+  }
+  const suivant = niveauSuivant(cycle, niveau);
+  return suivant ? `Passe en ${codeNiveau(suivant.cycle, suivant.niveau)}` : accord(sexe, "Admis", "Admise");
+}

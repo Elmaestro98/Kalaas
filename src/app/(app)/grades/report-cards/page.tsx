@@ -5,7 +5,7 @@ import { estScolaire } from "@/lib/lmd";
 import { vocabulaire } from "@/lib/etablissement";
 import { classesPourNotes, matieresNotables } from "@/lib/notes-donnees";
 import { chargerBulletins } from "@/lib/bulletins-donnees";
-import { formatRang, libellePeriode, periodes as listePeriodes, proposerDistinction } from "@/lib/bulletins";
+import { formatRang, libellePeriode, periodes as listePeriodes, proposerDecision, proposerDistinction } from "@/lib/bulletins";
 import ClassSelect from "../class-select";
 import PeriodTabs from "../period-tabs";
 import AppreciationGrid, { type LigneAppreciation } from "./appreciation-grid";
@@ -68,6 +68,8 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
   const matieres = notables === "TOUTES" ? resultats.matieres : resultats.matieres.filter((m) => notables.has(m.id));
   const cibles = [...(estDirecteur ? [{ id: "conseil", label: "Conseil de classe" }] : []), ...matieres.map((m) => ({ id: m.id, label: m.intitule }))];
   const cible = cibles.find((c) => c.id === params.cible) ?? cibles[0];
+  // Dernière période : le conseil de classe décide aussi du passage ou du redoublement
+  const finAnnee = cible?.id === "conseil" && periode === periodes.length;
   const lien = (p: number, c?: string) => `/grades/report-cards?session=${session.id}&periode=${p}${c ? `&cible=${c}` : ""}`;
 
   const lignes: LigneAppreciation[] = cible
@@ -82,6 +84,8 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
             texte: b.conseil.appreciation ?? "",
             // Pas encore d'avis enregistré : la distinction est proposée d'après la moyenne
             distinction: b.conseil.appreciation || b.conseil.distinction ? b.conseil.distinction : proposerDistinction(res.moyenne),
+            moyenneAnnuelle: b.ligne.annuelle.moyenne,
+            decision: b.ligne.decision ?? proposerDecision(b.ligne.annuelle.moyenne),
           };
         }
         return {
@@ -91,6 +95,8 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
           rang: null,
           texte: b.appreciations[cible.id] ?? "",
           distinction: null,
+          moyenneAnnuelle: null,
+          decision: null,
         };
       })
     : [];
@@ -165,6 +171,7 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
               periode={periode}
               cible={cible.id}
               lignes={lignes}
+              finAnnee={finAnnee}
             />
           )}
         </>

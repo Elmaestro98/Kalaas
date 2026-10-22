@@ -5,11 +5,19 @@ import { flash } from "@/lib/flash";
 import { getContexte } from "@/lib/tenant";
 import { estScolaire } from "@/lib/lmd";
 import { peutNoter } from "@/lib/notes-donnees";
-import { DISTINCTIONS, LONGUEUR_APPRECIATION, nbPeriodes, type DistinctionSaisie } from "@/lib/bulletins";
+import {
+  DECISIONS_FIN_ANNEE,
+  DISTINCTIONS,
+  LONGUEUR_APPRECIATION,
+  nbPeriodes,
+  type DecisionSaisie,
+  type DistinctionSaisie,
+} from "@/lib/bulletins";
 
 export type EtatAppreciations = { erreur: string | null; enregistre: number };
 
 const DISTINCTIONS_VALIDES = new Set<string>(DISTINCTIONS.map((d) => d.valeur));
+const DECISIONS_VALIDES = new Set<string>(DECISIONS_FIN_ANNEE.map((d) => d.valeur));
 
 // Enregistre les appréciations d'une matière (professeur) ou du conseil de classe (direction) pour une période
 export async function enregistrerAppreciations(etat: EtatAppreciations, formData: FormData): Promise<EtatAppreciations> {
@@ -41,21 +49,44 @@ export async function enregistrerAppreciations(etat: EtatAppreciations, formData
 
   const inscriptions = await db.inscription.findMany({
     where: { sessionId, statut: { in: ["ACTIVE", "TERMINEE"] } },
-    select: { id: true },
+    select: { id: true, decisionFinAnnee: true },
   });
+  // Dernière période : le conseil de classe décide aussi du passage ou du redoublement
+  const finAnnee = conseil && periode === nbPeriodes(institut.decoupageScolaire);
 
   const lignes = inscriptions.map((i) => {
     const texte = String(formData.get(`a_${i.id}`) ?? "").trim();
     const distinction = String(formData.get(`d_${i.id}`) ?? "");
+    const decision = String(formData.get(`f_${i.id}`) ?? "");
     return {
       inscriptionId: i.id,
+      decisionAvant: i.decisionFinAnnee,
+      decision: DECISIONS_VALIDES.has(decision) ? (decision as DecisionSaisie) : null,
       texte: texte.slice(0, LONGUEUR_APPRECIATION),
       distinction: DISTINCTIONS_VALIDES.has(distinction) ? (distinction as DistinctionSaisie) : null,
     };
   });
 
+  const decisionsModifiees = finAnnee ? lignes.filter((l) => l.decision !== l.decisionAvant) : [];
+
   // Un texte vide efface l'appréciation (rien n'apparaît sur le bulletin)
   await db.$transaction(async (tx) => {
+    for (const l of decisionsModifiees) {
+      await tx.inscription.update({ where: { id: l.inscriptionId }, data: { decisionFinAnnee: l.decision } });
+    }
+    if (decisionsModifiees.length > 0) {
+      await tx.journalAudit.create({
+        data: {
+          institutId: institut.id,
+          auteurId: membre.utilisateurId,
+          action: "DECISIONS_FIN_ANNEE",
+          entite: "Session",
+          entiteId: session.id,
+          avant: Object.fromEntries(decisionsModifiees.map((l) => [l.inscriptionId, l.decisionAvant])),
+          apres: Object.fromEntries(decisionsModifiees.map((l) => [l.inscriptionId, l.decision])),
+        },
+      });
+    }
     for (const l of lignes) {
       if (conseil) {
         const cle = { inscriptionId_periode: { inscriptionId: l.inscriptionId, periode } };
@@ -82,6 +113,7 @@ export async function enregistrerAppreciations(etat: EtatAppreciations, formData
   });
 
   revalidatePath("/grades/report-cards");
+  revalidatePath("/grades/results");
   await flash(conseil ? "Avis du conseil de classe enregistrés." : "Appréciations enregistrées.");
   return { erreur: null, enregistre: etat.enregistre + 1 };
 }

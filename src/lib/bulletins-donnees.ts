@@ -1,8 +1,14 @@
 import "server-only";
 import type { DbInstitut } from "@/lib/prisma";
-import { CYCLES, codeNiveau } from "@/lib/lmd";
+import { CYCLES, codeNiveau, type Cycle } from "@/lib/lmd";
 import { moyenneMatiere, moyennePonderee, rang, type MoyenneMatiere, type StatutNoteSaisie } from "@/lib/notes";
-import { moyenneAnnuelle, periodes as listePeriodes, type DecoupageSaisie, type DistinctionSaisie } from "@/lib/bulletins";
+import {
+  moyenneAnnuelle,
+  periodes as listePeriodes,
+  type DecisionSaisie,
+  type DecoupageSaisie,
+  type DistinctionSaisie,
+} from "@/lib/bulletins";
 
 // ─── Résultats d'une classe d'école, période par période ───
 
@@ -22,6 +28,7 @@ export type LigneScolaire = {
   matricule: string | null;
   periodes: Record<number, ResultatPeriode>;
   annuelle: { moyenne: number | null; rang: number | null; exAequo: boolean; moyennes: Record<string, number | null> };
+  decision: DecisionSaisie | null; // décision de fin d'année enregistrée par le conseil de classe
 };
 
 export type StatsClasse = {
@@ -33,6 +40,7 @@ export type StatsClasse = {
 
 export type ResultatsScolaires = {
   decoupage: DecoupageSaisie;
+  formation: { cycle: Cycle; niveau: number | null }; // pour le texte de la décision (« Passe en CM2 »)
   periodes: number[];
   matieres: MatiereBulletin[];
   lignes: LigneScolaire[];
@@ -67,7 +75,10 @@ export async function chargerResultatsScolaires(
   sessionId: string,
   decoupage: DecoupageSaisie,
 ): Promise<ResultatsScolaires | null> {
-  const session = await db.session.findFirst({ where: { id: sessionId }, select: { id: true, formationId: true } });
+  const session = await db.session.findFirst({
+    where: { id: sessionId },
+    select: { id: true, formationId: true, formation: { select: { cycle: true, niveau: true } } },
+  });
   if (!session) return null;
   const periodes = listePeriodes(decoupage);
 
@@ -151,6 +162,7 @@ export async function chargerResultatsScolaires(
             colonnes.map((m) => [m.id, moyenneAnnuelle(periodes.map((p) => resultats[p].moyennes[m.id].moyenne))]),
           ),
         },
+        decision: i.decisionFinAnnee,
       };
     })
     .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
@@ -169,6 +181,7 @@ export async function chargerResultatsScolaires(
 
   return {
     decoupage,
+    formation: session.formation,
     periodes,
     matieres: colonnes,
     lignes,

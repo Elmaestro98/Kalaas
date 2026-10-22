@@ -1,7 +1,7 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { formatDate } from "@/lib/format";
 import { formatNote } from "@/lib/notes";
-import { DISTINCTIONS, formatRang, libellePeriode, type DecoupageSaisie } from "@/lib/bulletins";
+import { DISTINCTIONS, formatRang, libellePeriode, texteDecision, type DecoupageSaisie } from "@/lib/bulletins";
 import type { Bulletin, EnTeteBulletin, ResultatsScolaires } from "@/lib/bulletins-donnees";
 
 // Couleurs du design system Kalaas (identiques au reçu et au relevé de notes)
@@ -253,6 +253,14 @@ export default function BulletinScolairePdf({
                     {b.ligne.annuelle.rang
                       ? ` · Rang : ${formatRang(b.ligne.annuelle.rang, b.ligne.annuelle.exAequo)} / ${b.effectif}`
                       : ""}
+                  </Text>
+                )}
+                {derniere && (
+                  <Text style={[styles.chiffre, { fontSize: 10, color: b.ligne.decision === "REDOUBLEMENT" ? ROUGE : NAVY }]}>
+                    Décision du conseil de classe :{" "}
+                    {b.ligne.decision
+                      ? texteDecision(b.ligne.decision, resultats.formation.cycle, resultats.formation.niveau, b.eleve.sexe)
+                      : "en attente"}
                   </Text>
                 )}
               </View>

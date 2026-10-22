@@ -227,7 +227,19 @@ export default async function NewEnrollmentPage({ searchParams }: NewEnrollmentP
 
     // Suggestion : le niveau suivant de la même filière, dans l'année en cours
     const f = derniere?.session.formation;
-    if (f && f.cycle !== "FORMATION_COURTE") {
+    if (f && derniere.decisionFinAnnee === "REDOUBLEMENT") {
+      // Le conseil de classe a décidé un redoublement : même niveau (et même série), nouvelle année
+      apprenant.parcours = `${apprenant.parcours} (${codeNiveau(f.cycle, f.niveau)} · redouble)`;
+      typeSuggere = "REDOUBLEMENT";
+      sessionSuggeree = sessions.find(
+        (s) =>
+          s.id !== derniere.sessionId &&
+          s.formation.cycle === f.cycle &&
+          s.formation.niveau === f.niveau &&
+          s.formation.filiere?.toLowerCase() === f.filiere?.toLowerCase() &&
+          s.anneeAcademique?.enCours,
+      )?.id;
+    } else if (f && f.cycle !== "FORMATION_COURTE") {
       apprenant.parcours = `${apprenant.parcours} (${codeNiveau(f.cycle, f.niveau)})`;
       const suivant = niveauSuivant(f.cycle, f.niveau);
       if (suivant) {

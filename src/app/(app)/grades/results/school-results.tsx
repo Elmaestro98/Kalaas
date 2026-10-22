@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FileDown, FileText } from "lucide-react";
 import { SEUIL_VALIDATION, formatNote } from "@/lib/notes";
-import { formatRang, libellePeriode, type DecoupageSaisie } from "@/lib/bulletins";
+import { formatRang, libellePeriode, texteDecision, type DecoupageSaisie } from "@/lib/bulletins";
 import type { ResultatsScolaires } from "@/lib/bulletins-donnees";
 import type { Vocabulaire } from "@/lib/etablissement";
 import PeriodTabs from "../period-tabs";
@@ -125,6 +125,11 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
                   <th scope="col" className="px-3 py-2 font-semibold text-ink">
                     Rang
                   </th>
+                  {annee && (
+                    <th scope="col" className="px-3 py-2 text-left font-semibold text-ink">
+                      Décision
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -166,6 +171,17 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
                       <td className="px-3 py-2 text-center tabular-nums">
                         {formatRang(classement.rang, classement.exAequo)}
                       </td>
+                      {annee && (
+                        <td
+                          className={`px-3 py-2 whitespace-nowrap ${
+                            l.decision === "REDOUBLEMENT" ? "font-semibold text-danger" : l.decision ? "font-semibold" : "text-ink-muted"
+                          }`}
+                        >
+                          {l.decision
+                            ? texteDecision(l.decision, resultats.formation.cycle, resultats.formation.niveau, null)
+                            : "À décider"}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -184,6 +200,7 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
                     <Note valeur={stats.moyenneClasse} />
                   </td>
                   <td />
+                  {annee && <td />}
                 </tr>
               </tfoot>
             </table>

@@ -37,6 +37,12 @@ enum Distinction {
   BLAME
 }
 
+// Décision du conseil de classe en fin d'année scolaire
+enum DecisionFinAnnee {
+  PASSAGE
+  REDOUBLEMENT
+}
+
 enum StatutInstitut {
   ACTIF
   SUSPENDU
@@ -525,6 +531,8 @@ model Inscription {
   motifRemise             String?
   statut                  StatutInscription @default(ACTIVE)
   dateSortie              DateTime?         @db.Date
+  // École : décision du conseil de classe en fin d'année (passage ou redoublement)
+  decisionFinAnnee        DecisionFinAnnee?
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
 
