@@ -27,6 +27,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-border bg-surface-200 px-4 lg:h-18 lg:px-8 print:hidden">
           <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/dashboard" />
           <div className="flex-1" />
+          {membre.utilisateur.superAdmin && (
+            <Link href="/admin" className="text-sm font-semibold text-gold-700 hover:underline">
+              Administration
+            </Link>
+          )}
           <Link
             href="/payments/new"
             className="hidden h-11 items-center rounded-md bg-gold-500 px-5 font-medium text-navy-900 hover:opacity-90 lg:flex"

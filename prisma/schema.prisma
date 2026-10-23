@@ -243,6 +243,7 @@ model Institut {
   appreciations      AppreciationMatiere[]
   conseilsClasse     ConseilClasse[]
   acquisitions       AcquisitionCompetence[]
+  activites          ActiviteJour[]
   periodesScolaires  PeriodeScolaire[]
   salles             Salle[]
   creneaux           Creneau[]
@@ -284,6 +285,7 @@ model Utilisateur {
 
   membres      Membre[]
   journalAudit JournalAudit[]
+  activites    ActiviteJour[]
 }
 
 model Membre {
@@ -789,6 +791,22 @@ model Relance {
 }
 
 // ─── Traçabilité et tâches planifiées ──────────────
+
+// Suivi de la plateforme : une ligne par personne, par établissement et par jour d'utilisation
+model ActiviteJour {
+  id            String   @id @default(cuid())
+  utilisateurId String
+  institutId    String
+  jour          DateTime @db.Date
+  derniere      DateTime @default(now())
+
+  utilisateur Utilisateur @relation(fields: [utilisateurId], references: [id])
+  institut    Institut    @relation(fields: [institutId], references: [id])
+
+  @@unique([utilisateurId, institutId, jour])
+  @@index([jour])
+  @@index([institutId, jour])
+}
 
 model JournalAudit {
   id         String   @id @default(cuid())

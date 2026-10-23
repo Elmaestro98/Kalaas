@@ -1,10 +1,11 @@
 import "server-only";
 import { cache } from "react";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import type { Role } from "@prisma/client";
 import { prisma, dbInstitut } from "@/lib/prisma";
 import { accepterInvitation } from "@/lib/invitations";
+import { noterActivite } from "@/lib/activite";
 
 export const getContexte = cache(async () => {
   const { userId, orgId } = await auth.protect();
@@ -42,7 +43,20 @@ export const getContexte = cache(async () => {
     );
   }
 
+  noterActivite(membre.utilisateurId, institut.id);
+
   return { institut, membre, db: dbInstitut(institut.id) };
+});
+
+// Administration de la plateforme (/admin) : réservée aux comptes « super administrateur ».
+// Pour les autres, la page n'existe pas (404) : aucun indice qu'elle existe.
+export const exigerSuperAdmin = cache(async () => {
+  const { userId } = await auth.protect();
+  const utilisateur = await prisma.utilisateur.findUnique({ where: { clerkUserId: userId } });
+  if (!utilisateur?.superAdmin) {
+    notFound();
+  }
+  return utilisateur;
 });
 
 export async function exigerRole(...roles: Role[]) {
