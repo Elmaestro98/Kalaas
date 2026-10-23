@@ -4,6 +4,11 @@ import { CYCLES, codeNiveau, type Cycle } from "@/lib/lmd";
 import { moyenneMatiere, moyennePonderee, rang, type MoyenneMatiere, type StatutNoteSaisie } from "@/lib/notes";
 import {
   moyenneAnnuelle,
+  noteSur,
+  parCompetences,
+  periodeDeLaDate,
+  type NiveauSaisie,
+  type DatesPeriode,
   periodes as listePeriodes,
   type DecisionSaisie,
   type DecoupageSaisie,
@@ -27,6 +32,7 @@ export type LigneScolaire = {
   nom: string;
   matricule: string | null;
   periodes: Record<number, ResultatPeriode>;
+  competences: Record<number, Record<string, NiveauSaisie>>; // préscolaire : niveau par période et par matière
   annuelle: { moyenne: number | null; rang: number | null; exAequo: boolean; moyennes: Record<string, number | null> };
   decision: DecisionSaisie | null; // décision de fin d'année enregistrée par le conseil de classe
 };
@@ -41,10 +47,12 @@ export type StatsClasse = {
 export type ResultatsScolaires = {
   decoupage: DecoupageSaisie;
   formation: { cycle: Cycle; niveau: number | null }; // pour le texte de la décision (« Passe en CM2 »)
+  sur: number; // échelle des moyennes : 10 à l'élémentaire, 20 sinon
+  parCompetences: boolean; // préscolaire : niveaux d'acquisition au lieu des notes
   periodes: number[];
   matieres: MatiereBulletin[];
   lignes: LigneScolaire[];
-  evaluations: Record<number, number>; // nombre d'évaluations par période
+  evaluations: Record<number, number>; // nombre d'évaluations par période (préscolaire : de compétences évaluées)
   verrouille: Record<number, boolean>; // toutes les évaluations de la période verrouillées
   stats: Record<number, StatsClasse>;
   statsAnnee: StatsClasse;
@@ -81,8 +89,10 @@ export async function chargerResultatsScolaires(
   });
   if (!session) return null;
   const periodes = listePeriodes(decoupage);
+  const sur = noteSur(session.formation.cycle);
+  const competences = parCompetences(session.formation.cycle);
 
-  const [matieres, affectations, evaluations, inscriptions] = await Promise.all([
+  const [matieres, affectations, evaluations, inscriptions, acquisitions] = await Promise.all([
     db.matiere.findMany({
       where: { formationId: session.formationId, active: true },
       orderBy: [{ ordre: "asc" }, { intitule: "asc" }],
@@ -107,6 +117,12 @@ export async function chargerResultatsScolaires(
       where: { sessionId, statut: { in: ["ACTIVE", "TERMINEE"] } },
       include: { apprenant: { select: { prenom: true, nom: true, matricule: true } } },
     }),
+    competences
+      ? db.acquisitionCompetence.findMany({
+          where: { inscription: { sessionId } },
+          select: { inscriptionId: true, matiereId: true, periode: true, niveau: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   // Professeur de la matière dans cette classe, sinon professeur habituel
@@ -137,6 +153,7 @@ export async function chargerResultatsScolaires(
                   note: note ? { statut: note.statut as StatutNoteSaisie, valeur: note.valeur } : null,
                 };
               }),
+            sur,
           );
         }
         // Une matière sans évaluation sur la période ne compte pas dans la moyenne générale
@@ -149,11 +166,22 @@ export async function chargerResultatsScolaires(
           exAequo: false,
         };
       }
+      // Préscolaire : niveaux d'acquisition ; la période est complète quand chaque compétence est évaluée
+      const niveaux: Record<number, Record<string, NiveauSaisie>> = {};
+      for (const p of periodes) {
+        niveaux[p] = Object.fromEntries(
+          acquisitions.filter((a) => a.inscriptionId === i.id && a.periode === p).map((a) => [a.matiereId, a.niveau]),
+        );
+        if (competences) {
+          resultats[p].complete = colonnes.length > 0 && colonnes.every((m) => niveaux[p][m.id]);
+        }
+      }
       return {
         inscriptionId: i.id,
         nom: `${i.apprenant.nom.toUpperCase()} ${i.apprenant.prenom}`,
         matricule: i.apprenant.matricule,
         periodes: resultats,
+        competences: niveaux,
         annuelle: {
           moyenne: moyenneAnnuelle(periodes.map((p) => resultats[p].moyenne)),
           rang: null,
@@ -182,12 +210,21 @@ export async function chargerResultatsScolaires(
   return {
     decoupage,
     formation: session.formation,
+    sur,
+    parCompetences: competences,
     periodes,
     matieres: colonnes,
     lignes,
-    evaluations: Object.fromEntries(periodes.map((p) => [p, evaluations.filter((e) => e.periode === p).length])),
+    evaluations: Object.fromEntries(
+      periodes.map((p) => [
+        p,
+        competences ? acquisitions.filter((a) => a.periode === p).length : evaluations.filter((e) => e.periode === p).length,
+      ]),
+    ),
+    // Préscolaire : pas de verrouillage (le bulletin est provisoire tant qu'une compétence n'est pas évaluée)
     verrouille: Object.fromEntries(
       periodes.map((p) => {
+        if (competences) return [p, true];
         const liste = evaluations.filter((e) => e.periode === p);
         return [p, liste.length > 0 && liste.every((e) => e.verrouillee)];
       }),
@@ -196,6 +233,26 @@ export async function chargerResultatsScolaires(
     statsAnnee: statistiques(annuelles, parMatiere((l, id) => l.annuelle.moyennes[id])),
     sansPeriode: evaluations.filter((e) => e.periode === null).length,
   };
+}
+
+// ─── Dates des périodes ────────────────────────────
+
+const jour = (d: Date) => d.toISOString().slice(0, 10);
+
+// Dates enregistrées des périodes de l'année de la classe (vide si non saisies ou classe sans année)
+export async function datesPeriodesDeLaClasse(db: DbInstitut, sessionId: string, decoupage: DecoupageSaisie): Promise<DatesPeriode[]> {
+  const session = await db.session.findFirst({ where: { id: sessionId }, select: { anneeAcademiqueId: true } });
+  if (!session?.anneeAcademiqueId) return [];
+  const periodes = await db.periodeScolaire.findMany({
+    where: { anneeAcademiqueId: session.anneeAcademiqueId, numero: { lte: listePeriodes(decoupage).length } },
+    orderBy: { numero: "asc" },
+  });
+  return periodes.map((p) => ({ numero: p.numero, dateDebut: jour(p.dateDebut), dateFin: jour(p.dateFin) }));
+}
+
+// Période en cours aujourd'hui d'après les dates saisies dans les Paramètres (null si pas de dates)
+export async function periodeEnCours(db: DbInstitut, sessionId: string, decoupage: DecoupageSaisie): Promise<number | null> {
+  return periodeDeLaDate(await datesPeriodesDeLaClasse(db, sessionId, decoupage), jour(new Date()));
 }
 
 // ─── Bulletins d'une période ───────────────────────
@@ -221,7 +278,7 @@ export type Bulletin = {
   ligne: LigneScolaire;
   appreciations: Record<string, string>; // par matière
   conseil: { appreciation: string | null; distinction: DistinctionSaisie | null };
-  absences: number; // depuis la rentrée
+  absences: number; // pendant la période si ses dates sont connues, sinon depuis la rentrée
   effectif: number;
 };
 
@@ -233,6 +290,9 @@ export async function chargerBulletins(
   periode: number,
   inscriptionId?: string,
 ) {
+  // Absences de la période (dates saisies dans les Paramètres), sinon depuis la rentrée
+  const dates = (await datesPeriodesDeLaClasse(db, sessionId, decoupage)).find((d) => d.numero === periode) ?? null;
+
   const [resultats, session, inscriptions, appreciations, conseils, absences] = await Promise.all([
     chargerResultatsScolaires(db, sessionId, decoupage),
     db.session.findFirst({
@@ -257,7 +317,11 @@ export async function chargerBulletins(
     }),
     db.presence.groupBy({
       by: ["inscriptionId"],
-      where: { statut: "ABSENT", inscription: { sessionId } },
+      where: {
+        statut: "ABSENT",
+        inscription: { sessionId },
+        ...(dates ? { seance: { date: { gte: new Date(dates.dateDebut), lte: new Date(dates.dateFin) } } } : {}),
+      },
       _count: true,
     }),
   ]);
@@ -296,5 +360,5 @@ export async function chargerBulletins(
       };
     });
 
-  return { resultats, enTete, bulletins };
+  return { resultats, enTete, bulletins, datesPeriode: dates };
 }

@@ -43,6 +43,13 @@ enum DecisionFinAnnee {
   REDOUBLEMENT
 }
 
+// Préscolaire : pas de notes, chaque compétence (domaine) est évaluée par un niveau
+enum NiveauAcquisition {
+  ACQUIS
+  EN_COURS
+  NON_ACQUIS
+}
+
 enum StatutInstitut {
   ACTIF
   SUSPENDU
@@ -235,6 +242,8 @@ model Institut {
   compteursMatricule CompteurMatricule[]
   appreciations      AppreciationMatiere[]
   conseilsClasse     ConseilClasse[]
+  acquisitions       AcquisitionCompetence[]
+  periodesScolaires  PeriodeScolaire[]
   salles             Salle[]
   creneaux           Creneau[]
   enseignants        Enseignant[]
@@ -318,10 +327,27 @@ model AnneeAcademique {
   enCours    Boolean  @default(false)
   createdAt  DateTime @default(now())
 
-  institut Institut  @relation(fields: [institutId], references: [id])
+  institut Institut          @relation(fields: [institutId], references: [id])
   sessions Session[]
+  periodes PeriodeScolaire[]
 
   @@unique([institutId, libelle])
+}
+
+// École : dates de chaque période (1er trimestre…) d'une année scolaire
+model PeriodeScolaire {
+  id                String   @id @default(cuid())
+  institutId        String
+  anneeAcademiqueId String
+  numero            Int
+  dateDebut         DateTime @db.Date
+  dateFin           DateTime @db.Date
+
+  institut        Institut        @relation(fields: [institutId], references: [id])
+  anneeAcademique AnneeAcademique @relation(fields: [anneeAcademiqueId], references: [id])
+
+  @@unique([anneeAcademiqueId, numero])
+  @@index([institutId])
 }
 
 // En LMD, une formation = un niveau d'une filière (ex. Licence Informatique — L2)
@@ -439,6 +465,7 @@ model Matiere {
   unite              UniteEnseignement?    @relation(fields: [ueId], references: [id], onDelete: SetNull)
   evaluations        Evaluation[]
   appreciations      AppreciationMatiere[]
+  acquisitions       AcquisitionCompetence[]
 
   @@unique([formationId, intitule])
   @@index([institutId])
@@ -547,6 +574,7 @@ model Inscription {
   documents     DocumentDelivre[]
   appreciations AppreciationMatiere[]
   conseils      ConseilClasse[]
+  acquisitions  AcquisitionCompetence[]
 
   @@index([institutId])
   @@index([apprenantId])
@@ -934,6 +962,25 @@ model AppreciationMatiere {
   texte         String
   auteurId      String?
   updatedAt     DateTime @updatedAt
+
+  institut    Institut    @relation(fields: [institutId], references: [id])
+  inscription Inscription @relation(fields: [inscriptionId], references: [id])
+  matiere     Matiere     @relation(fields: [matiereId], references: [id])
+
+  @@unique([inscriptionId, periode, matiereId])
+  @@index([institutId])
+}
+
+// Préscolaire : niveau d'acquisition d'une compétence (matière) par un élève sur une période
+model AcquisitionCompetence {
+  id            String            @id @default(cuid())
+  institutId    String
+  inscriptionId String
+  matiereId     String
+  periode       Int
+  niveau        NiveauAcquisition
+  auteurId      String?
+  updatedAt     DateTime          @updatedAt
 
   institut    Institut    @relation(fields: [institutId], references: [id])
   inscription Inscription @relation(fields: [inscriptionId], references: [id])

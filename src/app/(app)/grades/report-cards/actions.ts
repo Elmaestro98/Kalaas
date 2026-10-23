@@ -9,15 +9,19 @@ import {
   DECISIONS_FIN_ANNEE,
   DISTINCTIONS,
   LONGUEUR_APPRECIATION,
+  NIVEAUX_ACQUISITION,
   nbPeriodes,
+  parCompetences,
   type DecisionSaisie,
   type DistinctionSaisie,
+  type NiveauSaisie,
 } from "@/lib/bulletins";
 
 export type EtatAppreciations = { erreur: string | null; enregistre: number };
 
 const DISTINCTIONS_VALIDES = new Set<string>(DISTINCTIONS.map((d) => d.valeur));
 const DECISIONS_VALIDES = new Set<string>(DECISIONS_FIN_ANNEE.map((d) => d.valeur));
+const NIVEAUX_VALIDES = new Set<string>(NIVEAUX_ACQUISITION.map((n) => n.valeur));
 
 // Enregistre les appréciations d'une matière (professeur) ou du conseil de classe (direction) pour une période
 export async function enregistrerAppreciations(etat: EtatAppreciations, formData: FormData): Promise<EtatAppreciations> {
@@ -37,6 +41,8 @@ export async function enregistrerAppreciations(etat: EtatAppreciations, formData
   }
 
   const conseil = cible === "conseil";
+  // Préscolaire : le professeur choisit aussi le niveau d'acquisition de la compétence
+  const competences = !conseil && parCompetences(session.formation.cycle);
   if (conseil) {
     if (membre.role !== "DIRECTEUR") return echec("Seule la direction rédige l'avis du conseil de classe.");
   } else {
@@ -58,12 +64,14 @@ export async function enregistrerAppreciations(etat: EtatAppreciations, formData
     const texte = String(formData.get(`a_${i.id}`) ?? "").trim();
     const distinction = String(formData.get(`d_${i.id}`) ?? "");
     const decision = String(formData.get(`f_${i.id}`) ?? "");
+    const niveau = String(formData.get(`n_${i.id}`) ?? "");
     return {
       inscriptionId: i.id,
       decisionAvant: i.decisionFinAnnee,
       decision: DECISIONS_VALIDES.has(decision) ? (decision as DecisionSaisie) : null,
       texte: texte.slice(0, LONGUEUR_APPRECIATION),
       distinction: DISTINCTIONS_VALIDES.has(distinction) ? (distinction as DistinctionSaisie) : null,
+      niveau: NIVEAUX_VALIDES.has(niveau) ? (niveau as NiveauSaisie) : null,
     };
   });
 
@@ -88,6 +96,18 @@ export async function enregistrerAppreciations(etat: EtatAppreciations, formData
       });
     }
     for (const l of lignes) {
+      if (competences) {
+        const cle = { inscriptionId: l.inscriptionId, periode, matiereId: cible };
+        if (!l.niveau) {
+          await tx.acquisitionCompetence.deleteMany({ where: cle });
+        } else {
+          await tx.acquisitionCompetence.upsert({
+            where: { inscriptionId_periode_matiereId: cle },
+            create: { institutId: institut.id, ...cle, niveau: l.niveau, auteurId: membre.id },
+            update: { niveau: l.niveau, auteurId: membre.id },
+          });
+        }
+      }
       if (conseil) {
         const cle = { inscriptionId_periode: { inscriptionId: l.inscriptionId, periode } };
         if (!l.texte && !l.distinction) {
@@ -114,6 +134,8 @@ export async function enregistrerAppreciations(etat: EtatAppreciations, formData
 
   revalidatePath("/grades/report-cards");
   revalidatePath("/grades/results");
-  await flash(conseil ? "Avis du conseil de classe enregistrés." : "Appréciations enregistrées.");
+  await flash(
+    conseil ? "Avis du conseil de classe enregistrés." : competences ? "Compétences enregistrées." : "Appréciations enregistrées.",
+  );
   return { erreur: null, enregistre: etat.enregistre + 1 };
 }

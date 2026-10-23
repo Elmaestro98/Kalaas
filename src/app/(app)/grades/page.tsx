@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { BarChart3, FileText, Lock, PenLine, Trash2, Unlock } from "lucide-react";
+import { BarChart3, FileText, ListChecks, Lock, PenLine, Trash2, Unlock } from "lucide-react";
 import { exigerRole } from "@/lib/tenant";
 import { formatDate } from "@/lib/format";
 import { TYPES_EVALUATION } from "@/lib/notes";
 import { estScolaire } from "@/lib/lmd";
 import { vocabulaire } from "@/lib/etablissement";
-import { libellePeriode, periodes as listePeriodes } from "@/lib/bulletins";
+import { NIVEAUX_ACQUISITION, libellePeriode, noteSur, parCompetences, periodes as listePeriodes } from "@/lib/bulletins";
 import { classesPourNotes, matieresNotables } from "@/lib/notes-donnees";
+import { periodeEnCours } from "@/lib/bulletins-donnees";
 import { basculerVerrou, supprimerEvaluation } from "./actions";
 import ClassSelect from "./class-select";
 import EvaluationForm from "./evaluation-form";
@@ -66,14 +67,18 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
   const scolaire = estScolaire(session.formation.cycle);
   const periodes = listePeriodes(institut.decoupageScolaire);
   const demandee = Number(params.periode);
+  // Par défaut : la période en cours (dates des Paramètres), sinon la dernière période déjà notée
+  const enCours = scolaire && !periodes.includes(demandee) ? await periodeEnCours(db, session.id, institut.decoupageScolaire) : null;
   const periode = scolaire
     ? periodes.includes(demandee)
       ? demandee
-      : Math.max(1, ...evaluations.map((e) => e.periode ?? 0).filter((p) => periodes.includes(p)))
+      : (enCours ?? Math.max(1, ...evaluations.map((e) => e.periode ?? 0).filter((p) => periodes.includes(p))))
     : null;
   const dePeriode = scolaire ? evaluations.filter((e) => e.periode === periode) : evaluations;
   const sansPeriode = scolaire ? evaluations.filter((e) => e.periode === null).length : 0;
   const suffixe = periode ? `&periode=${periode}` : "";
+  // Préscolaire : pas de notes, les compétences sont évaluées sur la page des appréciations
+  const competences = parCompetences(session.formation.cycle);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -81,7 +86,9 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
         <div className="flex-1">
           <h1 className="text-2xl font-semibold lg:text-3xl">Notes</h1>
           <p className="mt-1 text-sm text-ink-muted">
-            Créez les évaluations de chaque matière avec leur poids, puis saisissez les notes sur la grille.
+            {competences
+              ? "Au préscolaire, les élèves ne sont pas notés : chaque compétence est évaluée par un niveau d'acquisition."
+              : "Créez les évaluations de chaque matière avec leur poids, puis saisissez les notes sur la grille."}
           </p>
         </div>
         {scolaire && (
@@ -90,7 +97,7 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
             className="flex h-11 items-center gap-2 rounded-md border border-border bg-surface-200 px-4 font-medium text-ink hover:bg-surface-100"
           >
             <FileText size={18} aria-hidden="true" />
-            Appréciations et bulletins
+            {competences ? "Compétences et bulletins" : "Appréciations et bulletins"}
           </Link>
         )}
         {estDirecteur && (
@@ -129,7 +136,37 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
         </p>
       )}
 
-      {visibles.length === 0 ? (
+      {competences ? (
+        <section className="mt-6 rounded-lg border border-border bg-surface-200 p-6">
+          <h2 className="font-semibold">Évaluation par compétences</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Chaque matière du programme est une compétence. Pour chaque élève et chaque{" "}
+            {libellePeriode(institut.decoupageScolaire, 1).split(" ")[1]}, choisissez un niveau :
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2 text-sm">
+            {NIVEAUX_ACQUISITION.map((n) => (
+              <li key={n.valeur} className="rounded-full border border-border bg-surface-100 px-3 py-1">
+                <span className="font-semibold">{n.court}</span> = {n.label}
+              </li>
+            ))}
+          </ul>
+          {visibles.length === 0 ? (
+            <p className="mt-4 text-sm text-ink-muted">
+              {matieres.length === 0
+                ? "La formation n'a pas encore de compétences : ajoutez-les comme matières dans son programme."
+                : "Aucune compétence à évaluer pour vous dans cette classe."}
+            </p>
+          ) : (
+            <Link
+              href={`/grades/report-cards?session=${session.id}${suffixe}${estDirecteur ? `&cible=${visibles[0].id}` : ""}`}
+              className="mt-4 inline-flex h-11 items-center gap-2 rounded-md bg-action px-4 font-medium text-on-action hover:bg-action-hover"
+            >
+              <ListChecks size={18} aria-hidden="true" />
+              Évaluer les compétences
+            </Link>
+          )}
+        </section>
+      ) : visibles.length === 0 ? (
         <p className="mt-6 rounded-lg border border-dashed border-border bg-surface-200 p-8 text-center text-sm text-ink-muted">
           {matieres.length === 0
             ? "La formation n'a pas encore de matières : complétez son programme."
@@ -230,6 +267,7 @@ export default async function GradesPage({ searchParams }: GradesPageProps) {
                       matiereId={m.id}
                       periode={periode}
                       poidsRestant={100 - poidsTotal}
+                      bareme={scolaire ? noteSur(session.formation.cycle) : 20}
                       suggestion={
                         poidsTotal >= 40 && !siennes.some((e) => e.type === "EXAMEN")
                           ? "Examen"

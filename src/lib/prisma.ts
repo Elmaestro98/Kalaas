@@ -15,6 +15,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const MODELES_INSTITUT = new Set<string>([
   "AnneeAcademique",
+  "PeriodeScolaire",
   "CompteurMatricule",
   "Salle",
   "Creneau",
@@ -27,6 +28,7 @@ const MODELES_INSTITUT = new Set<string>([
   "Note",
   "AppreciationMatiere",
   "ConseilClasse",
+  "AcquisitionCompetence",
   "DocumentDelivre",
   "CompteurDocument",
   "Membre",

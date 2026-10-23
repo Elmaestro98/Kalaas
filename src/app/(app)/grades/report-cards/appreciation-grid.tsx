@@ -3,15 +3,19 @@
 import { startTransition, useActionState, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { classeChamp } from "@/components/ui/field";
-import { SEUIL_VALIDATION, formatNote } from "@/lib/notes";
+import { formatNote } from "@/lib/notes";
 import {
   DECISIONS_FIN_ANNEE,
   DISTINCTIONS,
   LONGUEUR_APPRECIATION,
+  NIVEAU,
+  NIVEAUX_ACQUISITION,
   appreciationSuggeree,
   formatRang,
+  seuilReussite,
   type DecisionSaisie,
   type DistinctionSaisie,
+  type NiveauSaisie,
 } from "@/lib/bulletins";
 import { enregistrerAppreciations, type EtatAppreciations } from "./actions";
 
@@ -24,6 +28,8 @@ export type LigneAppreciation = {
   distinction: DistinctionSaisie | null; // enregistrée, sinon proposée
   moyenneAnnuelle: number | null; // dernière période uniquement
   decision: DecisionSaisie | null; // enregistrée, sinon proposée (dernière période)
+  niveau: NiveauSaisie | null; // préscolaire : niveau d'acquisition de la compétence
+  bilan: string | null; // préscolaire, conseil de classe : « 5 A · 2 EC · 1 NA »
 };
 
 type AppreciationGridProps = {
@@ -32,18 +38,40 @@ type AppreciationGridProps = {
   cible: string; // « conseil » ou identifiant de matière
   lignes: LigneAppreciation[];
   finAnnee: boolean; // conseil de la dernière période : décision de passage ou de redoublement
+  sur: number; // échelle des moyennes (10 ou 20)
+  competences: boolean; // préscolaire : niveaux d'acquisition au lieu des notes
 };
 
 const etatInitial: EtatAppreciations = { erreur: null, enregistre: 0 };
 
-export default function AppreciationGrid({ sessionId, periode, cible, lignes, finAnnee }: AppreciationGridProps) {
+export default function AppreciationGrid({
+  sessionId,
+  periode,
+  cible,
+  lignes,
+  finAnnee,
+  sur,
+  competences,
+}: AppreciationGridProps) {
   const [etat, envoyer, enCours] = useActionState(enregistrerAppreciations, etatInitial);
   const conseil = cible === "conseil";
   const [textes, setTextes] = useState<Record<string, string>>(
     Object.fromEntries(lignes.map((l) => [l.inscriptionId, l.texte])),
   );
+  const [niveaux, setNiveaux] = useState<Record<string, NiveauSaisie | "">>(
+    Object.fromEntries(lignes.map((l) => [l.inscriptionId, l.niveau ?? ""])),
+  );
 
-  const vides = lignes.filter((l) => !textes[l.inscriptionId] && l.moyenne !== null).length;
+  // Suggestion d'après le niveau d'acquisition (préscolaire) ou la moyenne
+  const suggestion = (l: LigneAppreciation): string => {
+    if (competences) {
+      const niveau = niveaux[l.inscriptionId];
+      return !conseil && niveau ? NIVEAU[niveau].suggestion : "";
+    }
+    return appreciationSuggeree(l.moyenne, sur);
+  };
+  const vides = lignes.filter((l) => !textes[l.inscriptionId] && suggestion(l)).length;
+  const seuil = seuilReussite(sur);
 
   return (
     <form
@@ -63,24 +91,26 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes, fi
         <p className="text-sm text-ink-muted">
           {LONGUEUR_APPRECIATION} caractères maximum. Un champ vide n&apos;apparaît pas sur le bulletin.
         </p>
-        <button
-          type="button"
-          disabled={vides === 0}
-          onClick={() =>
-            setTextes((avant) => ({
-              ...avant,
-              ...Object.fromEntries(
-                lignes
-                  .filter((l) => !avant[l.inscriptionId] && l.moyenne !== null)
-                  .map((l) => [l.inscriptionId, appreciationSuggeree(l.moyenne)]),
-              ),
-            }))
-          }
-          className="flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border bg-surface-200 px-3 text-sm font-medium hover:bg-surface-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Sparkles size={16} aria-hidden="true" />
-          Compléter avec des suggestions{vides > 0 && ` (${vides})`}
-        </button>
+        {!(competences && conseil) && (
+          <button
+            type="button"
+            disabled={vides === 0}
+            onClick={() =>
+              setTextes((avant) => ({
+                ...avant,
+                ...Object.fromEntries(
+                  lignes
+                    .filter((l) => !avant[l.inscriptionId] && suggestion(l))
+                    .map((l) => [l.inscriptionId, suggestion(l)]),
+                ),
+              }))
+            }
+            className="flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border bg-surface-200 px-3 text-sm font-medium hover:bg-surface-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Sparkles size={16} aria-hidden="true" />
+            Compléter avec des suggestions{vides > 0 && ` (${vides})`}
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-surface-200">
@@ -88,10 +118,18 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes, fi
           <thead className="bg-surface-100 text-left text-xs text-ink-muted">
             <tr>
               <th scope="col" className="px-3 py-2 font-semibold">Nom</th>
-              <th scope="col" className="px-3 py-2 text-center font-semibold">{conseil ? "Moy. générale" : "Moyenne"}</th>
-              {conseil && <th scope="col" className="px-3 py-2 text-center font-semibold">Rang</th>}
-              {conseil && <th scope="col" className="px-3 py-2 font-semibold">Distinction</th>}
-              {finAnnee && <th scope="col" className="px-3 py-2 text-center font-semibold">Moy. annuelle</th>}
+              {competences ? (
+                <th scope="col" className="px-3 py-2 font-semibold">{conseil ? "Compétences" : "Niveau"}</th>
+              ) : (
+                <th scope="col" className="px-3 py-2 text-center font-semibold">
+                  {conseil ? "Moy. générale" : "Moyenne"} /{sur}
+                </th>
+              )}
+              {conseil && !competences && <th scope="col" className="px-3 py-2 text-center font-semibold">Rang</th>}
+              {conseil && !competences && <th scope="col" className="px-3 py-2 font-semibold">Distinction</th>}
+              {finAnnee && !competences && (
+                <th scope="col" className="px-3 py-2 text-center font-semibold">Moy. annuelle</th>
+              )}
               {finAnnee && <th scope="col" className="px-3 py-2 font-semibold">Décision</th>}
               <th scope="col" className="w-1/2 px-3 py-2 font-semibold">{conseil ? "Appréciation générale" : "Appréciation"}</th>
             </tr>
@@ -100,15 +138,38 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes, fi
             {lignes.map((l) => (
               <tr key={l.inscriptionId}>
                 <th scope="row" className="px-3 py-2 text-left font-medium">{l.nom}</th>
-                <td
-                  className={`px-3 py-2 text-center tabular-nums ${
-                    l.moyenne !== null && l.moyenne < SEUIL_VALIDATION ? "text-danger" : ""
-                  }`}
-                >
-                  {formatNote(l.moyenne)}
-                </td>
-                {conseil && <td className="px-3 py-2 text-center tabular-nums">{l.rang ?? formatRang(null)}</td>}
-                {conseil && (
+                {competences ? (
+                  conseil ? (
+                    <td className="px-3 py-2 whitespace-nowrap text-ink-muted">{l.bilan ?? "Non évalué"}</td>
+                  ) : (
+                    <td className="px-3 py-2">
+                      <select
+                        name={`n_${l.inscriptionId}`}
+                        value={niveaux[l.inscriptionId] ?? ""}
+                        onChange={(e) =>
+                          setNiveaux((avant) => ({ ...avant, [l.inscriptionId]: e.target.value as NiveauSaisie | "" }))
+                        }
+                        aria-label={`Niveau de ${l.nom}`}
+                        className={`${classeChamp()} h-10`}
+                      >
+                        <option value="">Non évalué</option>
+                        {NIVEAUX_ACQUISITION.map((n) => (
+                          <option key={n.valeur} value={n.valeur}>
+                            {n.court} · {n.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                  )
+                ) : (
+                  <td className={`px-3 py-2 text-center tabular-nums ${l.moyenne !== null && l.moyenne < seuil ? "text-danger" : ""}`}>
+                    {formatNote(l.moyenne)}
+                  </td>
+                )}
+                {conseil && !competences && (
+                  <td className="px-3 py-2 text-center tabular-nums">{l.rang ?? formatRang(null)}</td>
+                )}
+                {conseil && !competences && (
                   <td className="px-3 py-2">
                     <select
                       name={`d_${l.inscriptionId}`}
@@ -125,10 +186,10 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes, fi
                     </select>
                   </td>
                 )}
-                {finAnnee && (
+                {finAnnee && !competences && (
                   <td
                     className={`px-3 py-2 text-center font-semibold tabular-nums ${
-                      l.moyenneAnnuelle !== null && l.moyenneAnnuelle < SEUIL_VALIDATION ? "text-danger" : ""
+                      l.moyenneAnnuelle !== null && l.moyenneAnnuelle < seuil ? "text-danger" : ""
                     }`}
                   >
                     {formatNote(l.moyenneAnnuelle)}
@@ -158,7 +219,7 @@ export default function AppreciationGrid({ sessionId, periode, cible, lignes, fi
                     onChange={(e) => setTextes((avant) => ({ ...avant, [l.inscriptionId]: e.target.value }))}
                     maxLength={LONGUEUR_APPRECIATION}
                     aria-label={`Appréciation de ${l.nom}`}
-                    placeholder={l.moyenne !== null ? appreciationSuggeree(l.moyenne) : ""}
+                    placeholder={suggestion(l)}
                     className={`${classeChamp()} h-10`}
                   />
                 </td>

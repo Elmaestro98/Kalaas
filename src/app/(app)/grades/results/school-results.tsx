@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FileDown, FileText } from "lucide-react";
-import { SEUIL_VALIDATION, formatNote } from "@/lib/notes";
-import { formatRang, libellePeriode, texteDecision, type DecoupageSaisie } from "@/lib/bulletins";
+import { formatNote } from "@/lib/notes";
+import { formatRang, libellePeriode, seuilReussite, texteDecision, type DecoupageSaisie } from "@/lib/bulletins";
 import type { ResultatsScolaires } from "@/lib/bulletins-donnees";
 import type { Vocabulaire } from "@/lib/etablissement";
 import PeriodTabs from "../period-tabs";
@@ -14,11 +14,11 @@ type SchoolResultsProps = {
   mots: Vocabulaire;
 };
 
-function Note({ valeur, provisoire }: { valeur: number | null; provisoire?: boolean }) {
+function Note({ valeur, provisoire, seuil }: { valeur: number | null; provisoire?: boolean; seuil: number }) {
   if (valeur === null) return <span className="text-ink-muted">—</span>;
   return (
     <span
-      className={`tabular-nums ${valeur < SEUIL_VALIDATION ? "text-danger" : ""} ${provisoire ? "italic opacity-70" : ""}`}
+      className={`tabular-nums ${valeur < seuil ? "text-danger" : ""} ${provisoire ? "italic opacity-70" : ""}`}
       title={provisoire ? "Moyenne provisoire : des notes manquent" : undefined}
     >
       {formatNote(valeur)}
@@ -31,6 +31,7 @@ function Note({ valeur, provisoire }: { valeur: number | null; provisoire?: bool
 export default function SchoolResults({ sessionId, resultats, vue, decoupage, mots }: SchoolResultsProps) {
   const annee = vue === "ANNEE";
   const stats = annee ? resultats.statsAnnee : resultats.stats[vue];
+  const seuil = seuilReussite(resultats.sur);
   const nbEvaluations = annee
     ? Object.values(resultats.evaluations).reduce((s, n) => s + n, 0)
     : resultats.evaluations[vue];
@@ -107,7 +108,7 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
               <div key={label as string} className="rounded-lg border border-border bg-surface-200 p-4">
                 <dt className="text-xs text-ink-muted">{label}</dt>
                 <dd className="mt-1 text-xl font-bold">
-                  <Note valeur={valeur as number | null} />
+                  <Note valeur={valeur as number | null} seuil={seuil} />
                 </dd>
               </div>
             ))}
@@ -127,7 +128,7 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
                     </th>
                   ))}
                   <th scope="col" className="border-l border-border px-3 py-2 font-semibold text-ink">
-                    Moyenne
+                    Moyenne /{resultats.sur}
                   </th>
                   <th scope="col" className="px-3 py-2 font-semibold text-ink">
                     Rang
@@ -168,12 +169,12 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
                         const provisoire = !annee && valeur !== null && !res!.moyennes[m.id].complete;
                         return (
                           <td key={m.id} className={`px-3 py-2 text-center ${i === 0 ? "border-l border-border" : ""}`}>
-                            <Note valeur={valeur} provisoire={provisoire} />
+                            <Note valeur={valeur} provisoire={provisoire} seuil={seuil} />
                           </td>
                         );
                       })}
                       <td className="border-l border-border px-3 py-2 text-center text-base font-bold">
-                        <Note valeur={moyenne} provisoire={!annee && moyenne !== null && !res!.complete} />
+                        <Note valeur={moyenne} provisoire={!annee && moyenne !== null && !res!.complete} seuil={seuil} />
                       </td>
                       <td className="px-3 py-2 text-center tabular-nums">
                         {formatRang(classement.rang, classement.exAequo)}
@@ -200,11 +201,11 @@ export default function SchoolResults({ sessionId, resultats, vue, decoupage, mo
                   </th>
                   {resultats.matieres.map((m, i) => (
                     <td key={m.id} className={`px-3 py-2 text-center ${i === 0 ? "border-l border-border" : ""}`}>
-                      <Note valeur={stats.moyennesMatieres[m.id] ?? null} />
+                      <Note valeur={stats.moyennesMatieres[m.id] ?? null} seuil={seuil} />
                     </td>
                   ))}
                   <td className="border-l border-border px-3 py-2 text-center font-bold">
-                    <Note valeur={stats.moyenneClasse} />
+                    <Note valeur={stats.moyenneClasse} seuil={seuil} />
                   </td>
                   <td />
                   {annee && <td />}

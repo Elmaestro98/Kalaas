@@ -8,6 +8,8 @@ import AcademicYearForm from "./academic-year-form";
 import PrefixForm from "./prefix-form";
 import ExpenseLimitForm from "./expense-limit-form";
 import SchoolTermForm from "./school-term-form";
+import TermDatesForm from "./term-dates-form";
+import { libellePeriode, nbPeriodes, proposerDatesPeriodes, type DatesPeriode } from "@/lib/bulletins";
 import EstablishmentForm from "./establishment-form";
 import RoomForm from "./room-form";
 
@@ -26,6 +28,27 @@ export default async function SettingsPage() {
       include: { _count: { select: { creneaux: true } } },
     }),
   ]);
+
+  // École : dates des périodes de l'année en cours (enregistrées, sinon proposées)
+  const anneeEnCours = annees.find((a) => a.enCours);
+  const nb = nbPeriodes(institut.decoupageScolaire);
+  const periodesEnregistrees =
+    institut.typeEtablissement === "ECOLE" && anneeEnCours
+      ? await db.periodeScolaire.findMany({
+          where: { anneeAcademiqueId: anneeEnCours.id, numero: { lte: nb } },
+          orderBy: { numero: "asc" },
+        })
+      : [];
+  const datesCompletes = periodesEnregistrees.length === nb;
+  const datesPeriodes: DatesPeriode[] = !anneeEnCours
+    ? []
+    : datesCompletes
+      ? periodesEnregistrees.map((p) => ({
+          numero: p.numero,
+          dateDebut: p.dateDebut.toISOString().slice(0, 10),
+          dateFin: p.dateFin.toISOString().slice(0, 10),
+        }))
+      : proposerDatesPeriodes(anneeEnCours.dateDebut, anneeEnCours.dateFin, nb);
 
   const maintenant = new Date();
   const anneeScolaire = maintenant.getMonth() >= 7 ? maintenant.getFullYear() : maintenant.getFullYear() - 1;
@@ -77,7 +100,8 @@ export default async function SettingsPage() {
               <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
                 <span className="min-w-24 font-semibold">{a.libelle}</span>
                 <span className="flex-1 text-ink-muted">
-                  {formatDate(a.dateDebut)} → {formatDate(a.dateFin)} · {a._count.sessions} session
+                  {formatDate(a.dateDebut)} → {formatDate(a.dateFin)} · {a._count.sessions}{" "}
+                  {institut.typeEtablissement === "ECOLE" ? "classe" : "session"}
                   {a._count.sessions > 1 ? "s" : ""}
                 </span>
                 {a.enCours ? (
@@ -101,6 +125,7 @@ export default async function SettingsPage() {
             key={anneeProposee}
             anneeProposee={anneeProposee}
             premiereAnnee={annees.length === 0}
+            scolaire={institut.typeEtablissement === "ECOLE"}
           />
         </div>
       </section>
@@ -112,6 +137,27 @@ export default async function SettingsPage() {
             Chaque évaluation est rattachée à une période, et un bulletin est édité à la fin de chaque période.
           </p>
           <SchoolTermForm decoupageActuel={institut.decoupageScolaire} />
+
+          <h3 className="mt-6 font-semibold">
+            Dates des {libellePeriode(institut.decoupageScolaire, 1).split(" ")[1]}s
+            {anneeEnCours && <span className="font-normal text-ink-muted"> · {anneeEnCours.libelle}</span>}
+          </h3>
+          <p className="mt-1 mb-3 text-sm text-ink-muted">
+            Elles servent à compter les absences de chaque période sur le bulletin et à ouvrir les notes sur la
+            période en cours.
+          </p>
+          {anneeEnCours ? (
+            <TermDatesForm
+              // Changement d'année ou de découpage : le formulaire repart des bonnes dates
+              key={`${anneeEnCours.id}-${nb}-${datesCompletes}`}
+              anneeId={anneeEnCours.id}
+              libelles={datesPeriodes.map((d) => libellePeriode(institut.decoupageScolaire, d.numero))}
+              datesInitiales={datesPeriodes}
+              enregistrees={datesCompletes}
+            />
+          ) : (
+            <p className="text-sm text-ink-muted">Créez d&apos;abord l&apos;année scolaire en cours (ci-dessus).</p>
+          )}
         </section>
       )}
 

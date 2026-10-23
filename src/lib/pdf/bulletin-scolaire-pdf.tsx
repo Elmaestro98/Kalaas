@@ -1,7 +1,16 @@
 import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { formatDate } from "@/lib/format";
 import { formatNote } from "@/lib/notes";
-import { DISTINCTIONS, formatRang, libellePeriode, texteDecision, type DecoupageSaisie } from "@/lib/bulletins";
+import {
+  DISTINCTIONS,
+  NIVEAUX_ACQUISITION,
+  formatRang,
+  libellePeriode,
+  seuilReussite,
+  texteDecision,
+  type DatesPeriode,
+  type DecoupageSaisie,
+} from "@/lib/bulletins";
 import type { Bulletin, EnTeteBulletin, ResultatsScolaires } from "@/lib/bulletins-donnees";
 
 // Couleurs du design system Kalaas (identiques au reçu et au relevé de notes)
@@ -35,6 +44,7 @@ const styles = StyleSheet.create({
   colCoef: { flex: 0.7, textAlign: "center" },
   colNote: { flex: 1, textAlign: "center" },
   colAppreciation: { flex: 3.6, paddingLeft: 4 },
+  colNiveau: { flex: 0.6, alignItems: "center", justifyContent: "center" },
   professeur: { fontSize: 6.5, color: GRIS, marginTop: 1 },
   gras: { fontFamily: "Helvetica-Bold" },
   rouge: { color: ROUGE },
@@ -83,13 +93,14 @@ export type BulletinScolairePdfProps = {
   decoupage: DecoupageSaisie;
   periode: number;
   bulletins: Bulletin[];
+  datesPeriode: DatesPeriode | null; // saisies dans les Paramètres
   dateEdition: Date;
 };
 
 type Style = (typeof styles)[keyof typeof styles];
 
-function Note({ valeur, style }: { valeur: number | null; style: Style[] }) {
-  return <Text style={[...style, ...(valeur !== null && valeur < 10 ? [styles.rouge] : [])]}>{formatNote(valeur)}</Text>;
+function Note({ valeur, style, seuil }: { valeur: number | null; style: Style[]; seuil: number }) {
+  return <Text style={[...style, ...(valeur !== null && valeur < seuil ? [styles.rouge] : [])]}>{formatNote(valeur)}</Text>;
 }
 
 // Référence lisible et stable du document (permet de retrouver le bulletin en cas de doute)
@@ -105,12 +116,18 @@ export default function BulletinScolairePdf({
   decoupage,
   periode,
   bulletins,
+  datesPeriode,
   dateEdition,
 }: BulletinScolairePdfProps) {
+  const du = datesPeriode
+    ? `du ${formatDate(new Date(datesPeriode.dateDebut))} au ${formatDate(new Date(datesPeriode.dateFin))}`
+    : null;
   const nomPeriode = libellePeriode(decoupage, periode);
   const stats = resultats.stats[periode];
   const derniere = periode === resultats.periodes.length;
   const precedentes = resultats.periodes.filter((p) => p < periode);
+  const { sur, parCompetences: competences } = resultats;
+  const seuil = seuilReussite(sur);
 
   return (
     <Document
@@ -140,8 +157,9 @@ export default function BulletinScolairePdf({
               </View>
               <View>
                 <Text style={styles.surtitre}>{enTete.annee ? `ANNÉE SCOLAIRE ${enTete.annee}` : "ANNÉE SCOLAIRE"}</Text>
-                <Text style={styles.titre}>BULLETIN DE NOTES</Text>
+                <Text style={styles.titre}>{competences ? "BULLETIN DE COMPÉTENCES" : "BULLETIN DE NOTES"}</Text>
                 <Text style={styles.sousTitre}>{nomPeriode}</Text>
+                {du ? <Text style={[styles.petit, { textAlign: "right" }]}>{du}</Text> : null}
               </View>
             </View>
 
@@ -172,72 +190,134 @@ export default function BulletinScolairePdf({
 
             {provisoire && (
               <Text style={styles.bandeau}>
-                Bulletin provisoire : des notes manquent ou n&apos;ont pas encore été validées (verrouillées) par la direction.
+                {competences
+                  ? "Bulletin provisoire : certaines compétences n'ont pas encore été évaluées."
+                  : "Bulletin provisoire : des notes manquent ou n'ont pas encore été validées (verrouillées) par la direction."}
               </Text>
             )}
 
-            <View style={styles.tableau}>
-              <View style={styles.ligneTitre}>
-                <Text style={[styles.colMatiere, styles.entetes]}>Matière</Text>
-                <Text style={[styles.colCoef, styles.entetes]}>Coef.</Text>
-                <Text style={[styles.colNote, styles.entetes]}>Moy. /20</Text>
-                <Text style={[styles.colNote, styles.entetes]}>Points</Text>
-                <Text style={[styles.colNote, styles.entetes]}>Moy. classe</Text>
-                <Text style={[styles.colAppreciation, styles.entetes]}>Appréciation du professeur</Text>
-              </View>
-              {resultats.matieres.map((m) => {
-                const moyenne = res.moyennes[m.id].moyenne;
-                return (
+            {competences ? (
+              <View style={styles.tableau}>
+                <View style={styles.ligneTitre}>
+                  <Text style={[styles.colMatiere, styles.entetes]}>Compétence</Text>
+                  {NIVEAUX_ACQUISITION.map((n) => (
+                    <Text key={n.valeur} style={[styles.colNiveau, styles.entetes, { textAlign: "center" }]}>
+                      {n.court}
+                    </Text>
+                  ))}
+                  <Text style={[styles.colAppreciation, styles.entetes]}>Appréciation</Text>
+                </View>
+                {resultats.matieres.map((m) => (
                   <View key={m.id} style={styles.ligne} wrap={false}>
                     <View style={styles.colMatiere}>
                       <Text style={styles.gras}>{m.intitule}</Text>
                       {m.professeur ? <Text style={styles.professeur}>{m.professeur}</Text> : null}
                     </View>
-                    <Text style={styles.colCoef}>{m.coefficient}</Text>
-                    <Note valeur={moyenne} style={[styles.colNote, styles.gras]} />
-                    <Text style={styles.colNote}>{moyenne === null ? "—" : formatNote(moyenne * m.coefficient)}</Text>
-                    <Text style={[styles.colNote, { color: GRIS }]}>{formatNote(stats.moyennesMatieres[m.id] ?? null)}</Text>
+                    {NIVEAUX_ACQUISITION.map((n) => (
+                      <View key={n.valeur} style={styles.colNiveau}>
+                        <View style={b.ligne.competences[periode][m.id] === n.valeur ? styles.caseCochee : styles.caseACocher} />
+                      </View>
+                    ))}
                     <Text style={styles.colAppreciation}>{b.appreciations[m.id] ?? ""}</Text>
                   </View>
-                );
-              })}
-              <View style={styles.ligneTotal}>
-                <Text style={[styles.colMatiere, styles.gras]}>Totaux</Text>
-                <Text style={[styles.colCoef, styles.gras]}>{totalCoef}</Text>
-                <Text style={styles.colNote} />
-                <Text style={[styles.colNote, styles.gras]}>{formatNote(totalCoef > 0 ? totalPoints : null)}</Text>
-                <Text style={styles.colNote} />
-                <Text style={styles.colAppreciation} />
+                ))}
+                <Text style={[styles.petit, { marginTop: 4 }]}>
+                  {NIVEAUX_ACQUISITION.map((n) => `${n.court} : ${n.label}`).join("   ·   ")}
+                </Text>
               </View>
-            </View>
+            ) : (
+              <View style={styles.tableau}>
+                <View style={styles.ligneTitre}>
+                  <Text style={[styles.colMatiere, styles.entetes]}>Matière</Text>
+                  <Text style={[styles.colCoef, styles.entetes]}>Coef.</Text>
+                  <Text style={[styles.colNote, styles.entetes]}>Moy. /{sur}</Text>
+                  <Text style={[styles.colNote, styles.entetes]}>Points</Text>
+                  <Text style={[styles.colNote, styles.entetes]}>Moy. classe</Text>
+                  <Text style={[styles.colAppreciation, styles.entetes]}>Appréciation du professeur</Text>
+                </View>
+                {resultats.matieres.map((m) => {
+                  const moyenne = res.moyennes[m.id].moyenne;
+                  return (
+                    <View key={m.id} style={styles.ligne} wrap={false}>
+                      <View style={styles.colMatiere}>
+                        <Text style={styles.gras}>{m.intitule}</Text>
+                        {m.professeur ? <Text style={styles.professeur}>{m.professeur}</Text> : null}
+                      </View>
+                      <Text style={styles.colCoef}>{m.coefficient}</Text>
+                      <Note valeur={moyenne} style={[styles.colNote, styles.gras]} seuil={seuil} />
+                      <Text style={styles.colNote}>{moyenne === null ? "—" : formatNote(moyenne * m.coefficient)}</Text>
+                      <Text style={[styles.colNote, { color: GRIS }]}>{formatNote(stats.moyennesMatieres[m.id] ?? null)}</Text>
+                      <Text style={styles.colAppreciation}>{b.appreciations[m.id] ?? ""}</Text>
+                    </View>
+                  );
+                })}
+                <View style={styles.ligneTotal}>
+                  <Text style={[styles.colMatiere, styles.gras]}>Totaux</Text>
+                  <Text style={[styles.colCoef, styles.gras]}>{totalCoef}</Text>
+                  <Text style={styles.colNote} />
+                  <Text style={[styles.colNote, styles.gras]}>{formatNote(totalCoef > 0 ? totalPoints : null)}</Text>
+                  <Text style={styles.colNote} />
+                  <Text style={styles.colAppreciation} />
+                </View>
+              </View>
+            )}
 
-            <View style={styles.synthese} wrap={false}>
-              <View style={styles.case}>
-                <Text style={styles.label}>MOYENNE DU {nomPeriode.split(" ")[1].toUpperCase()}</Text>
-                <Text style={[styles.chiffre, ...(res.moyenne !== null && res.moyenne < 10 ? [styles.rouge] : [])]}>
-                  {formatNote(res.moyenne)} / 20
-                </Text>
+            {competences ? (
+              <View style={styles.synthese} wrap={false}>
+                <View style={styles.case}>
+                  <Text style={styles.label}>COMPÉTENCES ACQUISES</Text>
+                  <Text style={styles.chiffre}>
+                    {Object.values(b.ligne.competences[periode]).filter((n) => n === "ACQUIS").length} /{" "}
+                    {resultats.matieres.length}
+                  </Text>
+                </View>
+                <View style={styles.case}>
+                  <Text style={styles.label}>ABSENCES</Text>
+                  <Text style={styles.chiffre}>{b.absences}</Text>
+                  <Text style={styles.petit}>{du ? "pendant la période" : "depuis la rentrée"}</Text>
+                </View>
               </View>
-              <View style={styles.case}>
-                <Text style={styles.label}>RANG</Text>
-                <Text style={styles.chiffre}>
-                  {res.rang ? `${formatRang(res.rang, res.exAequo)} / ${b.effectif}` : "—"}
-                </Text>
+            ) : (
+              <View style={styles.synthese} wrap={false}>
+                <View style={styles.case}>
+                  <Text style={styles.label}>MOYENNE DU {nomPeriode.split(" ")[1].toUpperCase()}</Text>
+                  <Text style={[styles.chiffre, ...(res.moyenne !== null && res.moyenne < seuil ? [styles.rouge] : [])]}>
+                    {formatNote(res.moyenne)} / {sur}
+                  </Text>
+                </View>
+                <View style={styles.case}>
+                  <Text style={styles.label}>RANG</Text>
+                  <Text style={styles.chiffre}>
+                    {res.rang ? `${formatRang(res.rang, res.exAequo)} / ${b.effectif}` : "—"}
+                  </Text>
+                </View>
+                <View style={styles.case}>
+                  <Text style={styles.label}>CLASSE (MOY. · + FORTE · + FAIBLE)</Text>
+                  <Text style={[styles.chiffre, { fontSize: 9.5 }]}>
+                    {formatNote(stats.moyenneClasse)} · {formatNote(stats.plusForte)} · {formatNote(stats.plusFaible)}
+                  </Text>
+                </View>
+                <View style={styles.case}>
+                  <Text style={styles.label}>ABSENCES</Text>
+                  <Text style={styles.chiffre}>{b.absences}</Text>
+                  <Text style={styles.petit}>{du ? "pendant la période" : "depuis la rentrée"}</Text>
+                </View>
               </View>
-              <View style={styles.case}>
-                <Text style={styles.label}>CLASSE (MOY. · + FORTE · + FAIBLE)</Text>
-                <Text style={[styles.chiffre, { fontSize: 9.5 }]}>
-                  {formatNote(stats.moyenneClasse)} · {formatNote(stats.plusForte)} · {formatNote(stats.plusFaible)}
-                </Text>
-              </View>
-              <View style={styles.case}>
-                <Text style={styles.label}>ABSENCES</Text>
-                <Text style={styles.chiffre}>{b.absences}</Text>
-                <Text style={styles.petit}>depuis la rentrée</Text>
-              </View>
-            </View>
+            )}
 
-            {(precedentes.length > 0 || derniere) && resultats.periodes.length > 1 && (
+            {competences && derniere && (
+              <View style={styles.rappel} wrap={false}>
+                <Text style={styles.label}>BILAN DE L&apos;ANNÉE</Text>
+                <Text style={[styles.chiffre, { fontSize: 10, color: b.ligne.decision === "REDOUBLEMENT" ? ROUGE : NAVY }]}>
+                  Décision du conseil de classe :{" "}
+                  {b.ligne.decision
+                    ? texteDecision(b.ligne.decision, resultats.formation.cycle, resultats.formation.niveau, b.eleve.sexe)
+                    : "en attente"}
+                </Text>
+              </View>
+            )}
+
+            {!competences && (precedentes.length > 0 || derniere) && resultats.periodes.length > 1 && (
               <View style={styles.rappel} wrap={false}>
                 <Text style={styles.label}>{derniere ? "BILAN DE L'ANNÉE" : "RAPPEL DES PÉRIODES PRÉCÉDENTES"}</Text>
                 <Text style={[styles.valeurNormale, { marginTop: 3 }]}>
@@ -250,7 +330,7 @@ export default function BulletinScolairePdf({
                 </Text>
                 {derniere && (
                   <Text style={[styles.chiffre, { fontSize: 10 }]}>
-                    Moyenne annuelle : {formatNote(b.ligne.annuelle.moyenne)} / 20
+                    Moyenne annuelle : {formatNote(b.ligne.annuelle.moyenne)} / {sur}
                     {b.ligne.annuelle.rang
                       ? ` · Rang : ${formatRang(b.ligne.annuelle.rang, b.ligne.annuelle.exAequo)} / ${b.effectif}`
                       : ""}
@@ -269,14 +349,16 @@ export default function BulletinScolairePdf({
 
             <View style={styles.conseil} wrap={false}>
               <Text style={styles.label}>AVIS DU CONSEIL DE CLASSE</Text>
-              <View style={styles.distinctions}>
-                {DISTINCTIONS.map((d) => (
-                  <View key={d.valeur} style={styles.distinction}>
-                    <View style={b.conseil.distinction === d.valeur ? styles.caseCochee : styles.caseACocher} />
-                    <Text style={b.conseil.distinction === d.valeur ? styles.gras : {}}>{d.label}</Text>
-                  </View>
-                ))}
-              </View>
+              {!competences && (
+                <View style={styles.distinctions}>
+                  {DISTINCTIONS.map((d) => (
+                    <View key={d.valeur} style={styles.distinction}>
+                      <View style={b.conseil.distinction === d.valeur ? styles.caseCochee : styles.caseACocher} />
+                      <Text style={b.conseil.distinction === d.valeur ? styles.gras : {}}>{d.label}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
               <Text style={[styles.valeurNormale, { marginTop: 5, minHeight: 14 }]}>
                 {b.conseil.appreciation ?? ""}
               </Text>

@@ -51,7 +51,8 @@ export type EvaluationPourCalcul = {
 
 export type MoyenneMatiere = { moyenne: number | null; complete: boolean };
 
-export function moyenneMatiere(evaluations: EvaluationPourCalcul[]): MoyenneMatiere {
+// sur : échelle de la moyenne (20 par défaut ; 10 à l'élémentaire)
+export function moyenneMatiere(evaluations: EvaluationPourCalcul[], sur = 20): MoyenneMatiere {
   let somme = 0;
   let poids = 0;
   let complete = evaluations.length > 0;
@@ -62,16 +63,16 @@ export function moyenneMatiere(evaluations: EvaluationPourCalcul[]): MoyenneMati
       continue;
     }
     if (e.note.statut === "DISPENSE") continue;
-    let sur20: number;
+    let ramenee: number;
     if (e.note.statut === "ABSENT") {
-      sur20 = 0;
+      ramenee = 0;
     } else if (e.note.valeur === null) {
       complete = false;
       continue;
     } else {
-      sur20 = (e.note.valeur / 100 / e.bareme) * 20;
+      ramenee = (e.note.valeur / 100 / e.bareme) * sur;
     }
-    somme += sur20 * e.poids;
+    somme += ramenee * e.poids;
     poids += e.poids;
   }
 

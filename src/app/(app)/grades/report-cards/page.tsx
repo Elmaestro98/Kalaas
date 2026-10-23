@@ -4,8 +4,16 @@ import { exigerRole } from "@/lib/tenant";
 import { estScolaire } from "@/lib/lmd";
 import { vocabulaire } from "@/lib/etablissement";
 import { classesPourNotes, matieresNotables } from "@/lib/notes-donnees";
-import { chargerBulletins } from "@/lib/bulletins-donnees";
-import { formatRang, libellePeriode, periodes as listePeriodes, proposerDecision, proposerDistinction } from "@/lib/bulletins";
+import { chargerBulletins, periodeEnCours } from "@/lib/bulletins-donnees";
+import {
+  bilanCompetences,
+  formatRang,
+  parCompetences,
+  libellePeriode,
+  periodes as listePeriodes,
+  proposerDecision,
+  proposerDistinction,
+} from "@/lib/bulletins";
 import ClassSelect from "../class-select";
 import PeriodTabs from "../period-tabs";
 import AppreciationGrid, { type LigneAppreciation } from "./appreciation-grid";
@@ -39,7 +47,9 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
         <ArrowLeft size={16} aria-hidden="true" />
         Notes
       </Link>
-      <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">Appréciations et bulletins</h1>
+      <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">
+        {session && parCompetences(session.formation.cycle) ? "Compétences et bulletins" : "Appréciations et bulletins"}
+      </h1>
     </>
   );
 
@@ -55,7 +65,10 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
   }
 
   const periodes = listePeriodes(decoupage);
-  const periode = periodes.includes(Number(params.periode)) ? Number(params.periode) : 1;
+  // Par défaut : la période en cours d'après les dates saisies dans les Paramètres
+  const periode = periodes.includes(Number(params.periode))
+    ? Number(params.periode)
+    : ((await periodeEnCours(db, session.id, decoupage)) ?? 1);
 
   const [donnees, notables] = await Promise.all([
     chargerBulletins(db, session.id, decoupage, periode),
@@ -63,6 +76,7 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
   ]);
   if (!donnees) return null;
   const { resultats, bulletins } = donnees;
+  const { sur, parCompetences: competences } = resultats;
 
   // Cibles possibles : le conseil de classe (direction) puis les matières que l'on peut noter
   const matieres = notables === "TOUTES" ? resultats.matieres : resultats.matieres.filter((m) => notables.has(m.id));
@@ -75,6 +89,7 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
   const lignes: LigneAppreciation[] = cible
     ? bulletins.map((b) => {
         const res = b.ligne.periodes[periode];
+        const niveaux = b.ligne.competences[periode];
         if (cible.id === "conseil") {
           return {
             inscriptionId: b.inscriptionId,
@@ -82,10 +97,16 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
             moyenne: res.moyenne,
             rang: res.rang ? `${formatRang(res.rang, res.exAequo)}/${b.effectif}` : null,
             texte: b.conseil.appreciation ?? "",
-            // Pas encore d'avis enregistré : la distinction est proposée d'après la moyenne
-            distinction: b.conseil.appreciation || b.conseil.distinction ? b.conseil.distinction : proposerDistinction(res.moyenne),
+            // Pas encore d'avis enregistré : la distinction est proposée d'après la moyenne (pas au préscolaire)
+            distinction:
+              competences || b.conseil.appreciation || b.conseil.distinction
+                ? b.conseil.distinction
+                : proposerDistinction(res.moyenne, sur),
             moyenneAnnuelle: b.ligne.annuelle.moyenne,
-            decision: b.ligne.decision ?? proposerDecision(b.ligne.annuelle.moyenne),
+            // Préscolaire : sans moyenne, le passage est proposé par défaut
+            decision: b.ligne.decision ?? (competences ? "PASSAGE" : proposerDecision(b.ligne.annuelle.moyenne, sur)),
+            niveau: null,
+            bilan: bilanCompetences(Object.values(niveaux)),
           };
         }
         return {
@@ -97,6 +118,8 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
           distinction: null,
           moyenneAnnuelle: null,
           decision: null,
+          niveau: niveaux[cible.id] ?? null,
+          bilan: null,
         };
       })
     : [];
@@ -105,8 +128,9 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
     <div className="mx-auto max-w-6xl">
       {entete}
       <p className="mt-1 text-sm text-ink-muted">
-        Les professeurs rédigent l&apos;appréciation de leur matière ; la direction rédige l&apos;avis du conseil de
-        classe. Le tout figure sur le bulletin de la période.
+        {competences
+          ? "Pour chaque compétence, choisissez le niveau de chaque élève et ajoutez si besoin une appréciation ; la direction rédige l'avis du conseil de classe. Le tout figure sur le bulletin de la période."
+          : "Les professeurs rédigent l'appréciation de leur matière ; la direction rédige l'avis du conseil de classe. Le tout figure sur le bulletin de la période."}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -134,7 +158,9 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
 
       {resultats.evaluations[periode] === 0 && (
         <p className="mt-3 rounded-sm bg-warning-soft px-4 py-2 text-sm text-warning">
-          Aucune évaluation au {libellePeriode(decoupage, periode)} : les moyennes sont vides.
+          {competences
+            ? `Aucune compétence évaluée au ${libellePeriode(decoupage, periode)} : choisissez une compétence ci-dessous pour commencer.`
+            : `Aucune évaluation au ${libellePeriode(decoupage, periode)} : les moyennes sont vides.`}
         </p>
       )}
 
@@ -172,6 +198,8 @@ export default async function ReportCardsPage({ searchParams }: ReportCardsPageP
               cible={cible.id}
               lignes={lignes}
               finAnnee={finAnnee}
+              sur={sur}
+              competences={competences}
             />
           )}
         </>

@@ -10,9 +10,10 @@ const etatInitial: EtatAnnee = { erreurs: {}, erreurGenerale: null, succes: fals
 type AcademicYearFormProps = {
   anneeProposee: number;
   premiereAnnee: boolean;
+  scolaire: boolean; // école : « année scolaire »
 };
 
-export default function AcademicYearForm({ anneeProposee, premiereAnnee }: AcademicYearFormProps) {
+export default function AcademicYearForm({ anneeProposee, premiereAnnee, scolaire }: AcademicYearFormProps) {
   const [etat, envoyer, enCours] = useActionState(creerAnneeAcademique, etatInitial);
   const [debut, setDebut] = useState(anneeProposee);
 
@@ -20,7 +21,7 @@ export default function AcademicYearForm({ anneeProposee, premiereAnnee }: Acade
 
   return (
     <form action={envoyer} className="space-y-4 rounded-md bg-surface-100 p-4">
-      <p className="text-sm font-semibold">Ajouter une année académique</p>
+      <p className="text-sm font-semibold">Ajouter une année {scolaire ? "scolaire" : "académique"}</p>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field id="libelle" label="Année" required error={erreurs.libelle}>

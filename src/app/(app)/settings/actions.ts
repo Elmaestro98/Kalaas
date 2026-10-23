@@ -7,6 +7,7 @@ import { exigerRole } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
 import { clerkClient } from "@clerk/nextjs/server";
 import { normaliserTelephone } from "@/lib/telephone";
+import { nbPeriodes, verifierDatesPeriodes, type DatesPeriode } from "@/lib/bulletins";
 
 // ─── Informations de l'établissement (en-tête des reçus et documents) ───
 
@@ -167,7 +168,7 @@ export async function creerAnneeAcademique(
     return { erreurs: {}, erreurGenerale: "L'enregistrement a échoué. Réessayez.", succes: false };
   }
 
-  await flash("Année académique créée.");
+  await flash(institut.typeEtablissement === "ECOLE" ? "Année scolaire créée." : "Année académique créée.");
   revalidatePath("/settings");
   return { erreurs: {}, erreurGenerale: null, succes: true };
 }
@@ -364,5 +365,57 @@ export async function modifierDecoupage(_etat: EtatDecoupage, formData: FormData
 
   await flash(decoupage === "TRIMESTRES" ? "L'année est découpée en trimestres." : "L'année est découpée en semestres.");
   revalidatePath("/", "layout");
+  return { erreur: null };
+}
+
+// ─── Dates des périodes (écoles) ───────────────────
+
+export type EtatDatesPeriodes = { erreur: string | null };
+
+export async function enregistrerDatesPeriodes(_etat: EtatDatesPeriodes, formData: FormData): Promise<EtatDatesPeriodes> {
+  const { institut, membre, db } = await exigerRole("DIRECTEUR");
+  const annee = await db.anneeAcademique.findFirst({ where: { id: String(formData.get("anneeId") ?? "") } });
+  if (!annee) {
+    return { erreur: "Année scolaire introuvable." };
+  }
+
+  const nb = nbPeriodes(institut.decoupageScolaire);
+  const dates: DatesPeriode[] = Array.from({ length: nb }, (_, i) => ({
+    numero: i + 1,
+    dateDebut: String(formData.get(`debut_${i + 1}`) ?? ""),
+    dateFin: String(formData.get(`fin_${i + 1}`) ?? ""),
+  }));
+  const jour = (d: Date) => d.toISOString().slice(0, 10);
+  const erreur = verifierDatesPeriodes(dates, jour(annee.dateDebut), jour(annee.dateFin));
+  if (erreur) {
+    return { erreur };
+  }
+
+  await db.$transaction(async (tx) => {
+    for (const d of dates) {
+      const valeurs = { dateDebut: new Date(d.dateDebut), dateFin: new Date(d.dateFin) };
+      await tx.periodeScolaire.upsert({
+        where: { anneeAcademiqueId_numero: { anneeAcademiqueId: annee.id, numero: d.numero } },
+        create: { institutId: institut.id, anneeAcademiqueId: annee.id, numero: d.numero, ...valeurs },
+        update: valeurs,
+      });
+    }
+    // Passage de trimestres à semestres : l'ancienne 3e période n'a plus de sens
+    await tx.periodeScolaire.deleteMany({ where: { anneeAcademiqueId: annee.id, numero: { gt: nb } } });
+    await tx.journalAudit.create({
+      data: {
+        institutId: institut.id,
+        auteurId: membre.utilisateurId,
+        action: "DATES_PERIODES_MODIFIEES",
+        entite: "AnneeAcademique",
+        entiteId: annee.id,
+        apres: dates,
+      },
+    });
+  });
+
+  await flash(`Dates des périodes de ${annee.libelle} enregistrées.`);
+  revalidatePath("/settings");
+  revalidatePath("/grades", "layout");
   return { erreur: null };
 }

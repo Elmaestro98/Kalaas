@@ -7,8 +7,9 @@ import { chargerResultatsClasse, classesPourNotes, cleSemestre } from "@/lib/not
 import ClassSelect from "../class-select";
 import { estScolaire } from "@/lib/lmd";
 import { periodes as listePeriodes } from "@/lib/bulletins";
-import { chargerResultatsScolaires } from "@/lib/bulletins-donnees";
+import { chargerResultatsScolaires, periodeEnCours } from "@/lib/bulletins-donnees";
 import SchoolResults from "./school-results";
+import PreschoolResults from "./preschool-results";
 
 type ResultsPageProps = {
   searchParams: Promise<{ session?: string; periode?: string }>;
@@ -45,12 +46,14 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
     const scolaires = await chargerResultatsScolaires(db, session.id, institut.decoupageScolaire);
     const periodes = listePeriodes(institut.decoupageScolaire);
     const demandee = Number(params.periode);
+    const competences = scolaires?.parCompetences ?? false;
     const vue: number | "ANNEE" =
-      params.periode === "annee"
+      params.periode === "annee" && !competences
         ? "ANNEE"
         : periodes.includes(demandee)
           ? demandee
-          : Math.max(1, ...periodes.filter((p) => (scolaires?.evaluations[p] ?? 0) > 0));
+          : ((await periodeEnCours(db, session.id, institut.decoupageScolaire)) ??
+            Math.max(1, ...periodes.filter((p) => (scolaires?.evaluations[p] ?? 0) > 0)));
     return (
       <div className="mx-auto max-w-7xl">
         <Link
@@ -61,14 +64,31 @@ export default async function ResultsPage({ searchParams }: ResultsPageProps) {
           Notes
         </Link>
         <h1 className="mt-3 text-2xl font-semibold lg:text-3xl">Résultats de la classe</h1>
-        <p className="mt-1 text-sm text-ink-muted">
-          Matière : évaluations de la période pondérées · moyenne générale : coefficients · année : moyenne des
-          périodes. <span className="italic">12,50*</span> = moyenne provisoire (notes manquantes).
-        </p>
+        {competences ? (
+          <p className="mt-1 text-sm text-ink-muted">
+            Préscolaire : pas de notes ni de classement, chaque compétence est évaluée par un niveau d&apos;acquisition.
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-ink-muted">
+            Matière : évaluations de la période pondérées · moyenne générale : coefficients · année : moyenne des
+            périodes{scolaires?.sur === 10 && " · élémentaire : moyennes sur 10"}.{" "}
+            <span className="italic">{scolaires?.sur === 10 ? "6,50*" : "12,50*"}</span> = moyenne provisoire (notes
+            manquantes).
+          </p>
+        )}
         <div className="mt-4 min-w-64">
           <ClassSelect valeur={session.id} chemin="/grades/results" classes={classes} />
         </div>
-        {scolaires && (
+        {scolaires && competences && vue !== "ANNEE" && (
+          <PreschoolResults
+            sessionId={session.id}
+            resultats={scolaires}
+            periode={vue}
+            decoupage={institut.decoupageScolaire}
+            mots={mots}
+          />
+        )}
+        {scolaires && !competences && (
           <SchoolResults
             sessionId={session.id}
             resultats={scolaires}

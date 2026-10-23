@@ -7,7 +7,7 @@ import { getContexte } from "@/lib/tenant";
 import { peutNoter } from "@/lib/notes-donnees";
 import { lireNote, type StatutNoteSaisie } from "@/lib/notes";
 import { estScolaire } from "@/lib/lmd";
-import { libellePeriode, nbPeriodes } from "@/lib/bulletins";
+import { libellePeriode, nbPeriodes, parCompetences } from "@/lib/bulletins";
 
 // ─── Créer une évaluation ──────────────────────────
 
@@ -40,6 +40,9 @@ export async function creerEvaluation(etat: EtatEvaluation, formData: FormData):
     : null;
   if (!session || !matiere) {
     return echec("Classe ou matière introuvable.");
+  }
+  if (parCompetences(session.formation.cycle)) {
+    return echec("Au préscolaire, les élèves ne sont pas notés : évaluez leurs compétences.");
   }
   if (!(await peutNoter(db, membre, session.id, matiere.id))) {
     return echec("Vous ne pouvez créer des évaluations que pour vos propres matières.");

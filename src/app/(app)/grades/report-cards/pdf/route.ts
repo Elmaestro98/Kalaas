@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
       decoupage: institut.decoupageScolaire,
       periode,
       bulletins: donnees.bulletins,
+      datesPeriode: donnees.datesPeriode,
       dateEdition: new Date(),
     }) as ReactElement<DocumentProps>,
   );

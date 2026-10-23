@@ -13,9 +13,10 @@ type EvaluationFormProps = {
   periode: number | null; // école : période de l'évaluation
   poidsRestant: number;
   suggestion: string;
+  bareme: number; // barème proposé : 10 à l'élémentaire, 20 sinon
 };
 
-export default function EvaluationForm({ sessionId, matiereId, periode, poidsRestant, suggestion }: EvaluationFormProps) {
+export default function EvaluationForm({ sessionId, matiereId, periode, poidsRestant, suggestion, bareme }: EvaluationFormProps) {
   const [etat, envoyer, enCours] = useActionState(creerEvaluation, etatInitial);
 
   return (
@@ -59,7 +60,7 @@ export default function EvaluationForm({ sessionId, matiereId, periode, poidsRes
       </label>
       <label className="space-y-1">
         <span className="text-xs font-medium">Sur</span>
-        <input name="bareme" type="number" required min={1} max={100} defaultValue={20} className={`${classeChamp()} h-10`} />
+        <input name="bareme" type="number" required min={1} max={100} defaultValue={bareme} className={`${classeChamp()} h-10`} />
       </label>
       <button
         type="submit"
